@@ -1,0 +1,10 @@
+{
+    "cmake.buildDirectory": "${workspaceFolder}/build/${buildKit}/${buildType}",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "files.associations": {
+        "string": "cpp",
+        "format": "cpp",
+        "iostream": "cpp",
+        "ostream": "cpp"
+    },
+}
