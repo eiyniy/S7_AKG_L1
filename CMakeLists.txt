@@ -18,6 +18,6 @@ file(GLOB_RECURSE SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 add_executable(${LOCAL_PROJECT_NAME})
 
 target_link_directories(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_LIBRARY_DIRS})
-target_include_directories(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_INCLUDE_DIRS})
+target_include_directories(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_INCLUDE_DIRS} include)
 target_sources(${LOCAL_PROJECT_NAME} PRIVATE ${SOURCES})
 target_compile_definitions(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_CFLAGS_OTHER})
