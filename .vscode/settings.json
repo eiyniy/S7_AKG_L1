@@ -5,6 +5,10 @@
         "string": "cpp",
         "format": "cpp",
         "iostream": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "vector": "cpp",
+        "fstream": "cpp",
+        "optional": "cpp",
+        "stdexcept": "cpp"
     },
 }
