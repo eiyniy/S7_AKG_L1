@@ -11,10 +11,6 @@ int main(int argc, char **argv)
 
     auto parser = new ObjParser("resources/models/uploads_files_2217034_WOMAN.obj");
 
-    // auto vertexStr = "v  -93.8845 599.1862 -119.7966";
-    // auto vertex = parser.parseVertex(vertexStr);
-    // vertex.print();
-
     auto tsStart = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
     auto vertices = parser->parseVertices();
     auto tsEndParse = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
