@@ -15,18 +15,6 @@ ObjParser::ObjParser(string p_pathToFile)
     readStream.open(pathToFile);
     if (!readStream.is_open())
         throw std::runtime_error("Could not open file");
-
-    string line;
-    int count = 0;
-
-    while (getline(readStream, line))
-    {
-        ++count;
-    }
-
-    cout << "Lines count: " << count << endl;
-
-    readStream.close();
 }
 
 optional<string> ObjParser::getNextPart(string::iterator iter, string::iterator iterEnd)
@@ -51,12 +39,21 @@ void ObjParser::moveToNext(std::string::iterator *iter)
         (*iter)++;
 }
 
-vector<Vertex> ObjParser::parseVertices(std::ifstream stream)
+vector<Vertex> ObjParser::parseVertices()
 {
-    return vector<Vertex>();
+    vector<Vertex> vertices;
+    string line;
+
+    while (getline(readStream, line) && !isVertex(line))
+        continue;
+
+    while (getline(readStream, line) && isVertex(line))
+        vertices.push_back(parseVertex(line));
+
+    return vertices;
 }
 
-bool ObjParser::isVertex(std::string line)
+bool ObjParser::isVertex(std::string &line)
 {
     auto iter = line.begin();
     auto iterEnd = line.end();
@@ -69,7 +66,7 @@ bool ObjParser::isVertex(std::string line)
         return false;
 }
 
-Vertex ObjParser::parseVertex(std::string line)
+Vertex ObjParser::parseVertex(std::string &line)
 {
     if (!isVertex(line))
         throw std::invalid_argument("Could not parse value");

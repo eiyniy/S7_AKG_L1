@@ -9,6 +9,7 @@
         "vector": "cpp",
         "fstream": "cpp",
         "optional": "cpp",
-        "stdexcept": "cpp"
+        "stdexcept": "cpp",
+        "iosfwd": "cpp"
     },
 }

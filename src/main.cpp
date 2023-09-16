@@ -8,11 +8,14 @@ int main(int argc, char **argv)
 {
     cout << "Hello world!" << endl;
 
-    auto parser = ObjParser("resources/models/uploads_files_2217034_WOMAN.obj");
+    auto parser = new ObjParser("resources/models/uploads_files_2217034_WOMAN.obj");
 
-    auto vertex = parser.parseVertex("v  -93.8845 599.1862 -119.7966");
+    // auto vertexStr = "v  -93.8845 599.1862 -119.7966";
+    // auto vertex = parser.parseVertex(vertexStr);
+    // vertex.print();
 
-    vertex.print();
+    auto vertices = parser->parseVertices();
+    cout << vertices.size();
 
     return 0;
 }
