@@ -30,7 +30,7 @@ optional<string> ObjParser::getNextPart(string::iterator iter, string::iterator 
     return string(iter, iterSecond);
 }
 
-void ObjParser::moveToNext(std::string::iterator *iter)
+void ObjParser::moveToNext(string::iterator *iter)
 {
     while (**iter != ' ')
         (*iter)++;
@@ -39,16 +39,20 @@ void ObjParser::moveToNext(std::string::iterator *iter)
         (*iter)++;
 }
 
-vector<Vertex> ObjParser::parseVertices()
+vector<Vertex> *ObjParser::parseVertices()
 {
-    vector<Vertex> vertices;
+    auto vertices = new vector<Vertex>;
     string line;
 
     while (getline(readStream, line) && !isVertex(line))
         continue;
 
     while (getline(readStream, line) && isVertex(line))
-        vertices.push_back(parseVertex(line));
+    {
+        Vertex elem;
+        parseVertex(line, elem);
+        vertices->push_back(elem);
+    }
 
     return vertices;
 }
@@ -66,7 +70,7 @@ bool ObjParser::isVertex(std::string &line)
         return false;
 }
 
-Vertex ObjParser::parseVertex(std::string &line)
+void ObjParser::parseVertex(std::string &line, Vertex &result)
 {
     if (!isVertex(line))
         throw std::invalid_argument("Could not parse value");
@@ -76,13 +80,9 @@ Vertex ObjParser::parseVertex(std::string &line)
 
     moveToNext(&iter);
 
-    Vertex v;
-
     while (auto value = getNextPart(iter, iterEnd))
     {
-        v.append(stod(value.value()));
+        result.append(stod(value.value()));
         moveToNext(&iter);
     }
-
-    return v;
 }

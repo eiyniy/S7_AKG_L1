@@ -6,15 +6,22 @@
 #include <fstream>
 #include <vector>
 
+enum class EntryType
+{
+    Vertex,
+    TextureVertex,
+    NormalVertex,
+    Polygon
+};
+
 class ObjParser
 {
 public:
     ObjParser(std::string p_pathToFile);
-    ~ObjParser();
 
-    std::vector<Vertex> parseVertices();
+    std::vector<Vertex> *parseVertices();
     bool isVertex(std::string &line);
-    Vertex parseVertex(std::string &line);
+    void parseVertex(std::string &line, Vertex &result);
     std::optional<std::string> getNextPart(std::string::iterator iter, std::string::iterator iterEnd);
     void moveToNext(std::string::iterator *iter);
 

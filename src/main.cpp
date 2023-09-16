@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include <ObjParser.hpp>
 #include <Vertex.hpp>
 
@@ -14,8 +15,16 @@ int main(int argc, char **argv)
     // auto vertex = parser.parseVertex(vertexStr);
     // vertex.print();
 
+    auto tsStart = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
     auto vertices = parser->parseVertices();
-    cout << vertices.size();
+    auto tsEndParse = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
+
+    cout << "Vertices count - " << vertices->size() << endl;
+    cout << "Parse time - " << tsEndParse - tsStart << "ms" << endl;
+
+    auto tsEnd = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
+
+    cout << "Total computing time - " << tsEnd - tsStart << "ms" << endl;
 
     return 0;
 }
