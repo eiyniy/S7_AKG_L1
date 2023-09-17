@@ -3,14 +3,12 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/src/headers",
                 "C:/msys64/mingw64/include/gtk-3.0",
                 "C:/msys64/mingw64/include/glib-2.0",
                 "C:/msys64/mingw64/include/**",
                 "C:/msys64/mingw64/lib/**",
-                "${workspaceFolder}/src/headers",
-                "${workspaceFolder}/src/headers"
+                // "${workspaceFolder}/include/**",
+                // "${workspaceFolder}/include/EntryTypes"
             ],
             "defines": [
                 "_DEBUG",

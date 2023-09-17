@@ -1,17 +1,17 @@
 #pragma once
 
+#include <BaseVertex.hpp>
 #include <vector>
+#include <string>
 #include <optional>
 
-class Vertex : std::vector<double>
+class Vertex : public BaseVertex
 {
 public:
-    void append(double value);
+    Vertex(std::string &line);
 
     double getX();
     double getY();
     double getZ();
     std::optional<double> getW();
-
-    void print();
 };

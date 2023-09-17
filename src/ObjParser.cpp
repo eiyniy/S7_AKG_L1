@@ -1,6 +1,7 @@
 #include <ObjParser.hpp>
 #include <optional>
 #include <filesystem>
+#include <functional>
 #include <iostream>
 
 using namespace std;
@@ -48,13 +49,28 @@ vector<Vertex> *ObjParser::parseVertices()
         continue;
 
     while (getline(readStream, line) && isVertex(line))
-    {
-        Vertex elem;
-        parseVertex(line, elem);
-        vertices->push_back(elem);
-    }
+        vertices->push_back(Vertex(line));
 
     return vertices;
+}
+
+optional<EntryType> ObjParser::getEntryType(std::string &line)
+{
+    auto iter = line.begin();
+    auto iterEnd = line.end();
+
+    auto type = getNextPart(iter, iterEnd);
+
+    if (type && type == "v")
+        return EntryType::Vertex;
+    else if (type && type == "vt")
+        return EntryType::TextureVertex;
+    else if (type && type == "vn")
+        return EntryType::NormalVertex;
+    else if (type && type == "f")
+        return EntryType::Polygon;
+    else
+        return {};
 }
 
 bool ObjParser::isVertex(std::string &line)
@@ -70,9 +86,11 @@ bool ObjParser::isVertex(std::string &line)
         return false;
 }
 
-void ObjParser::parseVertex(std::string &line, Vertex &result)
+template <typename T>
+void ObjParser::parseEntry(std::string &line, T &result)
 {
-    if (!isVertex(line))
+    auto type = getEntryType(line);
+    if (!type)
         throw std::invalid_argument("Could not parse value");
 
     auto iter = line.begin();
@@ -80,9 +98,18 @@ void ObjParser::parseVertex(std::string &line, Vertex &result)
 
     moveToNext(&iter);
 
+    function<T(string &)> convertFunc;
+
+    if (type == EntryType::Polygon)
+        convertFunc = [](string &str)
+        { return stoi(str); };
+    else
+        convertFunc = [](string &str)
+        { return stod(str); };
+
     while (auto value = getNextPart(iter, iterEnd))
     {
-        result.append(stod(value.value()));
+        result.append(convertFunc(value.value()));
         moveToNext(&iter);
     }
 }
