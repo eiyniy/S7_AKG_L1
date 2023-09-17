@@ -12,12 +12,14 @@ BaseVertex::BaseVertex(std::string &line)
         throw std::invalid_argument("Could not parse value");
 
     auto iter = line.begin();
-    ObjParser::moveToNext(&iter);
+    auto iterEnd = line.end();
+
+    ObjParser::moveToNext(&iter, iterEnd, ' ');
 
     std::optional<std::string> strPart;
-    while (strPart = ObjParser::getNextPart(iter, line.end()))
+    while (strPart = ObjParser::getNextPart(iter, line.end(), ' '))
     {
         this->append(stod(strPart.value()));
-        ObjParser::moveToNext(&iter);
+        ObjParser::moveToNext(&iter, iterEnd, ' ');
     }
 }

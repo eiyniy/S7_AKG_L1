@@ -1,10 +1,10 @@
 #pragma once
 
 #include <Entry.hpp>
-#include <vector>
-#include <optional>
+#include <string>
 
 class Polygon : public Entry<double>
 {
 public:
+    Polygon(std::string &line);
 };

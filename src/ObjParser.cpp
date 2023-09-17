@@ -1,4 +1,5 @@
 #include <ObjParser.hpp>
+#include <Types.hpp>
 #include <optional>
 #include <filesystem>
 #include <functional>
@@ -18,48 +19,14 @@ ObjParser::ObjParser(string p_pathToFile)
         throw std::runtime_error("Could not open file");
 }
 
-optional<string> ObjParser::getNextPart(string::iterator iter, string::iterator iterEnd)
-{
-    if (iter >= iterEnd)
-        return {};
-
-    auto iterSecond = iter;
-
-    while (*iterSecond != ' ' && iterSecond != iterEnd)
-        ++iterSecond;
-
-    return string(iter, iterSecond);
-}
-
-void ObjParser::moveToNext(string::iterator *iter)
-{
-    while (**iter != ' ')
-        (*iter)++;
-
-    while (**iter == ' ')
-        (*iter)++;
-}
-
-vector<Vertex> *ObjParser::parseVertices()
-{
-    auto vertices = new vector<Vertex>;
-    string line;
-
-    while (getline(readStream, line) && !isVertex(line))
-        continue;
-
-    while (getline(readStream, line) && isVertex(line))
-        vertices->push_back(Vertex(line));
-
-    return vertices;
-}
+#pragma region Static
 
 optional<EntryType> ObjParser::getEntryType(std::string &line)
 {
     auto iter = line.begin();
     auto iterEnd = line.end();
 
-    auto type = getNextPart(iter, iterEnd);
+    auto type = getNextPart(iter, iterEnd, ' ');
 
     if (type && type == "v")
         return EntryType::Vertex;
@@ -73,43 +40,63 @@ optional<EntryType> ObjParser::getEntryType(std::string &line)
         return {};
 }
 
-bool ObjParser::isVertex(std::string &line)
+optional<string> ObjParser::getNextPart(string::iterator iter, string::iterator iterEnd, char divider)
 {
-    auto iter = line.begin();
-    auto iterEnd = line.end();
+    if (iter >= iterEnd)
+        return {};
 
-    auto type = getNextPart(iter, iterEnd);
+    auto iterSecond = iter;
 
-    if (type && type == "v")
-        return true;
-    else
-        return false;
+    while (*iterSecond != divider && iterSecond != iterEnd)
+        ++iterSecond;
+
+    return string(iter, iterSecond);
 }
 
-template <typename T>
-void ObjParser::parseEntry(std::string &line, T &result)
+void ObjParser::moveToNext(string::iterator *iter, std::string::iterator iterEnd, char divider)
 {
-    auto type = getEntryType(line);
-    if (!type)
-        throw std::invalid_argument("Could not parse value");
+    while (*iter != iterEnd && **iter != divider)
+        (*iter)++;
 
-    auto iter = line.begin();
-    auto iterEnd = line.end();
+    while (*iter != iterEnd && **iter == divider)
+        (*iter)++;
+}
 
-    moveToNext(&iter);
+#pragma endregion Static
 
-    function<T(string &)> convertFunc;
+ObjInfo *ObjParser::parseEntries()
+{
+    auto info = new ObjInfo();
 
-    if (type == EntryType::Polygon)
-        convertFunc = [](string &str)
-        { return stoi(str); };
-    else
-        convertFunc = [](string &str)
-        { return stod(str); };
+    string line;
+    optional<EntryType> type;
 
-    while (auto value = getNextPart(iter, iterEnd))
+    while (getline(readStream, line))
     {
-        result.append(convertFunc(value.value()));
-        moveToNext(&iter);
+        if (!(type = getEntryType(line)))
+            continue;
+
+        switch (type.value())
+        {
+        case EntryType::Vertex:
+            info->addVertex(Vertex(line));
+            break;
+
+        case EntryType::TextureVertex:
+            info->addTVertex(TextureVertex(line));
+            break;
+
+        case EntryType::NormalVertex:
+            info->addNVertex(NormalVertex(line));
+            break;
+
+        case EntryType::Polygon:
+            info->addPolygon(Polygon(line));
+
+        default:
+            break;
+        }
     }
+
+    return info;
 }
