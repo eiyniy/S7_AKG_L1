@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Vertex::Vertex(std::string &line) : BaseVertex(line) {}
+Vertex::Vertex(std::string &line, ParseType parseType) : BaseVertex(line, parseType) {}
 
 double Vertex::getX()
 {

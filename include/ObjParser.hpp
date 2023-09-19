@@ -12,7 +12,7 @@ class ObjParser
 public:
     ObjParser(std::string p_pathToFile);
 
-    ObjInfo *parseEntries();
+    ObjInfo *parseEntries(ParseType parseType);
 
     static std::optional<EntryType> getEntryType(std::string &line);
     static std::optional<std::string> getNextPart(std::string::iterator iter, std::string::iterator iterEnd, char divider);

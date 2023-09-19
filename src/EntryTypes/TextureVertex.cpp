@@ -1,7 +1,7 @@
 #include <TextureVertex.hpp>
 #include <ObjParser.hpp>
 
-TextureVertex::TextureVertex(std::string &line) : BaseVertex(line) {}
+TextureVertex::TextureVertex(std::string &line, ParseType parseType) : BaseVertex(line, parseType) {}
 
 double TextureVertex::getU()
 {

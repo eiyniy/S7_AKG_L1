@@ -64,7 +64,7 @@ void ObjParser::moveToNext(string::iterator *iter, std::string::iterator iterEnd
 
 #pragma endregion Static
 
-ObjInfo *ObjParser::parseEntries()
+ObjInfo *ObjParser::parseEntries(ParseType parseType)
 {
     auto info = new ObjInfo();
 
@@ -79,24 +79,27 @@ ObjInfo *ObjParser::parseEntries()
         switch (type.value())
         {
         case EntryType::Vertex:
-            info->addVertex(Vertex(line));
+            info->addVertex(Vertex(line, parseType));
             break;
 
         case EntryType::TextureVertex:
-            info->addTVertex(TextureVertex(line));
+            info->addTVertex(TextureVertex(line, parseType));
             break;
 
         case EntryType::NormalVertex:
-            info->addNVertex(NormalVertex(line));
+            info->addNVertex(NormalVertex(line, parseType));
             break;
 
         case EntryType::Polygon:
-            info->addPolygon(Polygon(line));
+            info->addPolygon(Polygon(line, parseType));
 
         default:
             break;
         }
     }
+
+    readStream.clear();
+    readStream.seekg(0, std::ios::beg);
 
     return info;
 }

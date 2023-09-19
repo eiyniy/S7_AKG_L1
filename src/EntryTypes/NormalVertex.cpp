@@ -1,6 +1,6 @@
 #include <NormalVertex.hpp>
 
-NormalVertex::NormalVertex(std::string &line) : BaseVertex(line) {}
+NormalVertex::NormalVertex(std::string &line, ParseType parseType) : BaseVertex(line, parseType) {}
 
 double NormalVertex::getI()
 {
