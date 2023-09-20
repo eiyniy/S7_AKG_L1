@@ -4,27 +4,28 @@
 
 using namespace std;
 
-Vertex::Vertex(std::string &line, ParseType parseType) : BaseVertex(line, parseType) {}
+Vertex::Vertex(std::string &line) : BaseVertex(line)
+{
+    if (!v2.has_value() || !v3.has_value())
+        throw invalid_argument("Invalid argument");
+}
 
 double Vertex::getX()
 {
-    return this->at(0);
+    return v1;
 }
 
 double Vertex::getY()
 {
-    return this->at(1);
+    return v2.value();
 }
 
 double Vertex::getZ()
 {
-    return this->at(2);
+    return v3.value();
 }
 
 optional<double> Vertex::getW()
 {
-    if (this->size() < 4)
-        return {};
-
-    return this->at(3);
+    return v4;
 }

@@ -1,11 +1,17 @@
 #pragma once
 
-#include <Entry.hpp>
-#include <Types.hpp>
 #include <string>
+#include <vector>
+#include <optional>
 
-class BaseVertex : public Entry<double>
+class BaseVertex
 {
 public:
-    BaseVertex(std::string &line, ParseType parseType);
+    BaseVertex(std::string &line);
+
+protected:
+    double v1;
+    std::optional<double> v2;
+    std::optional<double> v3;
+    std::optional<double> v4;
 };

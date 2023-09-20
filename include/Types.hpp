@@ -7,10 +7,3 @@ enum class EntryType
     NormalVertex,
     Polygon
 };
-
-enum class ParseType
-{
-    Iterator,
-    Strtok,
-    Stringstream
-};

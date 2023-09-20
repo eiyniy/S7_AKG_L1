@@ -1,89 +1,50 @@
 #include <Polygon.hpp>
 #include <ObjParser.hpp>
+#include <Math.hpp>
 #include <string.h>
-#include <iostream>
-#include <sstream>
 
 using namespace std;
 
-Polygon::Polygon(std::string &line, ParseType parseType)
+Indexes::Indexes(std::vector<std::optional<int>> &indexes)
+{
+    if (!indexes.at(0).has_value() || indexes.size() != 3)
+        throw invalid_argument("Invalid argument");
+
+    vertexId = indexes[0].value();
+    tVertexId = indexes[1];
+    nVertexId = indexes[2];
+}
+
+Polygon::Polygon(std::string &line)
 {
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Polygon)
         throw std::invalid_argument("Could not parse value");
 
     std::optional<std::string> strPart;
+    auto accumulator = vector<optional<int>>(3, nullopt);
 
-    switch (parseType)
+    auto iter = line.begin();
+    auto iterEnd = line.end();
+
+    ObjParser::moveToNext(&iter, iterEnd, ' ');
+
+    while (strPart = ObjParser::getNextPart(iter, iterEnd, ' '))
     {
-    case ParseType::Iterator:
-    {
-        auto iter = line.begin();
-        auto iterEnd = line.end();
+        auto iterInner = strPart.value().begin();
+
+        std::optional<std::string> strPartInner;
+
+        int i = 0;
+        while (strPartInner = ObjParser::getNextPart(iterInner, strPart.value().end(), '/', true))
+        {
+            accumulator[i] = Math::optStoi(strPartInner.value());
+            ObjParser::moveToNext(&iterInner, strPart.value().end(), '/', true);
+            i++;
+        }
+
+        values.push_back(Indexes(accumulator));
 
         ObjParser::moveToNext(&iter, iterEnd, ' ');
-
-        while (strPart = ObjParser::getNextPart(iter, iterEnd, ' '))
-        {
-            auto iterInner = strPart.value().begin();
-
-            std::optional<std::string> strPartInner;
-            while (strPartInner = ObjParser::getNextPart(iterInner, strPart.value().end(), '/'))
-            {
-                this->append(stoi(strPartInner.value()));
-                ObjParser::moveToNext(&iterInner, strPart.value().end(), '/');
-            }
-
-            ObjParser::moveToNext(&iter, iterEnd, ' ');
-        }
-
-        break;
-    }
-    case ParseType::Strtok:
-    {
-        char *cstrPt = new char[line.length() + 1];
-        strcpy(cstrPt, line.c_str());
-
-        char *cstrPart = strtok(cstrPt, " ");
-
-        while (cstrPart = strtok(NULL, " "))
-        {
-            char *cstrInnerPt = new char[strlen(cstrPart) + 1];
-            strcpy(cstrInnerPt, cstrPart);
-
-            char *cstrPartInner = strtok(cstrInnerPt, "/");
-            do
-            {
-                this->append(stod(cstrPartInner));
-            } while (cstrPartInner = strtok(NULL, "/"));
-
-            delete[] cstrInnerPt;
-            break;
-        }
-
-        delete[] cstrPt;
-        break;
-
-        break;
-    }
-    case ParseType::Stringstream:
-    {
-        istringstream ss(line);
-        string strPart;
-
-        getline(ss, strPart, ' ');
-        while (getline(ss, strPart, ' '))
-        {
-            istringstream ssInner(strPart);
-            string strPartInner;
-
-            while (getline(ssInner, strPartInner, '/'))
-                this->append(stod(strPartInner));
-        }
-
-        break;
-    }
-    default:
-        break;
     }
 }

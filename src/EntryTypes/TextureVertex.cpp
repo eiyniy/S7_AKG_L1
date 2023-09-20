@@ -1,25 +1,19 @@
 #include <TextureVertex.hpp>
 #include <ObjParser.hpp>
 
-TextureVertex::TextureVertex(std::string &line, ParseType parseType) : BaseVertex(line, parseType) {}
+TextureVertex::TextureVertex(std::string &line) : BaseVertex(line) {}
 
 double TextureVertex::getU()
 {
-    return this->at(0);
+    return v1;
 }
 
 std::optional<double> TextureVertex::getV()
 {
-    if (this->size() < 2)
-        return {};
-
-    return this->at(1);
+    return v2;
 }
 
 std::optional<double> TextureVertex::getW()
 {
-    if (this->size() < 3)
-        return {};
-
-    return this->at(2);
+    return v3;
 }

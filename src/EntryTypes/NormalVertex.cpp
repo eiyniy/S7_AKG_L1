@@ -1,18 +1,25 @@
 #include <NormalVertex.hpp>
+#include <stdexcept>
 
-NormalVertex::NormalVertex(std::string &line, ParseType parseType) : BaseVertex(line, parseType) {}
+using namespace std;
+
+NormalVertex::NormalVertex(std::string &line) : BaseVertex(line)
+{
+    if (!v2.has_value() || !v3.has_value())
+        throw invalid_argument("Invalid argument");
+}
 
 double NormalVertex::getI()
 {
-    return this->at(0);
+    return v1;
 }
 
 double NormalVertex::getJ()
 {
-    return this->at(1);
+    return v2.value();
 }
 
 double NormalVertex::getK()
 {
-    return this->at(2);
+    return v3.value();
 }

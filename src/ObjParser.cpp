@@ -40,31 +40,39 @@ optional<EntryType> ObjParser::getEntryType(std::string &line)
         return {};
 }
 
-optional<string> ObjParser::getNextPart(string::iterator iter, string::iterator iterEnd, char divider)
+optional<string> ObjParser::getNextPart(string::iterator iter, string::iterator iterEnd, char divider, bool allowEmpty)
 {
     if (iter >= iterEnd)
-        return {};
+        return std::nullopt;
 
     auto iterSecond = iter;
 
     while (*iterSecond != divider && iterSecond != iterEnd)
         ++iterSecond;
 
+    /*if (allowEmpty && *iter == divider && *iterSecond == divider)
+        return "";
+    else*/
     return string(iter, iterSecond);
 }
 
-void ObjParser::moveToNext(string::iterator *iter, std::string::iterator iterEnd, char divider)
+void ObjParser::moveToNext(string::iterator *iter, std::string::iterator iterEnd, char divider, bool allowEmpty)
 {
     while (*iter != iterEnd && **iter != divider)
         (*iter)++;
 
-    while (*iter != iterEnd && **iter == divider)
+    if (allowEmpty)
         (*iter)++;
+    else
+    {
+        while (*iter != iterEnd && **iter == divider)
+            (*iter)++;
+    }
 }
 
 #pragma endregion Static
 
-ObjInfo *ObjParser::parseEntries(ParseType parseType)
+ObjInfo *ObjParser::parseEntries()
 {
     auto info = new ObjInfo();
 
@@ -79,19 +87,19 @@ ObjInfo *ObjParser::parseEntries(ParseType parseType)
         switch (type.value())
         {
         case EntryType::Vertex:
-            info->addVertex(Vertex(line, parseType));
+            info->addVertex(Vertex(line));
             break;
 
         case EntryType::TextureVertex:
-            info->addTVertex(TextureVertex(line, parseType));
+            info->addTVertex(TextureVertex(line));
             break;
 
         case EntryType::NormalVertex:
-            info->addNVertex(NormalVertex(line, parseType));
+            info->addNVertex(NormalVertex(line));
             break;
 
         case EntryType::Polygon:
-            info->addPolygon(Polygon(line, parseType));
+            info->addPolygon(Polygon(line));
 
         default:
             break;

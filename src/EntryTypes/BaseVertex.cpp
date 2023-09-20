@@ -1,13 +1,10 @@
 #include <BaseVertex.hpp>
 #include <ObjParser.hpp>
-#include <Types.hpp>
-#include <string.h>
-#include <iostream>
-#include <sstream>
+#include <optional>
 
 using namespace std;
 
-BaseVertex::BaseVertex(std::string &line, ParseType parseType)
+BaseVertex::BaseVertex(std::string &line)
 {
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Vertex &&
@@ -15,52 +12,27 @@ BaseVertex::BaseVertex(std::string &line, ParseType parseType)
         entryType != EntryType::NormalVertex)
         throw std::invalid_argument("Could not parse value");
 
-    std::optional<std::string> strPart;
+    optional<string> strPart;
+    auto accumulator = vector<optional<double>>(4, nullopt);
 
-    switch (parseType)
-    {
-    case ParseType::Iterator:
-    {
-        auto iter = line.begin();
-        auto iterEnd = line.end();
+    auto iter = line.begin();
+    auto iterEnd = line.end();
 
+    ObjParser::moveToNext(&iter, iterEnd, ' ');
+
+    int i = 0;
+    while (strPart = ObjParser::getNextPart(iter, line.end(), ' '))
+    {
+        accumulator[i] = stod(strPart.value());
         ObjParser::moveToNext(&iter, iterEnd, ' ');
-
-        while (strPart = ObjParser::getNextPart(iter, line.end(), ' '))
-        {
-            this->append(stod(strPart.value()));
-            ObjParser::moveToNext(&iter, iterEnd, ' ');
-        }
-
-        break;
+        ++i;
     }
-    case ParseType::Strtok:
-    {
-        char *cstrPt = new char[line.length() + 1];
-        strcpy(cstrPt, line.c_str());
 
-        char *cstrPart = strtok(cstrPt, " ");
+    if (!accumulator.at(0).has_value())
+        throw invalid_argument("Invalid argument");
 
-        while (cstrPart = strtok(NULL, " "))
-            this->append(stod(cstrPart));
-
-        delete[] cstrPt;
-        break;
-    }
-    case ParseType::Stringstream:
-    {
-        istringstream ss(line);
-        string strPart;
-
-        while (getline(ss, strPart, ' '))
-        {
-            if (isdigit(*strPart.begin()) || *strPart.begin() == '-')
-                this->append(stod(strPart));
-        }
-
-        break;
-    }
-    default:
-        break;
-    }
+    v1 = accumulator.at(0).value();
+    v2 = accumulator.at(1);
+    v3 = accumulator.at(2);
+    v4 = accumulator.at(3);
 }
