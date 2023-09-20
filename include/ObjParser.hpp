@@ -26,6 +26,4 @@ public:
 private:
     std::ifstream readStream;
     std::string pathToFile;
-
-    const char *allowedChars;
 };

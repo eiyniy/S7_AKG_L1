@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
     cout << "Hello world!" << endl;
 
-    auto parser = ObjParser("resources/models/uploads_files_2217034_WOMAN.obj");
+    auto parser = ObjParser(argv[1]);
 
     auto tsStart = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
 

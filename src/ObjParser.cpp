@@ -7,16 +7,16 @@
 
 using namespace std;
 
-ObjParser::ObjParser(string p_pathToFile) : allowedChars("-0123456789vtnf")
+ObjParser::ObjParser(string p_pathToFile)
 {
     if (!std::filesystem::exists(p_pathToFile))
-        throw std::runtime_error("Could not open file");
+        throw runtime_error("Could not open file");
 
     pathToFile = p_pathToFile;
 
     readStream.open(pathToFile);
     if (!readStream.is_open())
-        throw std::runtime_error("Could not open file");
+        throw runtime_error("Could not open file");
 }
 
 #pragma region Static

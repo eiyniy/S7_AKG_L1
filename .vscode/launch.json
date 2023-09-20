@@ -6,7 +6,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "name": "Launch (gdb)",
             "request": "launch",
-            "args": [],
+            "args": ["${workspaceFolder}/resources/models/uploads_files_2217034_WOMAN.obj"],
             "environment": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
