@@ -1,7 +1,7 @@
 #include <Polygon.hpp>
 #include <ObjParser.hpp>
 #include <Math.hpp>
-#include <string.h>
+#include <Timer.hpp>
 
 using namespace std;
 
@@ -24,32 +24,39 @@ Polygon::Polygon(std::string &line)
 
     storageMode = PolygonStorageMode::Static;
 
-    std::optional<std::string> strPart;
-    auto indexesAcc = vector<optional<VertexIndexes>>();
-    indexesAcc.reserve(4);
+    optional<std::string> strPart;
+    accumulator = vector<optional<VertexIndexes>>(4);
 
     auto iter = line.begin();
-    auto iterEnd = line.end();
+    auto iterEnd = line.cend();
 
-    ObjParser::moveToNext(&iter, iterEnd, ' ');
+    ObjParser::getNextPart(&iter, iterEnd, ' ');
 
     int i = 0;
-    while (strPart = ObjParser::getNextPart(iter, iterEnd, ' '))
+    while (strPart = ObjParser::getNextPart(&iter, iterEnd, ' '))
     {
         if (i >= 4)
             moveValuesToDynamic();
 
-        if (storageMode == PolygonStorageMode::Dynamic)
-            dValues.value().push_back(VertexIndexes(strPart.value()));
+        if (storageMode == PolygonStorageMode::Static)
+        {
+            Timer::start();
+            accumulator[i] = VertexIndexes(strPart.value());
+            Timer::stop();
+        }
         else
-            indexesAcc.push_back(VertexIndexes(strPart.value()));
+            dValues.value().push_back(VertexIndexes(strPart.value()));
 
-        ObjParser::moveToNext(&iter, iterEnd, ' ');
-        i++;
+        ++i;
     }
 
+    /*
+        for (; i < 4; ++i)
+            accumulator[i] = nullopt;
+    */
+
     if (storageMode == PolygonStorageMode::Static)
-        sValues = Values(indexesAcc);
+        sValues = Values(accumulator);
 }
 
 void Polygon::moveValuesToDynamic()

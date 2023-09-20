@@ -1,22 +1,25 @@
 #include <VertexIndexes.hpp>
 #include <ObjParser.hpp>
 #include <Math.hpp>
+#include <Timer.hpp>
 #include <vector>
+#include <chrono>
 
 using namespace std;
 
 VertexIndexes::VertexIndexes(std::string &str)
 {
     optional<string> strPart;
-    auto accumulator = vector<optional<double>>();
-    accumulator.reserve(3);
+    //auto accumulator = vector<optional<double>>(3, nullopt);
 
     auto iter = str.begin();
+    auto iterEnd = str.cend();
 
-    while (strPart = ObjParser::getNextPart(iter, str.end(), '/', true))
+    int i = 0;
+    while (strPart = ObjParser::getNextPart(&iter, iterEnd, '/', true))
     {
-        accumulator.push_back(Math::optStoi(strPart.value()));
-        ObjParser::moveToNext(&iter, str.end(), '/', true);
+        accumulator[i] = Math::optStoi(strPart.value());
+        ++i;
     }
 
     if (!accumulator.at(0).has_value())

@@ -24,9 +24,8 @@ ObjParser::ObjParser(string p_pathToFile) : allowedChars("-0123456789vtnf")
 optional<EntryType> ObjParser::getEntryType(std::string &line)
 {
     auto iter = line.begin();
-    auto iterEnd = line.end();
 
-    auto type = getNextPart(iter, iterEnd, ' ');
+    auto type = getNextPart(&iter, line.end(), ' ');
 
     if (type && type == "v")
         return EntryType::Vertex;
@@ -40,36 +39,38 @@ optional<EntryType> ObjParser::getEntryType(std::string &line)
         return {};
 }
 
-optional<string> ObjParser::getNextPart(string::iterator iter, string::iterator iterEnd, char divider)
+optional<string> ObjParser::getNextPart(
+    string::iterator *iter,
+    string::const_iterator iterEnd,
+    char divider,
+    bool allowEmpty)
 {
-    if (iter >= iterEnd)
+    if (*iter >= iterEnd)
         return std::nullopt;
 
-    auto iterSecond = iter;
+    auto iterSecond = *iter;
 
     while (iterSecond < iterEnd && *iterSecond != divider)
         ++iterSecond;
 
-    return string(iter, iterSecond);
-}
+    auto result = string(*iter, iterSecond);
 
-void ObjParser::moveToNext(string::iterator *iter, std::string::iterator iterEnd, char divider, bool allowEmpty)
-{
-    while (*iter < iterEnd && **iter != divider)
-        (*iter)++;
+    *iter = iterSecond;
 
     if (allowEmpty)
     {
         do
         {
-            (*iter)++;
+            ++(*iter);
         } while (*iter < iterEnd && **iter != divider && **iter != '-' && !isdigit(**iter));
     }
     else
     {
         while (*iter < iterEnd && (**iter == divider || **iter == '\r'))
-            (*iter)++;
+            ++(*iter);
     }
+
+    return result;
 }
 
 #pragma endregion Static
@@ -79,17 +80,16 @@ ObjInfo *ObjParser::parseEntries(std::string &fileContent)
     auto info = new ObjInfo();
 
     auto iter = fileContent.begin();
-    auto iterEnd = fileContent.end();
+    auto iterEnd = fileContent.cend();
 
-    optional<string> line;
-    while (line = getNextPart(iter, iterEnd, '\n'))
-    {
-        parseEntry(line.value(), info);
-        moveToNext(&iter, iterEnd, '\n');
-    }
+    istringstream ss(fileContent);
+    string line;
+
+    while (getline(ss, line, '\n'))
+        parseEntry(line, info);
 
     readStream.clear();
-    readStream.seekg(0, std::ios::beg);
+    readStream.seekg(0, ios::beg);
 
     return info;
 }

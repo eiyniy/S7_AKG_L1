@@ -16,15 +16,14 @@ BaseVertex::BaseVertex(std::string &line)
     auto accumulator = vector<optional<double>>(4, nullopt);
 
     auto iter = line.begin();
-    auto iterEnd = line.end();
+    auto iterEnd = line.cend();
 
-    ObjParser::moveToNext(&iter, iterEnd, ' ');
+    ObjParser::getNextPart(&iter, iterEnd, ' ');
 
     int i = 0;
-    while (strPart = ObjParser::getNextPart(iter, line.end(), ' '))
+    while (strPart = ObjParser::getNextPart(&iter, line.end(), ' '))
     {
         accumulator[i] = stod(strPart.value());
-        ObjParser::moveToNext(&iter, iterEnd, ' ');
         ++i;
     }
 

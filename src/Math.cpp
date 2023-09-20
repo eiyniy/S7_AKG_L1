@@ -1,8 +1,8 @@
-#include "Math.hpp"
+#include <Math.hpp>
 
 using namespace std;
 
-std::optional<int> Math::optStoi(std::string str)
+optional<int> Math::optStoi(string str)
 {
     if (str.empty())
         return nullopt;
