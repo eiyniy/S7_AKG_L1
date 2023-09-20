@@ -12,13 +12,13 @@ vector<optional<double>> VertexIndexes::accumulator = vector<optional<double>>(3
 VertexIndexes::VertexIndexes(std::string &str)
 {
     optional<string> strPart;
-    // auto accumulator = vector<optional<double>>(3, nullopt);
+    auto accumulator = vector<optional<double>>(3, nullopt);
 
     auto iter = str.begin();
     auto iterEnd = str.cend();
 
     int i = 0;
-    while (strPart = ObjParser::getNextPart(&iter, iterEnd, '/', true))
+    while ((strPart = ObjParser::getNextPart(&iter, iterEnd, '/', true)))
     {
         accumulator[i] = Math::optStoi(strPart.value());
         ++i;

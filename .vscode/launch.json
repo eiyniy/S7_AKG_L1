@@ -1,12 +1,13 @@
 {
     "version": "0.2.0",
     "configurations": [
-        // GDB Debugging:
         {
             "program": "${command:cmake.launchTargetPath}",
             "name": "Launch (gdb)",
             "request": "launch",
-            "args": ["${workspaceFolder}/resources/models/uploads_files_2217034_WOMAN.obj"],
+            "args": [
+                "${workspaceFolder}/resources/models/uploads_files_2217034_WOMAN.obj"
+            ],
             "environment": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -22,6 +23,6 @@
                     "ignoreFailures": true
                 }
             ]
-        }
+        },
     ]
 }

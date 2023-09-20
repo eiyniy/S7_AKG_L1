@@ -31,7 +31,7 @@ Polygon::Polygon(std::string &line)
     storageMode = PolygonStorageMode::Static;
 
     optional<std::string> strPart;
-    accumulator = vector<optional<VertexIndexes>>(4, nullopt);
+    auto accumulator = vector<optional<VertexIndexes>>(4, nullopt);
 
     auto iter = line.begin();
     auto iterEnd = line.cend();
@@ -39,7 +39,7 @@ Polygon::Polygon(std::string &line)
     ObjParser::getNextPart(&iter, iterEnd, ' ');
 
     int i = 0;
-    while (strPart = ObjParser::getNextPart(&iter, iterEnd, ' '))
+    while ((strPart = ObjParser::getNextPart(&iter, iterEnd, ' ')))
     {
         if (i >= 4)
             moveValuesToDynamic();
