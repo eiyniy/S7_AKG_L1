@@ -1,5 +1,6 @@
 #include <VertexIndexes.hpp>
 #include <ObjParser.hpp>
+#include <Math.hpp>
 #include <vector>
 
 using namespace std;
@@ -11,12 +12,11 @@ VertexIndexes::VertexIndexes(std::string &str)
     accumulator.reserve(3);
 
     auto iter = str.begin();
-    auto iterEnd = str.end();
 
     while (strPart = ObjParser::getNextPart(iter, str.end(), '/', true))
     {
-        accumulator.push_back(stod(strPart.value()));
-        ObjParser::moveToNext(&iter, iterEnd, '/', true);
+        accumulator.push_back(Math::optStoi(strPart.value()));
+        ObjParser::moveToNext(&iter, str.end(), '/', true);
     }
 
     if (!accumulator.at(0).has_value())

@@ -22,56 +22,48 @@ Polygon::Polygon(std::string &line)
     if (entryType != EntryType::Polygon)
         throw std::invalid_argument("Could not parse value");
 
+    storageMode = PolygonStorageMode::Static;
+
     std::optional<std::string> strPart;
-    auto indexesAcc = vector<optional<VertexIndexes>>(4, nullopt);
-
-    setStorageMode(line);
-
-    if (storageMode == PolygonStorageMode::Dynamic)
-    {
-        dValues = std::make_optional(vector<VertexIndexes>());
-        dValues.value().reserve(5);
-    }
+    auto indexesAcc = vector<optional<VertexIndexes>>();
+    indexesAcc.reserve(4);
 
     auto iter = line.begin();
     auto iterEnd = line.end();
 
     ObjParser::moveToNext(&iter, iterEnd, ' ');
 
-    int j = 0;
+    int i = 0;
     while (strPart = ObjParser::getNextPart(iter, iterEnd, ' '))
     {
+        if (i >= 4)
+            moveValuesToDynamic();
+
         if (storageMode == PolygonStorageMode::Dynamic)
             dValues.value().push_back(VertexIndexes(strPart.value()));
         else
-            indexesAcc[j] = VertexIndexes(strPart.value());
+            indexesAcc.push_back(VertexIndexes(strPart.value()));
 
         ObjParser::moveToNext(&iter, iterEnd, ' ');
-        j++;
+        i++;
     }
 
     if (storageMode == PolygonStorageMode::Static)
         sValues = Values(indexesAcc);
 }
 
-// TODO replace with static default & remove if more then 4
-void Polygon::setStorageMode(std::string &line)
+void Polygon::moveValuesToDynamic()
 {
-    auto iter = line.begin();
-    auto iterEnd = line.end();
+    if (!sValues.has_value())
+        throw runtime_error("Could not store polygon");
 
-    int count = 0;
+    storageMode = PolygonStorageMode::Dynamic;
 
-    ObjParser::moveToNext(&iter, iterEnd, ' ');
+    dValues = make_optional(vector<VertexIndexes>());
+    dValues.value().reserve(5);
 
-    while (ObjParser::getNextPart(iter, iterEnd, ' '))
-    {
-        ++count;
-        ObjParser::moveToNext(&iter, iterEnd, ' ');
-    }
-
-    if (count <= 4)
-        storageMode = PolygonStorageMode::Static;
-    else
-        storageMode = PolygonStorageMode::Dynamic;
+    dValues.value().at(0) = sValues.value().v1;
+    dValues.value().at(1) = sValues.value().v2;
+    dValues.value().at(2) = sValues.value().v3;
+    dValues.value().at(3) = sValues.value().v4.value();
 }

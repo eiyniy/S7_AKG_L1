@@ -21,11 +21,11 @@ class Polygon
 public:
     Polygon(std::string &line);
 
-    void setStorageMode(std::string &line);
-
 private:
     PolygonStorageMode storageMode;
 
     std::optional<std::vector<VertexIndexes>> dValues;
     std::optional<Values> sValues;
+
+    void moveValuesToDynamic();
 };

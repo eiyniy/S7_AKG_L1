@@ -76,6 +76,11 @@ ObjInfo *ObjParser::parseEntries()
 {
     auto info = new ObjInfo();
 
+    auto tsStart = std::chrono::high_resolution_clock::now();
+    auto tsEnd = tsStart;
+
+    long long vParseTime = 0, vtParseTime = 0, vnParseTime = 0, pParseTime = 0;
+
     string line;
     optional<EntryType> type;
 
@@ -87,24 +92,59 @@ ObjInfo *ObjParser::parseEntries()
         switch (type.value())
         {
         case EntryType::Vertex:
+        {
+            tsStart = std::chrono::high_resolution_clock::now();
+
             info->addVertex(Vertex(line));
-            break;
 
+            tsEnd = std::chrono::high_resolution_clock::now();
+            vParseTime += std::chrono::duration_cast<std::chrono::nanoseconds>(tsEnd - tsStart).count();
+
+            break;
+        }
         case EntryType::TextureVertex:
+        {
+            tsStart = std::chrono::high_resolution_clock::now();
+
             info->addTVertex(TextureVertex(line));
-            break;
 
+            tsEnd = std::chrono::high_resolution_clock::now();
+            vtParseTime += std::chrono::duration_cast<std::chrono::nanoseconds>(tsEnd - tsStart).count();
+
+            break;
+        }
         case EntryType::NormalVertex:
-            info->addNVertex(NormalVertex(line));
-            break;
+        {
+            tsStart = std::chrono::high_resolution_clock::now();
 
+            info->addNVertex(NormalVertex(line));
+
+            tsEnd = std::chrono::high_resolution_clock::now();
+            vnParseTime += std::chrono::duration_cast<std::chrono::nanoseconds>(tsEnd - tsStart).count();
+
+            break;
+        }
         case EntryType::Polygon:
+        {
+            tsStart = std::chrono::high_resolution_clock::now();
+
             info->addPolygon(Polygon(line));
 
+            tsEnd = std::chrono::high_resolution_clock::now();
+            pParseTime += std::chrono::duration_cast<std::chrono::nanoseconds>(tsEnd - tsStart).count();
+
+            break;
+        }
         default:
             break;
         }
     }
+
+    cout << "Vertex parse time - " << vParseTime / 1000000 << "ms" << endl;
+    cout << "Texture vertex parse time - " << vtParseTime / 1000000 << "ms" << endl;
+    cout << "Normal vertex parse time - " << vnParseTime / 1000000 << "ms" << endl;
+    cout << "Polygon parse time - " << pParseTime / 1000000 << "ms" << endl;
+    cout << endl;
 
     readStream.clear();
     readStream.seekg(0, std::ios::beg);
