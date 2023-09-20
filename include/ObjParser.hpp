@@ -12,13 +12,17 @@ class ObjParser
 public:
     ObjParser(std::string p_pathToFile);
 
-    ObjInfo *parseEntries();
+    std::string *readFile();
+    ObjInfo *parseEntries(std::string &fileContent);
+    void parseEntry(std::string &line, ObjInfo *result);
 
     static std::optional<EntryType> getEntryType(std::string &line);
-    static std::optional<std::string> getNextPart(std::string::iterator iter, std::string::iterator iterEnd, char divider, bool allowEmpty = false);
+    static std::optional<std::string> getNextPart(std::string::iterator iter, std::string::iterator iterEnd, char divider);
     static void moveToNext(std::string::iterator *iter, std::string::iterator iterEnd, char divider, bool allowEmpty = false);
 
 private:
     std::ifstream readStream;
     std::string pathToFile;
+
+    const char *allowedChars;
 };

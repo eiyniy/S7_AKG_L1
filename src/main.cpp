@@ -12,7 +12,10 @@ int main(int argc, char **argv)
     auto parser = ObjParser("resources/models/uploads_files_2217034_WOMAN.obj");
 
     auto tsStart = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
-    auto objInfoPt = parser.parseEntries();
+
+    string *fileContentPt = parser.readFile();
+
+    auto objInfoPt = parser.parseEntries(*fileContentPt);
 
     cout << "Vertices count - " << objInfoPt->getVertices().size() << endl;
     cout << "Texture vertices count - " << objInfoPt->getTVertices().size() << endl;
