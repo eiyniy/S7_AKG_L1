@@ -5,6 +5,8 @@
 
 using namespace std;
 
+vector<optional<VertexIndexes>> Polygon::accumulator = vector<optional<VertexIndexes>>(4, nullopt);
+
 Values::Values(std::vector<std::optional<VertexIndexes>> &values)
 {
     if (!values.at(0).has_value() || !values.at(1).has_value() || !values.at(2).has_value())
@@ -16,8 +18,12 @@ Values::Values(std::vector<std::optional<VertexIndexes>> &values)
     v4 = values[3];
 }
 
+Values::Values() {}
+
 Polygon::Polygon(std::string &line)
 {
+    Timer::start();
+
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Polygon)
         throw std::invalid_argument("Could not parse value");
@@ -25,7 +31,7 @@ Polygon::Polygon(std::string &line)
     storageMode = PolygonStorageMode::Static;
 
     optional<std::string> strPart;
-    accumulator = vector<optional<VertexIndexes>>(4);
+    accumulator = vector<optional<VertexIndexes>>(4, nullopt);
 
     auto iter = line.begin();
     auto iterEnd = line.cend();
@@ -38,25 +44,18 @@ Polygon::Polygon(std::string &line)
         if (i >= 4)
             moveValuesToDynamic();
 
-        if (storageMode == PolygonStorageMode::Static)
-        {
-            Timer::start();
-            accumulator[i] = VertexIndexes(strPart.value());
-            Timer::stop();
-        }
-        else
+        if (storageMode == PolygonStorageMode::Dynamic)
             dValues.value().push_back(VertexIndexes(strPart.value()));
+        else
+            accumulator[i] = VertexIndexes(strPart.value());
 
         ++i;
     }
 
-    /*
-        for (; i < 4; ++i)
-            accumulator[i] = nullopt;
-    */
-
     if (storageMode == PolygonStorageMode::Static)
         sValues = Values(accumulator);
+
+    Timer::stop();
 }
 
 void Polygon::moveValuesToDynamic()

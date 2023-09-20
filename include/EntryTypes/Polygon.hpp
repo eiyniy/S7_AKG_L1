@@ -9,6 +9,7 @@
 struct Values
 {
     Values(std::vector<std::optional<VertexIndexes>> &values);
+    Values();
 
     VertexIndexes v1;
     VertexIndexes v2;

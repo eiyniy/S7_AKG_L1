@@ -6,12 +6,6 @@
 
 using namespace std;
 
-chrono::_V2::system_clock::time_point Timer::timeStart;
-long long Timer::nsCount;
-
-vector<optional<VertexIndexes>> Polygon::accumulator = vector<optional<VertexIndexes>>(4, nullopt);
-vector<optional<double>> VertexIndexes::accumulator = vector<optional<double>>(3, nullopt);
-
 int main(int argc, char **argv)
 {
     cout << "Hello world!" << endl;

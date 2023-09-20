@@ -7,10 +7,12 @@
 
 using namespace std;
 
+vector<optional<double>> VertexIndexes::accumulator = vector<optional<double>>(3, nullopt);
+
 VertexIndexes::VertexIndexes(std::string &str)
 {
     optional<string> strPart;
-    //auto accumulator = vector<optional<double>>(3, nullopt);
+    // auto accumulator = vector<optional<double>>(3, nullopt);
 
     auto iter = str.begin();
     auto iterEnd = str.cend();
