@@ -7,3 +7,9 @@ enum class EntryType
     NormalVertex,
     Polygon
 };
+
+enum class PolygonStorageMode
+{
+    Static,
+    Dynamic
+};

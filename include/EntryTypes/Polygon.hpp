@@ -1,16 +1,19 @@
 #pragma once
 
+#include <VertexIndexes.hpp>
+#include <Types.hpp>
 #include <string>
 #include <vector>
 #include <optional>
 
-struct Indexes
+struct Values
 {
-    Indexes(std::vector<std::optional<int>> &indexes);
+    Values(std::vector<std::optional<VertexIndexes>> &values);
 
-    int vertexId;
-    std::optional<int> tVertexId;
-    std::optional<int> nVertexId;
+    VertexIndexes v1;
+    VertexIndexes v2;
+    VertexIndexes v3;
+    std::optional<VertexIndexes> v4;
 };
 
 class Polygon
@@ -18,6 +21,11 @@ class Polygon
 public:
     Polygon(std::string &line);
 
+    void setStorageMode(std::string &line);
+
 private:
-    std::vector<Indexes> values;
+    PolygonStorageMode storageMode;
+
+    std::optional<std::vector<VertexIndexes>> dValues;
+    std::optional<Values> sValues;
 };
