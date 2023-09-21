@@ -13,7 +13,7 @@ BaseVertex::BaseVertex(std::string &line)
         throw std::invalid_argument("Could not parse value");
 
     optional<string> strPart;
-    auto accumulator = vector<optional<double>>(4, nullopt);
+    static auto accumulator = vector<optional<double>>(4, nullopt);
 
     auto iter = line.begin();
     auto iterEnd = line.cend();
@@ -21,7 +21,7 @@ BaseVertex::BaseVertex(std::string &line)
     ObjParser::getNextPart(&iter, iterEnd, ' ');
 
     int i = 0;
-    while (strPart = ObjParser::getNextPart(&iter, line.end(), ' '))
+    while ((strPart = ObjParser::getNextPart(&iter, line.end(), ' ')))
     {
         accumulator[i] = stod(strPart.value());
         ++i;
@@ -34,4 +34,6 @@ BaseVertex::BaseVertex(std::string &line)
     v2 = accumulator.at(1);
     v3 = accumulator.at(2);
     v4 = accumulator.at(3);
+
+    accumulator = vector<optional<double>>(4, nullopt);
 }

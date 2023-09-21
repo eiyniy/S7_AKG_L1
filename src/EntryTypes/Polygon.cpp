@@ -5,8 +5,6 @@
 
 using namespace std;
 
-vector<optional<VertexIndexes>> Polygon::accumulator = vector<optional<VertexIndexes>>(4, nullopt);
-
 Values::Values(std::vector<std::optional<VertexIndexes>> &values)
 {
     if (!values.at(0).has_value() || !values.at(1).has_value() || !values.at(2).has_value())
@@ -31,7 +29,7 @@ Polygon::Polygon(std::string &line)
     storageMode = PolygonStorageMode::Static;
 
     optional<std::string> strPart;
-    auto accumulator = vector<optional<VertexIndexes>>(4, nullopt);
+    static auto accumulator = vector<optional<VertexIndexes>>(4, nullopt);
 
     auto iter = line.begin();
     auto iterEnd = line.cend();
@@ -65,7 +63,7 @@ void Polygon::moveValuesToDynamic()
 
     storageMode = PolygonStorageMode::Dynamic;
 
-    dValues = make_optional(vector<VertexIndexes>());
+    dValues = vector<VertexIndexes>();
     dValues.value().reserve(5);
 
     dValues.value().at(0) = sValues.value().v1;

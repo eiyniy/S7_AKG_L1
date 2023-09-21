@@ -28,7 +28,5 @@ private:
     std::optional<std::vector<VertexIndexes>> dValues;
     std::optional<Values> sValues;
 
-    static std::vector<std::optional<VertexIndexes>> accumulator;
-
     void moveValuesToDynamic();
 };
