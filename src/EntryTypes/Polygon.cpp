@@ -2,12 +2,13 @@
 #include <ObjParser.hpp>
 #include <Math.hpp>
 #include <Timer.hpp>
+#include <array>
 
 using namespace std;
 
-Values::Values(std::vector<std::optional<VertexIndexes>> &values)
+Values::Values(array<optional<VertexIndexes>, 4> &values)
 {
-    if (!values.at(0).has_value() || !values.at(1).has_value() || !values.at(2).has_value())
+    if (!values[0].has_value() || !values[1].has_value() || !values[2].has_value())
         throw invalid_argument("Invalid argument");
 
     v1 = values[0].value();
@@ -29,7 +30,7 @@ Polygon::Polygon(std::string &line)
     storageMode = PolygonStorageMode::Static;
 
     optional<std::string> strPart;
-    static auto accumulator = vector<optional<VertexIndexes>>(4, nullopt);
+    static auto accumulator = array<optional<VertexIndexes>, 4>();
 
     auto iter = line.begin();
     auto iterEnd = line.cend();
@@ -53,6 +54,8 @@ Polygon::Polygon(std::string &line)
     if (storageMode == PolygonStorageMode::Static)
         sValues = Values(accumulator);
 
+    accumulator.fill(nullopt);
+
     Timer::stop();
 }
 
@@ -63,11 +66,10 @@ void Polygon::moveValuesToDynamic()
 
     storageMode = PolygonStorageMode::Dynamic;
 
-    dValues = vector<VertexIndexes>();
-    dValues.value().reserve(5);
+    dValues = vector<VertexIndexes>(4);
 
-    dValues.value().at(0) = sValues.value().v1;
-    dValues.value().at(1) = sValues.value().v2;
-    dValues.value().at(2) = sValues.value().v3;
-    dValues.value().at(3) = sValues.value().v4.value();
+    dValues.value()[0] = sValues.value().v1;
+    dValues.value()[1] = sValues.value().v2;
+    dValues.value()[2] = sValues.value().v3;
+    dValues.value()[3] = sValues.value().v4.value();
 }

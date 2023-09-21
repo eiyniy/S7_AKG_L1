@@ -5,10 +5,11 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <array>
 
 struct Values
 {
-    Values(std::vector<std::optional<VertexIndexes>> &values);
+    Values(std::array<std::optional<VertexIndexes>, 4> &values);
     Values();
 
     VertexIndexes v1;
