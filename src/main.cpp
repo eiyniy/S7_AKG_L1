@@ -3,6 +3,7 @@
 #include <ObjParser.hpp>
 #include <Vertex.hpp>
 #include <Timer.hpp>
+#include <Matrix.hpp>
 
 using namespace std;
 
@@ -26,6 +27,8 @@ int main(int argc, char **argv)
 
     auto tsParseEnd = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
     cout << "Parse time - " << tsParseEnd - tsStart << "ms" << endl;
+
+    Matrix<int> m{2, 5};
 
     delete objInfoPt;
 
