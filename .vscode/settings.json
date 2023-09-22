@@ -38,7 +38,7 @@
         "map": "cpp",
         "set": "cpp",
         "unordered_map": "cpp",
-        "exception": "cpp",
+        "logic_error": "cpp",
         "algorithm": "cpp",
         "functional": "cpp",
         "iterator": "cpp",
@@ -76,6 +76,8 @@
         "netfwd": "cpp",
         "timer": "cpp",
         "future": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "exception": "cpp",
+        "*.inc": "cpp"
     },
 }

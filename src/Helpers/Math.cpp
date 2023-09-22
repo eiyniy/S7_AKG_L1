@@ -1,11 +1,9 @@
 #include <Math.hpp>
 
-using namespace std;
-
-optional<int> Math::optStoi(string str)
+std::optional<int> Math::optStoi(std::string str)
 {
     if (str.empty())
-        return nullopt;
+        return std::nullopt;
     else
         return stoi(str);
 }

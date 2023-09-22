@@ -1,20 +1,18 @@
 #include <BaseVertex.hpp>
 #include <ObjParser.hpp>
-#include <optional>
 #include <array>
+#include <stdexcept>
 
-using namespace std;
-
-BaseVertex::BaseVertex(std::string &line)
+BaseVertex::BaseVertex(std::string &line, EntryType type)
 {
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Vertex &&
         entryType != EntryType::TextureVertex &&
         entryType != EntryType::NormalVertex)
-        throw std::invalid_argument("Could not parse value");
+        throw std::logic_error("Could not parse value");
 
-    optional<string> strPart;
-    static auto accumulator = array<optional<double>, 4>();
+    std::optional<std::string> strPart;
+    static auto accumulator = std::array<std::optional<double>, 4>();
 
     auto iter = line.begin();
     auto iterEnd = line.cend();
@@ -28,13 +26,14 @@ BaseVertex::BaseVertex(std::string &line)
         ++i;
     }
 
-    if (!accumulator[0].has_value())
-        throw invalid_argument("Invalid argument");
+    if (i < 1)
+        throw std::logic_error("Can't parse value");
 
-    v1 = accumulator[0].value();
-    v2 = accumulator[1];
-    v3 = accumulator[2];
-    v4 = accumulator[3];
+    vector = CoordinateVector(
+        accumulator[0].value(),
+        accumulator[1].value_or(0),
+        accumulator[2].value_or(0));
+    v4 = accumulator[3].value_or(1);
 
-    accumulator.fill(nullopt);
+    accumulator.fill(std::nullopt);
 }

@@ -6,12 +6,10 @@
 #include <chrono>
 #include <array>
 
-using namespace std;
-
 VertexIndexes::VertexIndexes(std::string &str)
 {
-    optional<string> strPart;
-    static auto accumulator = array<optional<double>, 3>();
+    std::optional<std::string> strPart;
+    static auto accumulator = std::array<std::optional<double>, 3>();
 
     auto iter = str.begin();
     auto iterEnd = str.cend();
@@ -24,13 +22,13 @@ VertexIndexes::VertexIndexes(std::string &str)
     }
 
     if (!accumulator[0].has_value())
-        throw invalid_argument("Invalid argument");
+        throw std::logic_error("Invalid argument");
 
     vertexId = accumulator[0].value();
     tVertexId = accumulator[1];
     nVertexId = accumulator[2];
 
-    accumulator.fill(nullopt);
+    accumulator.fill(std::nullopt);
 }
 
 VertexIndexes::VertexIndexes() {}

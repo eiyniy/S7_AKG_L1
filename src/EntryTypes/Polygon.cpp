@@ -4,12 +4,10 @@
 #include <Timer.hpp>
 #include <array>
 
-using namespace std;
-
-Values::Values(array<optional<VertexIndexes>, 4> &values)
+Values::Values(std::array<std::optional<VertexIndexes>, 4> &values)
 {
     if (!values[0].has_value() || !values[1].has_value() || !values[2].has_value())
-        throw invalid_argument("Invalid argument");
+        throw std::logic_error("Invalid argument");
 
     v1 = values[0].value();
     v2 = values[1].value();
@@ -21,16 +19,14 @@ Values::Values() {}
 
 Polygon::Polygon(std::string &line)
 {
-    Timer::start();
-
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Polygon)
-        throw std::invalid_argument("Could not parse value");
+        throw std::logic_error("Could not parse value");
 
     storageMode = PolygonStorageMode::Static;
 
-    optional<std::string> strPart;
-    static auto accumulator = array<optional<VertexIndexes>, 4>();
+    std::optional<std::string> strPart;
+    static auto accumulator = std::array<std::optional<VertexIndexes>, 4>();
 
     auto iter = line.begin();
     auto iterEnd = line.cend();
@@ -54,19 +50,17 @@ Polygon::Polygon(std::string &line)
     if (storageMode == PolygonStorageMode::Static)
         sValues = Values(accumulator);
 
-    accumulator.fill(nullopt);
-
-    Timer::stop();
+    accumulator.fill(std::nullopt);
 }
 
 void Polygon::moveValuesToDynamic()
 {
     if (!sValues.has_value())
-        throw runtime_error("Could not store polygon");
+        throw std::logic_error("Could not store polygon");
 
     storageMode = PolygonStorageMode::Dynamic;
 
-    dValues = vector<VertexIndexes>(4);
+    dValues = std::vector<VertexIndexes>(4);
 
     dValues.value()[0] = sValues.value().v1;
     dValues.value()[1] = sValues.value().v2;

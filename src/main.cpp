@@ -5,37 +5,33 @@
 #include <Timer.hpp>
 #include <Matrix.hpp>
 
-using namespace std;
-
 int main(int argc, char **argv)
 {
-    cout << "Hello world!" << endl;
+    std::cout << "Hello world!" << std::endl;
 
     auto parser = ObjParser(argv[1]);
 
-    auto tsStart = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
+    auto tsStart = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-    string *fileContentPt = parser.readFile();
+    std::string *fileContentPt = parser.readFile();
 
     auto objInfoPt = parser.parseEntries(*fileContentPt);
 
-    cout << "Vertices count - " << objInfoPt->getVertices().size() << endl;
-    cout << "Texture vertices count - " << objInfoPt->getTVertices().size() << endl;
-    cout << "Normal vertices count - " << objInfoPt->getNVertices().size() << endl;
-    cout << "Polygons count - " << objInfoPt->getPolygons().size() << endl;
-    cout << endl;
+    std::cout << "Vertices count - " << objInfoPt->getVertices().size() << std::endl;
+    std::cout << "Texture vertices count - " << objInfoPt->getTVertices().size() << std::endl;
+    std::cout << "Normal vertices count - " << objInfoPt->getNVertices().size() << std::endl;
+    std::cout << "Polygons count - " << objInfoPt->getPolygons().size() << std::endl;
+    std::cout << std::endl;
 
-    auto tsParseEnd = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
-    cout << "Parse time - " << tsParseEnd - tsStart << "ms" << endl;
-
-    Matrix<int> m{2, 5};
+    auto tsParseEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
     delete objInfoPt;
 
-    auto tsEnd = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
-    cout << "Memory free time - " << tsEnd - tsParseEnd << "ms" << endl;
-    cout << "Timer time - " << Timer::getNs() / 1000000 << "ms" << endl;
-    cout << "Total time - " << tsEnd - tsStart << "ms" << endl;
+    auto tsEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    std::cout << "Memory free time - " << tsEnd - tsParseEnd << "ms" << std::endl;
+    std::cout << "Timer time - " << Timer::getNs() / 1000000 << "ms" << std::endl;
+    std::cout << "Total time - " << tsEnd - tsStart << "ms" << std::endl;
 
     return 0;
 }

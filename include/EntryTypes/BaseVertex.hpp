@@ -1,16 +1,16 @@
 #pragma once
 
+#include <Types.hpp>
+#include <CoordinateVector.hpp>
 #include <string>
 #include <optional>
 
 class BaseVertex
 {
 public:
-    BaseVertex(std::string &line);
+    BaseVertex(std::string &line, EntryType type);
 
 protected:
-    double v1;
-    std::optional<double> v2;
-    std::optional<double> v3;
-    std::optional<double> v4;
+    CoordinateVector vector;
+    double v4;
 };

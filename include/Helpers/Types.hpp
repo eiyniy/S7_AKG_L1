@@ -13,3 +13,10 @@ enum class PolygonStorageMode
     Static,
     Dynamic
 };
+
+enum class AxisName
+{
+    X,
+    Y,
+    Z
+};
