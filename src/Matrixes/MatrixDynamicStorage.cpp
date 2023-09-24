@@ -1,7 +1,7 @@
 #include <MatrixDynamicStorage.hpp>
 
 MatrixDynamicStorage::MatrixDynamicStorage(int rows, int cols)
-    : MatrixStorageProvider(rows, cols)
+    : MatrixBaseStorage(rows, cols)
 {
     values = std::vector<std::vector<double>>(rows);
 

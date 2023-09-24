@@ -5,7 +5,7 @@
 
 #pragma region CONSTRUCTION
 
-Matrix::Matrix(MatrixStorageProvider *p_storage)
+Matrix::Matrix(MatrixBaseStorage *p_storage)
     : storage(p_storage) {}
 
 Matrix::~Matrix()
@@ -13,6 +13,7 @@ Matrix::~Matrix()
     delete storage;
 }
 
+// TODO: FIX THIS - ADD STRORAGE ALLOCATION
 Matrix::Matrix(const Matrix &m)
 {
     for (int i = 0; i < getRows(); ++i)
@@ -140,7 +141,7 @@ void Matrix::convert(
     CoordinateVector zAxis,
     CoordinateVector translation)
 {
-    Matrix multiplier{new MatrixStaticStorage<4, 4>()};
+    Matrix multiplier{MatrixStaticStorage<4, 4>::getNewPooled()};
 
     multiplier.storage->get(0, 0) = xAxis.getX();
     multiplier.storage->get(0, 1) = yAxis.getX();

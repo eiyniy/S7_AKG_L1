@@ -8,7 +8,7 @@ enum class EntryType
     Polygon
 };
 
-enum class PolygonStorageMode
+enum class StorageMode
 {
     Static,
     Dynamic

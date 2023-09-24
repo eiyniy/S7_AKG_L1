@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
     auto tsEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << "Memory free time - " << tsEnd - tsParseEnd << "ms" << std::endl;
-    std::cout << "Timer time - " << Timer::getNs() / 1000000 << "ms" << std::endl;
+    std::cout << "Timer time - " << Timer::getNs() / 1000000 << "ms. Calls count - " << Timer::getCalls() << std::endl;
     std::cout << "Total time - " << tsEnd - tsStart << "ms" << std::endl;
 
     return 0;

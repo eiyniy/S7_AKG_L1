@@ -24,7 +24,7 @@ public:
     Polygon(std::string &line);
 
 private:
-    PolygonStorageMode storageMode;
+    StorageMode storageMode;
 
     std::optional<std::vector<VertexIndexes>> dValues;
     std::optional<Values> sValues;

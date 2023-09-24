@@ -1,9 +1,9 @@
 #pragma once
 
 #include <vector>
-#include <MatrixStorageProvider.hpp>
+#include <MatrixBaseStorage.hpp>
 
-class MatrixDynamicStorage : public MatrixStorageProvider
+class MatrixDynamicStorage : public MatrixBaseStorage
 {
 public:
     MatrixDynamicStorage(int rows, int cols);

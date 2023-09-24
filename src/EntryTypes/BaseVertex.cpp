@@ -1,5 +1,6 @@
 #include <BaseVertex.hpp>
 #include <ObjParser.hpp>
+#include <Timer.hpp>
 #include <array>
 #include <stdexcept>
 

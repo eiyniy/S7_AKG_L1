@@ -9,10 +9,10 @@
 class ObjInfo
 {
 public:
-    void addVertex(Vertex vertex);
-    void addTVertex(TextureVertex tVertex);
-    void addNVertex(NormalVertex nVertex);
-    void addPolygon(Polygon polygon);
+    void addVertex(const Vertex &vertex);
+    void addTVertex(const TextureVertex &tVertex);
+    void addNVertex(const NormalVertex &nVertex);
+    void addPolygon(const Polygon &polygon);
 
     std::vector<Vertex> &getVertices();
     std::vector<TextureVertex> &getTVertices();

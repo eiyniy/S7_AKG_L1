@@ -1,18 +1,26 @@
 #include <CoordinateVector.hpp>
 #include <MatrixStaticStorage.hpp>
+#include <Timer.hpp>
 
 CoordinateVector::CoordinateVector()
-    : Matrix(new MatrixStaticStorage<1, 3>()) {}
+    // : Matrix(new MatrixStaticStorage<1, 3>()) {}
+    : Matrix(MatrixStaticStorage<1, 3>::getNewPooled())
+{
+}
 
 CoordinateVector::CoordinateVector(const CoordinateVector &vector)
-    : Matrix(new MatrixStaticStorage<1, 3>())
+    : Matrix(MatrixStaticStorage<1, 3>::getNewPooled())
 {
+    Timer::start();
+
     for (int j = 0; j < getCols(); ++j)
         storage->get(0, j) = vector.storage->get(0, j);
+
+    Timer::stop();
 }
 
 CoordinateVector::CoordinateVector(double v1, double v2, double v3)
-    : Matrix(new MatrixStaticStorage<1, 3>())
+    : Matrix(MatrixStaticStorage<1, 3>::getNewPooled())
 {
     storage->get(0, 0) = v1;
     storage->get(0, 1) = v2;

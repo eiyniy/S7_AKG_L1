@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MatrixStorageProvider.hpp>
+#include <MatrixBaseStorage.hpp>
 #include <Types.hpp>
 #include <vector>
 #include <stdexcept>
@@ -15,7 +15,7 @@ class CoordinateVector;
 class Matrix
 {
 public:
-    Matrix(MatrixStorageProvider *p_storage);
+    Matrix(MatrixBaseStorage *p_storage);
     ~Matrix();
 
     Matrix(const Matrix &m);
@@ -53,7 +53,7 @@ public:
 
 protected:
     std::optional<double> length;
-    MatrixStorageProvider *storage;
+    MatrixBaseStorage *storage;
 };
 
 Matrix operator+(const Matrix &m1, const Matrix &m2);

@@ -1,5 +1,6 @@
 #include <ObjParser.hpp>
 #include <Types.hpp>
+#include <Timer.hpp>
 #include <optional>
 #include <filesystem>
 #include <functional>
@@ -112,8 +113,6 @@ void ObjParser::parseEntry(std::string &line, ObjInfo *result)
         break;
     case EntryType::Polygon:
         result->addPolygon(Polygon(line));
-        break;
-    default:
         break;
     }
 }
