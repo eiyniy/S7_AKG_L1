@@ -6,12 +6,12 @@ TextureVertex::TextureVertex(std::string &line)
 
 double TextureVertex::getU()
 {
-    return vector.getX();
+    return v1;
 }
 
 std::optional<double> TextureVertex::getV()
 {
-    auto v = vector.getY();
+    auto v = v2;
 
     if (v == 0)
         return std::nullopt;
@@ -21,7 +21,7 @@ std::optional<double> TextureVertex::getV()
 
 std::optional<double> TextureVertex::getW()
 {
-    auto w = vector.getY();
+    auto w = v3;
 
     if (w == 0)
         return std::nullopt;

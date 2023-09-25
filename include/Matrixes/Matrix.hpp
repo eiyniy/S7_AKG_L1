@@ -21,6 +21,8 @@ public:
     Matrix(const Matrix &m);
     Matrix &operator=(const Matrix &m);
 
+    static Matrix fromCoordinats(double v1, double v2, double v3);
+
     Matrix &operator+=(const Matrix &m);
     Matrix &operator-=(const Matrix &m);
     Matrix &operator*=(const Matrix &m);
@@ -29,6 +31,8 @@ public:
 
     const double getCols() const;
     const double getRows() const;
+
+    const double getValue(const int i, const int j) const;
 
     void convert(
         CoordinateVector xAxis,

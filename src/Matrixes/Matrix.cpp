@@ -47,6 +47,17 @@ Matrix &Matrix::operator=(const Matrix &m)
     return *this;
 }
 
+Matrix Matrix::fromCoordinats(double v1, double v2, double v3)
+{
+    auto m = Matrix(MatrixStaticStorage<1, 3>::getNewPooled());
+
+    m.storage->get(0, 0) = v1;
+    m.storage->get(0, 1) = v2;
+    m.storage->get(0, 2) = v3;
+
+    return m;
+}
+
 Matrix &Matrix::operator+=(const Matrix &m)
 {
     if (getRows() != m.getRows() || getCols() != m.getCols())
@@ -129,6 +140,11 @@ const double Matrix::getCols() const
 const double Matrix::getRows() const
 {
     return storage->rows;
+}
+
+const double Matrix::getValue(const int i, const int j) const
+{
+    return storage->get(i, j);
 }
 
 #pragma endregion FUNCTIONS

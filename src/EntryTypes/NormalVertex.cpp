@@ -8,15 +8,15 @@ NormalVertex::NormalVertex(std::string &line)
 
 double NormalVertex::getI()
 {
-    return vector.getX();
+    return v1;
 }
 
 double NormalVertex::getJ()
 {
-    return vector.getY();
+    return v2;
 }
 
 double NormalVertex::getK()
 {
-    return vector.getZ();
+    return v3;
 }
