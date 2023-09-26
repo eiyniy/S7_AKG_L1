@@ -174,10 +174,10 @@ void Matrix::convert(
     multiplier.storage->get(2, 2) = zAxis.getZ();
     multiplier.storage->get(2, 3) = translation.getZ();
 
-    multiplier.storage->get(3, 0) = 0;
-    multiplier.storage->get(3, 1) = 0;
-    multiplier.storage->get(3, 2) = 0;
-    multiplier.storage->get(3, 3) = 1;
+    multiplier.storage->get(3, 0) = xAxis.getW();
+    multiplier.storage->get(3, 1) = yAxis.getW();
+    multiplier.storage->get(3, 2) = zAxis.getW();
+    multiplier.storage->get(3, 3) = translation.getW();
 
     *this *= multiplier;
 }
@@ -185,19 +185,19 @@ void Matrix::convert(
 void Matrix::moveConvert(CoordinateVector &translation)
 {
     convert(
-        {1, 0, 0},
-        {0, 1, 0},
-        {0, 0, 1},
+        {1, 0, 0, 0},
+        {0, 1, 0, 0},
+        {0, 0, 1, 0},
         translation);
 }
 
 void Matrix::scaleConvert(CoordinateVector &scale)
 {
     convert(
-        {scale.getX(), 0, 0},
-        {0, scale.getY(), 0},
-        {0, 0, scale.getZ()},
-        {0, 0, 0});
+        {scale.getX(), 0, 0, 0},
+        {0, scale.getY(), 0, 0},
+        {0, 0, scale.getZ(), 0},
+        {0, 0, 0, 1});
 }
 
 void Matrix::rotateConvert(AxisName axis, double angle)
@@ -206,29 +206,29 @@ void Matrix::rotateConvert(AxisName axis, double angle)
     {
     case AxisName::X:
         convert(
-            {1, 0, 0},
-            {0, cos(angle), sin(angle)},
-            {0, -sin(angle), cos(angle)},
-            {0, 0, 0});
+            {1, 0, 0, 0},
+            {0, cos(angle), sin(angle), 0},
+            {0, -sin(angle), cos(angle), 0},
+            {0, 0, 0, 1});
         break;
     case AxisName::Y:
         convert(
-            {cos(angle), 0, -sin(angle)},
-            {0, 1, 0},
-            {sin(angle), 0, cos(angle)},
-            {0, 0, 0});
+            {cos(angle), 0, -sin(angle), 0},
+            {0, 1, 0, 0},
+            {sin(angle), 0, cos(angle), 0},
+            {0, 0, 0, 1});
         break;
     case AxisName::Z:
         convert(
-            {cos(angle), 0, -sin(angle)},
-            {0, 1, 0},
-            {sin(angle), 0, cos(angle)},
-            {0, 0, 0});
+            {cos(angle), 0, -sin(angle), 0},
+            {0, 1, 0, 0},
+            {sin(angle), 0, cos(angle), 0},
+            {0, 0, 0, 1});
         break;
     }
 }
 
-void Matrix::toViewerConvert(
+void Matrix::toObserverConvert(
     CoordinateVector &eye,
     CoordinateVector &target,
     CoordinateVector &up)
@@ -245,21 +245,83 @@ void Matrix::toViewerConvert(
             xAxis.getX(),
             yAxis.getX(),
             zAxis.getX(),
+            0,
         },
         {
             xAxis.getY(),
             yAxis.getY(),
             zAxis.getY(),
+            0,
         },
         {
             xAxis.getZ(),
             yAxis.getZ(),
             zAxis.getZ(),
+            0,
         },
         {
             -xAxis.scalarMultiply(eye),
             -yAxis.scalarMultiply(eye),
             -zAxis.scalarMultiply(eye),
+            1,
+        });
+}
+
+void Matrix::toProjectionConvert(double fov, double aspect, double zFar, double zNear)
+{
+    convert(
+        {
+            1.0 / (aspect * tan(fov / 2)),
+            0,
+            0,
+            0,
+        },
+        {
+            0,
+            1.0 / tan(fov / 2),
+            0,
+            0,
+        },
+        {
+            0,
+            0,
+            zFar / (zNear - zFar),
+            -1,
+        },
+        {
+            0,
+            0,
+            zNear * zFar / (zNear - zFar),
+            0,
+        });
+}
+
+void Matrix::toViewerConvert(double width, double height, double xMin, double yMin)
+{
+    convert(
+        {
+            width / 2,
+            0,
+            0,
+            0,
+        },
+        {
+            0,
+            -height / 2,
+            0,
+            0,
+        },
+        {
+            0,
+            0,
+            1,
+            0,
+        },
+        {
+            xMin + width / 2,
+            yMin + height / 2,
+            0,
+            1,
         });
 }
 
@@ -267,7 +329,8 @@ void Matrix::toViewerConvert(
 
 #pragma region DUAL_OPERATORS
 
-Matrix operator+(const Matrix &m1, const Matrix &m2)
+Matrix
+operator+(const Matrix &m1, const Matrix &m2)
 {
     Matrix temp(m1);
     return (temp += m2);

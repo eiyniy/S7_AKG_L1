@@ -9,10 +9,6 @@ project(${LOCAL_PROJECT_NAME}
         DESCRIPTION ${LOCAL_PROJECT_DESCRIPTION}
         LANGUAGES CXX)
 
-
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
-
 file(GLOB_RECURSE SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 
 MACRO(HEADER_DIRECTORIES return_list)
@@ -31,10 +27,9 @@ HEADER_DIRECTORIES(header_dir_list)
 list(LENGTH header_dir_list header_dir_list_count)
 message(STATUS "[INFO] Found ${header_dir_list_count} header directories.")
 
-add_executable(${LOCAL_PROJECT_NAME})
+add_executable(${LOCAL_PROJECT_NAME} ${SOURCES})
 
-target_link_directories(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_LIBRARY_DIRS})
-target_include_directories(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_INCLUDE_DIRS} ${header_dir_list})
-target_compile_definitions(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_CFLAGS_OTHER})
-
-target_sources(${LOCAL_PROJECT_NAME} PRIVATE ${SOURCES})
+# target_link_directories(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_LIBRARY_DIRS})
+# target_include_directories(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_INCLUDE_DIRS} ${header_dir_list})
+# target_compile_definitions(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_CFLAGS_OTHER})
+target_include_directories(${LOCAL_PROJECT_NAME} PRIVATE ${header_dir_list})

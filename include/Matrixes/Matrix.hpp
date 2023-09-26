@@ -50,10 +50,22 @@ public:
         AxisName axis,
         double angle);
 
-    void toViewerConvert(
+    void toObserverConvert(
         CoordinateVector &eye,
         CoordinateVector &target,
         CoordinateVector &up);
+
+    void toProjectionConvert(
+        double fov,
+        double aspect,
+        double zFar,
+        double zNear);
+
+    void toViewerConvert(
+        double width,
+        double height,
+        double xMin,
+        double yMin);
 
 protected:
     std::optional<double> length;

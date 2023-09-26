@@ -19,12 +19,13 @@ CoordinateVector::CoordinateVector(const CoordinateVector &vector)
     Timer::stop();
 }
 
-CoordinateVector::CoordinateVector(double v1, double v2, double v3)
+CoordinateVector::CoordinateVector(double v1, double v2, double v3, double p_w)
     : Matrix(MatrixStaticStorage<1, 3>::getNewPooled())
 {
     storage->get(0, 0) = v1;
     storage->get(0, 1) = v2;
     storage->get(0, 2) = v3;
+    w = p_w;
 }
 
 double CoordinateVector::getX()
@@ -40,6 +41,11 @@ double CoordinateVector::getY()
 double CoordinateVector::getZ()
 {
     return storage->get(0, 2);
+}
+
+double CoordinateVector::getW()
+{
+    return w;
 }
 
 double CoordinateVector::scalarMultiply(const CoordinateVector &vector)
