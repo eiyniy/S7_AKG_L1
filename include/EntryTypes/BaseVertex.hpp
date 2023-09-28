@@ -13,7 +13,7 @@ public:
 
     static BaseVertex fromMatrix(Matrix &m);
 
-    operator Matrix() const;
+    operator CoordinateVector() const;
 
 protected:
     double v1, v2, v3, v4;

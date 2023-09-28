@@ -78,6 +78,11 @@
         "future": "cpp",
         "shared_mutex": "cpp",
         "exception": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "complex": "cpp",
+        "unordered_set": "cpp",
+        "regex": "cpp",
+        "hash_map": "cpp",
+        "typeindex": "cpp"
     },
 }

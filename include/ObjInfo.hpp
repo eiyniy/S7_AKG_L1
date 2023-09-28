@@ -19,8 +19,6 @@ public:
     std::vector<NormalVertex> &getNVertices();
     std::vector<Polygon> &getPolygons();
 
-    void convertPolygons();
-
 private:
     std::vector<Vertex> vertices;
     std::vector<TextureVertex> tVertices;

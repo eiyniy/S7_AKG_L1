@@ -52,7 +52,7 @@ BaseVertex BaseVertex::fromMatrix(Matrix &m)
     return v;
 }
 
-BaseVertex::operator Matrix() const
+BaseVertex::operator CoordinateVector() const
 {
-    return Matrix::fromCoordinats(v1, v2, v3);
+    return CoordinateVector::fromCoordinats(v1, v2, v3, v4);
 }

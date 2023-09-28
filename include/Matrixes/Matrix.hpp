@@ -21,51 +21,18 @@ public:
     Matrix(const Matrix &m);
     Matrix &operator=(const Matrix &m);
 
-    static Matrix fromCoordinats(double v1, double v2, double v3);
-
     Matrix &operator+=(const Matrix &m);
     Matrix &operator-=(const Matrix &m);
     Matrix &operator*=(const Matrix &m);
     Matrix &operator*=(const double v);
     Matrix &operator/=(const double v);
 
+    operator CoordinateVector() const;
+
     const double getCols() const;
     const double getRows() const;
 
-    const double getValue(const int i, const int j) const;
-
-    void convert(
-        CoordinateVector xAxis,
-        CoordinateVector yAxis,
-        CoordinateVector zAxis,
-        CoordinateVector translation);
-
-    void moveConvert(
-        CoordinateVector &translation);
-
-    void scaleConvert(
-        CoordinateVector &scale);
-
-    void rotateConvert(
-        AxisName axis,
-        double angle);
-
-    void toObserverConvert(
-        CoordinateVector &eye,
-        CoordinateVector &target,
-        CoordinateVector &up);
-
-    void toProjectionConvert(
-        double fov,
-        double aspect,
-        double zFar,
-        double zNear);
-
-    void toViewerConvert(
-        double width,
-        double height,
-        double xMin,
-        double yMin);
+    double &getValue(const int i, const int j) const;
 
 protected:
     std::optional<double> length;

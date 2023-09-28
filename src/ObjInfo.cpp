@@ -39,7 +39,3 @@ std::vector<Polygon> &ObjInfo::getPolygons()
 {
     return polygons;
 }
-
-void ObjInfo::convertPolygons()
-{
-}
