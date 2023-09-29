@@ -1,3 +1,4 @@
+#include <iostream>
 #include <MainWindow.hpp>
 
 MainWindow::MainWindow(Scene &p_scene)
@@ -14,6 +15,11 @@ void MainWindow::startLoop()
 
     for (auto el : scene.getObjInfo().getVertices())
     {
+        // std::cout << el.getX() << ' ' << el.getY() << ' ' << el.getZ() << std::endl;
+
+        if (el.getX() < 0 || el.getX() > 640 || el.getY() < 0 || el.getY() > 480)
+            continue;
+
         buffer.setPixel(el.getX(), el.getY(), sf::Color::Red);
     }
 

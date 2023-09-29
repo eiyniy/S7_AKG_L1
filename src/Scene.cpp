@@ -1,21 +1,20 @@
+#include <iostream>
 #include <Scene.hpp>
 
-Scene::Scene(ObjInfo &p_objInfo, Camera &p_camera, CoordinateVector &p_up)
-    : objInfo(p_objInfo), camera(p_camera), up(p_up) {}
+Scene::Scene(ObjInfo &p_objInfo, Camera &p_camera, CoordinateVector &p_up, CoordinateVector &p_target)
+    : objInfo(p_objInfo), camera(p_camera), up(p_up), target(p_target) {}
 
 void Scene::modelConvert()
 {
-    for (auto &el : objInfo.getVertices())
+    auto vertices = objInfo.getVertices();
+
+    for (auto &el : vertices)
     {
         auto cv = CoordinateVector::fromCoordinats(el.getX(), el.getY(), el.getZ(), el.getW().value_or(1));
 
-        cv.log();
-        cv.toObserverConvert(camera.getPosition(), {0, 0, 0}, up);
-        cv.log();
+        cv.toObserverConvert(camera.getPosition(), target, up);
         cv.toProjectionConvert(80, 640 / 480, 1, 0);
-        cv.log();
         cv.toViewerConvert(640, 480, 0, 0);
-        cv.log();
 
         auto bv = BaseVertex::fromMatrix(cv);
         el = *static_cast<Vertex *>(&bv);

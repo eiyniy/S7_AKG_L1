@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     auto tsParseEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
-    Camera camera({0, 0, 0});
+    Camera camera({0, 10, 0});
     CoordinateVector up({0, 1, 0});
 
     Scene scene{*objInfoPt, camera, up};

@@ -45,7 +45,6 @@ CoordinateVector &CoordinateVector::operator*=(const CoordinateVector &cv)
     temp.storage->get(0, 0) = (getY() * cv.getZ()) - (getZ() * cv.getY());
     temp.storage->get(0, 1) = (getZ() * cv.getX()) - (getX() * cv.getZ());
     temp.storage->get(0, 2) = (getX() * cv.getY()) - (getY() * cv.getX());
-    // temp.storage->get(0, 3) = (getX() * cv.getY()) - (getY() * cv.getX());
     temp.storage->get(0, 3) = 1;
 
     return (*this = temp);
@@ -86,9 +85,6 @@ double CoordinateVector::scalarMultiply(const CoordinateVector &vector)
 
 const double CoordinateVector::getLength()
 {
-    if (getRows() != 1 || getCols() != 3)
-        throw std::logic_error("Can't get lenght");
-
     if (length.has_value())
         return length.value();
 
@@ -99,8 +95,13 @@ const double CoordinateVector::getLength()
 
 CoordinateVector CoordinateVector::getNormalized()
 {
-    auto matrix = *this * (1 / getLength());
-    return *static_cast<CoordinateVector *>(&matrix);
+    if (getLength() != 0)
+    {
+        auto matrix = *this * (1 / getLength());
+        return *static_cast<CoordinateVector *>(&matrix);
+    }
+    else
+        return CoordinateVector();
 }
 
 void CoordinateVector::convert(
@@ -185,6 +186,7 @@ void CoordinateVector::toObserverConvert(
     const CoordinateVector &target,
     const CoordinateVector &up)
 {
+
     CoordinateVector zAxis = eye - target;
     CoordinateVector xAxis = up * zAxis;
     CoordinateVector yAxis = zAxis * xAxis;
@@ -192,9 +194,6 @@ void CoordinateVector::toObserverConvert(
     xAxis = xAxis.getNormalized();
     yAxis = yAxis.getNormalized();
     zAxis = zAxis.getNormalized();
-
-    // auto zAxis = static_cast<CoordinateVector *>(&zAxisBase)->getNormalized();
-    // auto xAxis = static_cast<CoordinateVector *>(&xAxisBase)->getNormalized();
 
     convert(
         {
