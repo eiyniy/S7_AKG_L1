@@ -29,13 +29,13 @@ int main(int argc, char **argv)
     auto tsParseEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
-    Camera camera({0, 10, 0});
-    CoordinateVector up({0, 1, 0});
+    auto camera = Camera({0, 10, 0}, {objInfoPt->getVertices().at(1)});
+    auto up = CoordinateVector(0, 1, 0);
 
-    Scene scene{*objInfoPt, camera, up};
+    auto scene = Scene(*objInfoPt, camera, up);
     scene.modelConvert();
 
-    MainWindow mainWindow{scene};
+    auto mainWindow = MainWindow(scene);
     mainWindow.startLoop();
 
     delete objInfoPt;

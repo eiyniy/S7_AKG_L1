@@ -1,6 +1,7 @@
 #include <CoordinateVector.hpp>
 #include <MatrixStaticStorage.hpp>
 #include <Timer.hpp>
+#include <Vertex.hpp>
 #include <iostream>
 
 CoordinateVector::CoordinateVector()
@@ -15,6 +16,15 @@ CoordinateVector::CoordinateVector(const CoordinateVector &vector)
         storage->get(0, j) = vector.storage->get(0, j);
 
     Timer::stop();
+}
+
+CoordinateVector::CoordinateVector(const Vertex &vertex)
+    : Matrix(MatrixStaticStorage<1, 4>::getNewPooled())
+{
+    storage->get(0, 0) = vertex.getX();
+    storage->get(0, 1) = vertex.getY();
+    storage->get(0, 2) = vertex.getZ();
+    storage->get(0, 3) = vertex.getW().value_or(0);
 }
 
 CoordinateVector::CoordinateVector(double v1, double v2, double v3, double w)

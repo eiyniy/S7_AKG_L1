@@ -3,11 +3,14 @@
 #include <Matrix.hpp>
 #include <vector>
 
+class Vertex;
+
 class CoordinateVector : public Matrix
 {
 public:
     CoordinateVector();
     CoordinateVector(const CoordinateVector &vector);
+    CoordinateVector(const Vertex &vertex);
     CoordinateVector(double v1, double v2, double v3, double w = 0);
 
     static CoordinateVector fromCoordinats(double v1, double v2, double v3, double w);

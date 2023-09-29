@@ -10,10 +10,9 @@ private:
     ObjInfo &objInfo;
     Camera &camera;
     CoordinateVector &up;
-    CoordinateVector &target;
 
 public:
-    Scene(ObjInfo &p_objInfo, Camera &p_camera, CoordinateVector &p_up, CoordinateVector &p_target);
+    Scene(ObjInfo &p_objInfo, Camera &p_camera, CoordinateVector &p_up);
 
     void modelConvert();
     ObjInfo &getObjInfo();

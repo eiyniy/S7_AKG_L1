@@ -6,9 +6,11 @@ class Camera
 {
 private:
     CoordinateVector position;
+    CoordinateVector target;
 
 public:
-    Camera(CoordinateVector p_position);
+    Camera(const CoordinateVector &p_position, const CoordinateVector &p_target);
 
     CoordinateVector &getPosition();
+    CoordinateVector &getTarget();
 };
