@@ -5,9 +5,13 @@
 #include <array>
 #include <stdexcept>
 
-BaseVertex::BaseVertex() {}
+BaseVertex::BaseVertex(const double p_v1, const double p_v2, const double p_v3, const double p_v4)
+    : v1(p_v1), v2(p_v2), v3(p_v3), v4(p_v4) {}
 
-BaseVertex::BaseVertex(std::string &line, EntryType type)
+BaseVertex::BaseVertex(const BaseVertex &bv)
+    : v1(bv.v1), v2(bv.v2), v3(bv.v3), v4(bv.v4) {}
+
+BaseVertex::BaseVertex(const std::string &line)
 {
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Vertex &&
@@ -18,7 +22,7 @@ BaseVertex::BaseVertex(std::string &line, EntryType type)
     std::optional<std::string> strPart;
     static auto accumulator = std::array<std::optional<double>, 4>();
 
-    auto iter = line.begin();
+    auto iter = line.cbegin();
     auto iterEnd = line.cend();
 
     ObjParser::getNextPart(&iter, iterEnd, ' ');
@@ -41,18 +45,12 @@ BaseVertex::BaseVertex(std::string &line, EntryType type)
     accumulator.fill(std::nullopt);
 }
 
-BaseVertex BaseVertex::fromMatrix(Matrix &m)
+BaseVertex BaseVertex::fromMatrix(const Matrix &m)
 {
-    auto v = BaseVertex();
-
-    v.v1 = m.getValue(0, 0);
-    v.v2 = m.getValue(0, 1);
-    v.v3 = m.getValue(0, 2);
-
-    return v;
+    return BaseVertex(m.getValue(0, 0), m.getValue(0, 1), m.getValue(0, 2));
 }
 
 BaseVertex::operator CoordinateVector() const
 {
-    return CoordinateVector::fromCoordinats(v1, v2, v3, v4);
+    return CoordinateVector(v1, v2, v3, v4);
 }

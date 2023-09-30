@@ -12,6 +12,6 @@ public:
     static void start();
     static void stop();
 
-    static long long getNs();
-    static int getCalls();
+    static const long long getNs();
+    static const int getCalls();
 };

@@ -13,7 +13,7 @@ Matrix::~Matrix()
     delete storage;
 }
 
-// TODO: FIX THIS - ADD STRORAGE ALLOCATION
+// TODO: FIX STRORAGE ALLOCATION
 Matrix::Matrix(const Matrix &m)
 {
     storage = new MatrixDynamicStorage(m.getRows(), m.getCols());

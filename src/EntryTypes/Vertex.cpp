@@ -1,25 +1,26 @@
 #include <Vertex.hpp>
 #include <ObjParser.hpp>
 
-Vertex::Vertex(std::string &line)
-    : BaseVertex(line, EntryType::Vertex) {}
+Vertex::Vertex(const std::string &line) : BaseVertex(line) {}
 
-double Vertex::getX() const
+Vertex::Vertex(const BaseVertex &bVertex) : BaseVertex(bVertex) {}
+
+const double Vertex::getX() const
 {
     return v1;
 }
 
-double Vertex::getY() const
+const double Vertex::getY() const
 {
     return v2;
 }
 
-double Vertex::getZ() const
+const double Vertex::getZ() const
 {
     return v3;
 }
 
-std::optional<double> Vertex::getW() const
+const std::optional<double> Vertex::getW() const
 {
     return v4;
 }

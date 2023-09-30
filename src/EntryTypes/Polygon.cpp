@@ -4,7 +4,7 @@
 #include <Timer.hpp>
 #include <array>
 
-Values::Values(std::array<std::optional<VertexIndexes>, 4> &values)
+Values::Values(const std::array<std::optional<VertexIndexes>, 4> &values)
 {
     if (!values[0].has_value() || !values[1].has_value() || !values[2].has_value())
         throw std::logic_error("Invalid argument");
@@ -15,9 +15,7 @@ Values::Values(std::array<std::optional<VertexIndexes>, 4> &values)
     v4 = values[3];
 }
 
-Values::Values() {}
-
-Polygon::Polygon(std::string &line)
+Polygon::Polygon(const std::string &line)
 {
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Polygon)
@@ -28,7 +26,7 @@ Polygon::Polygon(std::string &line)
     std::optional<std::string> strPart;
     static auto accumulator = std::array<std::optional<VertexIndexes>, 4>();
 
-    auto iter = line.begin();
+    auto iter = line.cbegin();
     auto iterEnd = line.cend();
 
     ObjParser::getNextPart(&iter, iterEnd, ' ');

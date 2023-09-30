@@ -11,6 +11,6 @@ private:
 public:
     Camera(const CoordinateVector &p_position, const CoordinateVector &p_target);
 
-    CoordinateVector &getPosition();
-    CoordinateVector &getTarget();
+    const CoordinateVector &getPosition() const;
+    const CoordinateVector &getTarget() const;
 };

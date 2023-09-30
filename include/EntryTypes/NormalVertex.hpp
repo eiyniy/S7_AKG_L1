@@ -8,9 +8,9 @@
 class NormalVertex : public BaseVertex
 {
 public:
-    NormalVertex(std::string &line);
+    NormalVertex(const std::string &line);
 
-    double getI();
-    double getJ();
-    double getK();
+    const double getI() const;
+    const double getJ() const;
+    const double getK() const;
 };

@@ -8,10 +8,11 @@
 class Vertex : public BaseVertex
 {
 public:
-    Vertex(std::string &line);
+    Vertex(const std::string &line);
+    Vertex(const BaseVertex &bVertex);
 
-    double getX() const;
-    double getY() const;
-    double getZ() const;
-    std::optional<double> getW() const;
+    const double getX() const;
+    const double getY() const;
+    const double getZ() const;
+    const std::optional<double> getW() const;
 };

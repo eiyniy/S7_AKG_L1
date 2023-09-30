@@ -6,12 +6,12 @@
 class MainWindow
 {
 public:
-    MainWindow(Scene &p_scene);
+    MainWindow(const Scene &p_scene);
 
     void startLoop();
 
 private:
-    Scene &scene;
+    const Scene &scene;
 
     sf::RenderWindow window;
     sf::Image buffer;

@@ -9,15 +9,14 @@
 class BaseVertex
 {
 public:
-    BaseVertex(std::string &line, EntryType type);
+    BaseVertex(const double p_v1, const double p_v2, const double p_v3, const double p_v4 = 0);
+    BaseVertex(const BaseVertex &bv);
+    BaseVertex(const std::string &line);
 
-    static BaseVertex fromMatrix(Matrix &m);
+    static BaseVertex fromMatrix(const Matrix &m);
 
     operator CoordinateVector() const;
 
 protected:
     double v1, v2, v3, v4;
-
-private:
-    BaseVertex();
 };

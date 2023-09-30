@@ -1,15 +1,14 @@
 #include <TextureVertex.hpp>
 #include <ObjParser.hpp>
 
-TextureVertex::TextureVertex(std::string &line)
-    : BaseVertex(line, EntryType::TextureVertex) {}
+TextureVertex::TextureVertex(const std::string &line) : BaseVertex(line) {}
 
-double TextureVertex::getU()
+const double TextureVertex::getU() const
 {
     return v1;
 }
 
-std::optional<double> TextureVertex::getV()
+const std::optional<double> TextureVertex::getV() const
 {
     auto v = v2;
 
@@ -19,7 +18,7 @@ std::optional<double> TextureVertex::getV()
         return v;
 }
 
-std::optional<double> TextureVertex::getW()
+const std::optional<double> TextureVertex::getW() const
 {
     auto w = v3;
 

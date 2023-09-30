@@ -11,7 +11,7 @@ VertexIndexes::VertexIndexes(std::string &str)
     std::optional<std::string> strPart;
     static auto accumulator = std::array<std::optional<double>, 3>();
 
-    auto iter = str.begin();
+    auto iter = str.cbegin();
     auto iterEnd = str.cend();
 
     int i = 0;

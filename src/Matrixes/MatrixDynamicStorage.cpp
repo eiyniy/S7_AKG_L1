@@ -13,8 +13,3 @@ double &MatrixDynamicStorage::get(const int row, const int col)
 {
     return values[row][col];
 }
-
-void MatrixDynamicStorage::set(const int row, const int col, const double value)
-{
-    values[row][col] = value;
-}

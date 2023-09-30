@@ -8,9 +8,9 @@
 class TextureVertex : public BaseVertex
 {
 public:
-    TextureVertex(std::string &line);
+    TextureVertex(const std::string &line);
 
-    double getU();
-    std::optional<double> getV();
-    std::optional<double> getW();
+    const double getU() const;
+    const std::optional<double> getV() const;
+    const std::optional<double> getW() const;
 };

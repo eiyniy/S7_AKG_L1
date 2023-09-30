@@ -21,7 +21,7 @@ ObjParser::ObjParser(std::string p_pathToFile)
 
 #pragma region Static
 
-std::optional<EntryType> ObjParser::getEntryType(std::string &line)
+std::optional<EntryType> ObjParser::getEntryType(const std::string &line)
 {
     auto iter = line.begin();
 
@@ -40,7 +40,7 @@ std::optional<EntryType> ObjParser::getEntryType(std::string &line)
 }
 
 std::optional<std::string> ObjParser::getNextPart(
-    std::string::iterator *iter,
+    std::string::const_iterator *iter,
     std::string::const_iterator iterEnd,
     char divider,
     bool allowEmpty)
@@ -75,11 +75,11 @@ std::optional<std::string> ObjParser::getNextPart(
 
 #pragma endregion Static
 
-ObjInfo *ObjParser::parseEntries(std::string &fileContent)
+ObjInfo *ObjParser::parseEntries(const std::string &fileContent)
 {
     auto info = new ObjInfo();
 
-    auto iter = fileContent.begin();
+    auto iter = fileContent.cbegin();
     auto iterEnd = fileContent.cend();
 
     std::istringstream ss(fileContent);
@@ -94,7 +94,7 @@ ObjInfo *ObjParser::parseEntries(std::string &fileContent)
     return info;
 }
 
-void ObjParser::parseEntry(std::string &line, ObjInfo *result)
+void ObjParser::parseEntry(const std::string &line, ObjInfo *result) const
 {
     std::optional<EntryType> type;
     if (!(type = getEntryType(line)))

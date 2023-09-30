@@ -11,26 +11,24 @@ public:
     CoordinateVector();
     CoordinateVector(const CoordinateVector &vector);
     CoordinateVector(const Vertex &vertex);
-    CoordinateVector(double v1, double v2, double v3, double w = 0);
-
-    static CoordinateVector fromCoordinats(double v1, double v2, double v3, double w);
+    CoordinateVector(const double v1, const double v2, const double v3, const double w = 0);
 
     CoordinateVector &operator*=(const CoordinateVector &cv);
 
-    double getX() const;
-    double getY() const;
-    double getZ() const;
-    double getW() const;
+    const double getX() const;
+    const double getY() const;
+    const double getZ() const;
+    const double getW() const;
 
     double scalarMultiply(const CoordinateVector &vector);
     const double getLength();
     CoordinateVector getNormalized();
 
     void convert(
-        const CoordinateVector xAxis,
-        const CoordinateVector yAxis,
-        const CoordinateVector zAxis,
-        const CoordinateVector translation);
+        const CoordinateVector &xAxis,
+        const CoordinateVector &yAxis,
+        const CoordinateVector &zAxis,
+        const CoordinateVector &translation);
 
     void moveConvert(
         const CoordinateVector &translation);

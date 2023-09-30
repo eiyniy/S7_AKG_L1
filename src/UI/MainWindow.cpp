@@ -1,7 +1,8 @@
 #include <iostream>
 #include <MainWindow.hpp>
+#include <Timer.hpp>
 
-MainWindow::MainWindow(Scene &p_scene)
+MainWindow::MainWindow(const Scene &p_scene)
     : window({sf::VideoMode(640, 480), "SFML Graphics"}),
       scene(p_scene)
 {
@@ -23,6 +24,13 @@ void MainWindow::startLoop()
         buffer.setPixel(el.getX(), el.getY(), sf::Color::Red);
     }
 
+    bufferTexture.loadFromImage(buffer);
+    bufferSprite.setTexture(bufferTexture);
+    window.draw(bufferSprite);
+    window.display();
+
+    Timer::stop();
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -31,11 +39,5 @@ void MainWindow::startLoop()
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-
-        bufferTexture.loadFromImage(buffer);
-        bufferSprite.setTexture(bufferTexture);
-        window.draw(bufferSprite);
-
-        window.display();
     }
 }

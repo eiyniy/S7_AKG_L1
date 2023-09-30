@@ -17,12 +17,12 @@ void Timer::stop()
     ++callsCount;
 }
 
-long long Timer::getNs()
+const long long Timer::getNs()
 {
     return nsCount;
 }
 
-int Timer::getCalls()
+const int Timer::getCalls()
 {
     return callsCount;
 }

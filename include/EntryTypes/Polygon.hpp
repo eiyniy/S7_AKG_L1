@@ -9,8 +9,7 @@
 
 struct Values
 {
-    Values(std::array<std::optional<VertexIndexes>, 4> &values);
-    Values();
+    Values(const std::array<std::optional<VertexIndexes>, 4> &values);
 
     VertexIndexes v1;
     VertexIndexes v2;
@@ -21,7 +20,7 @@ struct Values
 class Polygon
 {
 public:
-    Polygon(std::string &line);
+    Polygon(const std::string &line);
 
 private:
     StorageMode storageMode;

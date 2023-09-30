@@ -3,12 +3,12 @@
 Camera::Camera(const CoordinateVector &p_position, const CoordinateVector &p_target)
     : position(p_position), target(p_target) {}
 
-CoordinateVector &Camera::getPosition()
+const CoordinateVector &Camera::getPosition() const
 {
     return position;
 }
 
-CoordinateVector &Camera::getTarget()
+const CoordinateVector &Camera::getTarget() const
 {
     return target;
 }

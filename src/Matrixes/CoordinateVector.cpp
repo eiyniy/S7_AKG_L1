@@ -10,12 +10,8 @@ CoordinateVector::CoordinateVector()
 CoordinateVector::CoordinateVector(const CoordinateVector &vector)
     : Matrix(MatrixStaticStorage<1, 4>::getNewPooled())
 {
-    Timer::start();
-
     for (int j = 0; j < getCols(); ++j)
         storage->get(0, j) = vector.storage->get(0, j);
-
-    Timer::stop();
 }
 
 CoordinateVector::CoordinateVector(const Vertex &vertex)
@@ -36,18 +32,6 @@ CoordinateVector::CoordinateVector(double v1, double v2, double v3, double w)
     storage->get(0, 3) = w;
 }
 
-CoordinateVector CoordinateVector::fromCoordinats(double v1, double v2, double v3, double w)
-{
-    auto cv = CoordinateVector();
-
-    cv.storage->get(0, 0) = v1;
-    cv.storage->get(0, 1) = v2;
-    cv.storage->get(0, 2) = v3;
-    cv.storage->get(0, 2) = v3;
-
-    return cv;
-}
-
 CoordinateVector &CoordinateVector::operator*=(const CoordinateVector &cv)
 {
     CoordinateVector temp;
@@ -60,22 +44,22 @@ CoordinateVector &CoordinateVector::operator*=(const CoordinateVector &cv)
     return (*this = temp);
 }
 
-double CoordinateVector::getX() const
+const double CoordinateVector::getX() const
 {
     return storage->get(0, 0);
 }
 
-double CoordinateVector::getY() const
+const double CoordinateVector::getY() const
 {
     return storage->get(0, 1);
 }
 
-double CoordinateVector::getZ() const
+const double CoordinateVector::getZ() const
 {
     return storage->get(0, 2);
 }
 
-double CoordinateVector::getW() const
+const double CoordinateVector::getW() const
 {
     return storage->get(0, 3);
 }
@@ -115,10 +99,10 @@ CoordinateVector CoordinateVector::getNormalized()
 }
 
 void CoordinateVector::convert(
-    CoordinateVector xAxis,
-    CoordinateVector yAxis,
-    CoordinateVector zAxis,
-    CoordinateVector translation)
+    const CoordinateVector &xAxis,
+    const CoordinateVector &yAxis,
+    const CoordinateVector &zAxis,
+    const CoordinateVector &translation)
 {
     Matrix multiplier{MatrixStaticStorage<4, 4>::getNewPooled()};
 

@@ -1,22 +1,19 @@
 #include <NormalVertex.hpp>
 #include <stdexcept>
 
-NormalVertex::NormalVertex(std::string &line)
-    : BaseVertex(line, EntryType::NormalVertex)
-{
-}
+NormalVertex::NormalVertex(const std::string &line) : BaseVertex(line) {}
 
-double NormalVertex::getI()
+const double NormalVertex::getI() const
 {
     return v1;
 }
 
-double NormalVertex::getJ()
+const double NormalVertex::getJ() const
 {
     return v2;
 }
 
-double NormalVertex::getK()
+const double NormalVertex::getK() const
 {
     return v3;
 }

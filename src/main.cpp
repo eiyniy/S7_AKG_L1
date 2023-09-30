@@ -10,6 +10,8 @@
 
 int main(int argc, char **argv)
 {
+    Timer::start();
+
     std::cout << "Hello world!" << std::endl;
 
     auto parser = ObjParser(argv[1]);

@@ -8,5 +8,5 @@ class Math
 public:
     Math() = delete;
 
-    static std::optional<int> optStoi(std::string str);
+    static std::optional<int> optStoi(const std::string &str);
 };
