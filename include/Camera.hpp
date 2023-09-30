@@ -16,7 +16,9 @@ public:
 
     const CoordinateVector &getPosition() const;
     const CoordinateVector &getTarget() const;
-    const Dot getResolution() const;
+    const Dot &cGetResolution() const;
     const int getFOV() const;
     const double getAspect() const;
+    
+    Dot &getResolution();
 };

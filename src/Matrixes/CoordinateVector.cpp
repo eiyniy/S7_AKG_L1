@@ -5,31 +5,31 @@
 #include <iostream>
 
 CoordinateVector::CoordinateVector()
-    : Matrix(MatrixStaticStorage<1, 4>::getNewPooled()) {}
+    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled()) {}
 
 CoordinateVector::CoordinateVector(const CoordinateVector &vector)
-    : Matrix(MatrixStaticStorage<1, 4>::getNewPooled())
+    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled())
 {
-    for (int j = 0; j < getCols(); ++j)
-        storage->get(0, j) = vector.storage->get(0, j);
+    for (int i = 0; i < getRows(); ++i)
+        storage->get(i, 0) = vector.storage->get(i, 0);
 }
 
 CoordinateVector::CoordinateVector(const Vertex &vertex)
-    : Matrix(MatrixStaticStorage<1, 4>::getNewPooled())
+    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled())
 {
     storage->get(0, 0) = vertex.getX();
-    storage->get(0, 1) = vertex.getY();
-    storage->get(0, 2) = vertex.getZ();
-    storage->get(0, 3) = vertex.getW().value_or(0);
+    storage->get(1, 0) = vertex.getY();
+    storage->get(2, 0) = vertex.getZ();
+    storage->get(3, 0) = vertex.getW().value_or(0);
 }
 
 CoordinateVector::CoordinateVector(double v1, double v2, double v3, double w)
-    : Matrix(MatrixStaticStorage<1, 4>::getNewPooled())
+    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled())
 {
     storage->get(0, 0) = v1;
-    storage->get(0, 1) = v2;
-    storage->get(0, 2) = v3;
-    storage->get(0, 3) = w;
+    storage->get(1, 0) = v2;
+    storage->get(2, 0) = v3;
+    storage->get(3, 0) = w;
 }
 
 CoordinateVector &CoordinateVector::operator*=(const CoordinateVector &cv)
@@ -37,9 +37,9 @@ CoordinateVector &CoordinateVector::operator*=(const CoordinateVector &cv)
     CoordinateVector temp;
 
     temp.storage->get(0, 0) = (getY() * cv.getZ()) - (getZ() * cv.getY());
-    temp.storage->get(0, 1) = (getZ() * cv.getX()) - (getX() * cv.getZ());
-    temp.storage->get(0, 2) = (getX() * cv.getY()) - (getY() * cv.getX());
-    temp.storage->get(0, 3) = 1;
+    temp.storage->get(1, 0) = (getZ() * cv.getX()) - (getX() * cv.getZ());
+    temp.storage->get(2, 0) = (getX() * cv.getY()) - (getY() * cv.getX());
+    temp.storage->get(3, 0) = 1;
 
     return (*this = temp);
 }
@@ -51,17 +51,17 @@ const double CoordinateVector::getX() const
 
 const double CoordinateVector::getY() const
 {
-    return storage->get(0, 1);
+    return storage->get(1, 0);
 }
 
 const double CoordinateVector::getZ() const
 {
-    return storage->get(0, 2);
+    return storage->get(2, 0);
 }
 
 const double CoordinateVector::getW() const
 {
-    return storage->get(0, 3);
+    return storage->get(3, 0);
 }
 
 double CoordinateVector::scalarMultiply(const CoordinateVector &vector)
@@ -71,8 +71,8 @@ double CoordinateVector::scalarMultiply(const CoordinateVector &vector)
 
     double result;
 
-    for (int i = 0; i < this->getCols(); ++i)
-        result += storage->get(0, i) * vector.storage->get(0, i);
+    for (int i = 0; i < this->getRows(); ++i)
+        result += storage->get(i, 0) * vector.storage->get(i, 0);
 
     return result;
 }
@@ -82,7 +82,7 @@ const double CoordinateVector::getLength()
     if (length.has_value())
         return length.value();
 
-    length = sqrt(pow(storage->get(0, 0), 2) + pow(storage->get(0, 1), 2) + pow(storage->get(0, 2), 2));
+    length = sqrt(pow(storage->get(0, 0), 2) + pow(storage->get(1, 0), 2) + pow(storage->get(2, 0), 2));
 
     return length.value();
 }
@@ -240,9 +240,14 @@ void CoordinateVector::toProjectionConvert(double fov, double aspect, double zFa
         {
             0,
             0,
-            zNear * zFar / (zNear - zFar),
+            (zNear * zFar) / (zNear - zFar),
             0,
         });
+
+    storage->get(0, 0) /= storage->get(3, 0);
+    storage->get(1, 0) /= storage->get(3, 0);
+    storage->get(2, 0) /= storage->get(3, 0);
+    storage->get(3, 0) /= storage->get(3, 0);
 }
 
 void CoordinateVector::toViewerConvert(double width, double height, double xMin, double yMin)

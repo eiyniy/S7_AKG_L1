@@ -6,12 +6,16 @@
 class MainWindow
 {
 public:
-    MainWindow(const Scene &p_scene);
+    MainWindow(Scene &p_scene);
 
     void startLoop();
 
 private:
-    const Scene &scene;
+    void draw();
+
+    bool isDrawed;
+
+    Scene &scene;
 
     sf::RenderWindow window;
     sf::Image buffer;

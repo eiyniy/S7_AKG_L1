@@ -22,7 +22,12 @@ const CoordinateVector &Camera::getTarget() const
     return target;
 }
 
-const Dot Camera::getResolution() const
+const Dot &Camera::cGetResolution() const
+{
+    return resolution;
+}
+
+Dot &Camera::getResolution()
 {
     return resolution;
 }

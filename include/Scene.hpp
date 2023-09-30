@@ -7,14 +7,17 @@
 class Scene
 {
 private:
-    const ObjInfo &objInfo;
-    const Camera &camera;
+    ObjInfo &objInfo;
     const CoordinateVector &up;
+    Camera &camera;
 
 public:
-    Scene(const ObjInfo &p_objInfo, const Camera &p_camera, const CoordinateVector &p_up);
+    Scene(ObjInfo &p_objInfo, Camera &p_camera, const CoordinateVector &p_up);
 
-    void modelConvert() const;
-    const ObjInfo &getObjInfo() const;
-    const Camera &getCamera() const;
+    void modelConvert();
+
+    const ObjInfo &cGetObjInfo() const;
+    const Camera &cGetCamera() const;
+
+    Camera &getCamera();
 };

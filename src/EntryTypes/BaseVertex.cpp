@@ -47,7 +47,7 @@ BaseVertex::BaseVertex(const std::string &line)
 
 BaseVertex BaseVertex::fromMatrix(const Matrix &m)
 {
-    return BaseVertex(m.getValue(0, 0), m.getValue(0, 1), m.getValue(0, 2));
+    return BaseVertex(m.getValue(0, 0), m.getValue(1, 0), m.getValue(2, 0));
 }
 
 BaseVertex::operator CoordinateVector() const

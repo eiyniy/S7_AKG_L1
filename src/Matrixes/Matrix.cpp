@@ -118,7 +118,7 @@ Matrix &Matrix::operator/=(const double v)
 
 Matrix::operator CoordinateVector() const
 {
-    return CoordinateVector(storage->get(0, 0), storage->get(0, 1), storage->get(0, 2));
+    return CoordinateVector(storage->get(0, 0), storage->get(1, 0), storage->get(2, 0));
 }
 
 #pragma endregion OPERATORS

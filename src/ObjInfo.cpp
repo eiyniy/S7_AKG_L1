@@ -20,22 +20,27 @@ void ObjInfo::addPolygon(const Polygon &polygon)
     polygons.push_back(polygon);
 }
 
-const std::vector<Vertex> &ObjInfo::getVertices() const
+std::vector<Vertex> &ObjInfo::getVertices()
 {
     return vertices;
 }
 
-const std::vector<TextureVertex> &ObjInfo::getTVertices() const
+const std::vector<Vertex> &ObjInfo::cGetVertices() const
+{
+    return vertices;
+}
+
+const std::vector<TextureVertex> &ObjInfo::cGetTVertices() const
 {
     return tVertices;
 }
 
-const std::vector<NormalVertex> &ObjInfo::getNVertices() const
+const std::vector<NormalVertex> &ObjInfo::cGetNVertices() const
 {
     return nVertices;
 }
 
-const std::vector<Polygon> &ObjInfo::getPolygons() const
+const std::vector<Polygon> &ObjInfo::cGetPolygons() const
 {
     return polygons;
 }

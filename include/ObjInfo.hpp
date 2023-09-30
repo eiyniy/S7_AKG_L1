@@ -14,10 +14,12 @@ public:
     void addNVertex(const NormalVertex &nVertex);
     void addPolygon(const Polygon &polygon);
 
-    const std::vector<Vertex> &getVertices() const;
-    const std::vector<TextureVertex> &getTVertices() const;
-    const std::vector<NormalVertex> &getNVertices() const;
-    const std::vector<Polygon> &getPolygons() const;
+    std::vector<Vertex> &getVertices();
+
+    const std::vector<Vertex> &cGetVertices() const;
+    const std::vector<TextureVertex> &cGetTVertices() const;
+    const std::vector<NormalVertex> &cGetNVertices() const;
+    const std::vector<Polygon> &cGetPolygons() const;
 
 private:
     std::vector<Vertex> vertices;
