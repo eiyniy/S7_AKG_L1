@@ -16,4 +16,5 @@ public:
 
     void modelConvert() const;
     const ObjInfo &getObjInfo() const;
+    const Camera &getCamera() const;
 };

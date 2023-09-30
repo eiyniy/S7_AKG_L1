@@ -3,22 +3,29 @@
 #include <Timer.hpp>
 
 MainWindow::MainWindow(const Scene &p_scene)
-    : window({sf::VideoMode(640, 480), "SFML Graphics"}),
+    : window({sf::VideoMode(p_scene.getCamera().getResolution().x,
+                            p_scene.getCamera().getResolution().y),
+              "SFML Graphics"}),
       scene(p_scene)
 {
     window.setFramerateLimit(165);
-    buffer.create(640, 480, sf::Color::Black);
+    buffer.create(scene.getCamera().getResolution().x, scene.getCamera().getResolution().y, sf::Color::Black);
 }
 
 void MainWindow::startLoop()
 {
     window.clear();
 
+    scene.modelConvert();
+
     for (auto el : scene.getObjInfo().getVertices())
     {
         // std::cout << el.getX() << ' ' << el.getY() << ' ' << el.getZ() << std::endl;
 
-        if (el.getX() < 0 || el.getX() > 640 || el.getY() < 0 || el.getY() > 480)
+        if (el.getX() < 0 ||
+            el.getX() > scene.getCamera().getResolution().x ||
+            el.getY() < 0 ||
+            el.getY() > scene.getCamera().getResolution().y)
             continue;
 
         buffer.setPixel(el.getX(), el.getY(), sf::Color::Red);

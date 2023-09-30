@@ -20,3 +20,11 @@ enum class AxisName
     Y,
     Z
 };
+
+class Dot
+{
+public:
+    Dot(const int p_x, const int p_y);
+
+    int x, y;
+};

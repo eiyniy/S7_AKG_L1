@@ -14,9 +14,9 @@ void Scene::modelConvert() const
 
         cv.toObserverConvert(camera.getPosition(), camera.getTarget(), up);
         // cv.log();
-        cv.toProjectionConvert(80, 640 / 480, 1, 0);
+        cv.toProjectionConvert(camera.getFOV(), camera.getAspect(), 1, 0);
         // cv.log();
-        cv.toViewerConvert(640, 480, 0, 0);
+        cv.toViewerConvert(camera.getResolution().x, camera.getResolution().y, 0, 0);
         // cv.log();
 
         el = Vertex(BaseVertex::fromMatrix(cv));
@@ -26,4 +26,9 @@ void Scene::modelConvert() const
 const ObjInfo &Scene::getObjInfo() const
 {
     return objInfo;
+}
+
+const Camera &Scene::getCamera() const
+{
+    return camera;
 }
