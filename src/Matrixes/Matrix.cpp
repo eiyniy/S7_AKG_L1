@@ -1,3 +1,4 @@
+#include <iostream>
 #include <Matrix.hpp>
 #include <CoordinateVector.hpp>
 #include <MatrixDynamicStorage.hpp>
@@ -79,17 +80,26 @@ Matrix &Matrix::operator*=(const Matrix &m)
     if (getCols() != m.getRows())
         throw std::logic_error("Could not execute vector multiply");
 
-    auto storage = new MatrixDynamicStorage(getRows(), m.getCols());
-    auto temp = Matrix(storage);
+    auto newStorage = new MatrixDynamicStorage(getRows(), m.getCols());
+    auto temp = Matrix(newStorage);
 
     for (int i = 0; i < temp.getRows(); ++i)
     {
         for (int j = 0; j < temp.getCols(); ++j)
         {
+            temp.storage->get(i, j) = 0;
+
             for (int k = 0; k < getCols(); ++k)
+            {
                 temp.storage->get(i, j) += (storage->get(i, k) * m.storage->get(k, j));
+                // std::cout << "(" << storage->get(i, k) << " * " << m.storage->get(k, j) << ")[" << (storage->get(i, k) * m.storage->get(k, j)) << "] + ";
+            }
+
+            // std::cout << " == " << temp.storage->get(i, j) << std::endl;
         }
     }
+
+    // temp.log();
 
     return (*this = temp);
 }
@@ -118,7 +128,7 @@ Matrix &Matrix::operator/=(const double v)
 
 Matrix::operator CoordinateVector() const
 {
-    return CoordinateVector(storage->get(0, 0), storage->get(1, 0), storage->get(2, 0));
+    return CoordinateVector(storage->get(0, 0), storage->get(1, 0), storage->get(2, 0), storage->get(3, 0));
 }
 
 #pragma endregion OPERATORS
@@ -138,6 +148,18 @@ const double Matrix::getRows() const
 double &Matrix::getValue(const int i, const int j) const
 {
     return storage->get(i, j);
+}
+
+void Matrix::log()
+{
+    for (auto i = 0; i < storage->rows; ++i)
+    {
+        for (auto j = 0; j < storage->cols; ++j)
+            std::cout << storage->get(i, j) << ' ';
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl;
 }
 
 #pragma endregion FUNCTIONS

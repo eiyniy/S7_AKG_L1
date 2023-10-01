@@ -12,7 +12,12 @@ Camera::Camera(
 {
 }
 
-const CoordinateVector &Camera::getPosition() const
+CoordinateVector &Camera::getPosition()
+{
+    return position;
+}
+
+const CoordinateVector &Camera::cGetPosition() const
 {
     return position;
 }

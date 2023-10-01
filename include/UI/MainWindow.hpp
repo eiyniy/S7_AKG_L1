@@ -15,6 +15,9 @@ private:
 
     bool isDrawed;
 
+    bool isXPressed, isYPressed, isZPressed;
+    bool isMoving;
+
     Scene &scene;
 
     sf::RenderWindow window;

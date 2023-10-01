@@ -7,6 +7,7 @@
 #include <MainWindow.hpp>
 #include <Scene.hpp>
 #include <Camera.hpp>
+#include <MatrixStaticStorage.hpp>
 
 int main(int argc, char **argv)
 {
@@ -31,7 +32,7 @@ int main(int argc, char **argv)
     auto tsParseEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
-    auto camera = Camera({0, 100, -100}, {objInfoPt->cGetVertices().at(0)}, {1280, 720}, 100);
+    auto camera = Camera({0, 0, 0}, {objInfoPt->cGetVertices().at(0)}, {1280, 720}, 100);
     auto up = CoordinateVector(0, 1, 0);
     auto scene = Scene(*objInfoPt, camera, up);
 

@@ -21,6 +21,12 @@ enum class AxisName
     Z
 };
 
+enum class Direction
+{
+    Forward,
+    Backward
+};
+
 class Dot
 {
 public:

@@ -57,6 +57,32 @@ public:
         const double xMin,
         const double yMin);
 
+    static Matrix getMoveConvert(
+        const CoordinateVector &translation);
+
+    static Matrix getConvertMatrix(
+        const CoordinateVector &xAxis,
+        const CoordinateVector &yAxis,
+        const CoordinateVector &zAxis,
+        const CoordinateVector &translation);
+
+    static Matrix getObserverConvert(
+        const CoordinateVector &eye,
+        const CoordinateVector &target,
+        const CoordinateVector &up);
+
+    static Matrix getProjectionConvert(
+        const double fov,
+        const double aspect,
+        const double zFar,
+        const double zNear);
+
+    static Matrix getWindowConvert(
+        const double width,
+        const double height,
+        const double xMin,
+        const double yMin);
+
     void log();
 };
 

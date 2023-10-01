@@ -34,6 +34,8 @@ public:
 
     double &getValue(const int i, const int j) const;
 
+    void log();
+
 protected:
     std::optional<double> length;
     MatrixBaseStorage *storage;

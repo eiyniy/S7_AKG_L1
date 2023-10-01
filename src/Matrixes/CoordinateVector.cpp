@@ -32,6 +32,7 @@ CoordinateVector::CoordinateVector(double v1, double v2, double v3, double w)
     storage->get(3, 0) = w;
 }
 
+// /*
 CoordinateVector &CoordinateVector::operator*=(const CoordinateVector &cv)
 {
     CoordinateVector temp;
@@ -43,6 +44,7 @@ CoordinateVector &CoordinateVector::operator*=(const CoordinateVector &cv)
 
     return (*this = temp);
 }
+// */
 
 const double CoordinateVector::getX() const
 {
@@ -253,6 +255,137 @@ void CoordinateVector::toProjectionConvert(double fov, double aspect, double zFa
 void CoordinateVector::toViewerConvert(double width, double height, double xMin, double yMin)
 {
     convert(
+        {
+            width / 2,
+            0,
+            0,
+            0,
+        },
+        {
+            0,
+            -height / 2,
+            0,
+            0,
+        },
+        {
+            0,
+            0,
+            1,
+            0,
+        },
+        {
+            xMin + width / 2,
+            yMin + height / 2,
+            0,
+            1,
+        });
+}
+
+Matrix CoordinateVector::getMoveConvert(const CoordinateVector &translation)
+{
+    return getConvertMatrix(
+        {1, 0, 0, 0},
+        {0, 1, 0, 0},
+        {0, 0, 1, 0},
+        translation);
+}
+
+Matrix CoordinateVector::getConvertMatrix(const CoordinateVector &xAxis, const CoordinateVector &yAxis, const CoordinateVector &zAxis, const CoordinateVector &translation)
+{
+    auto multiplier = Matrix(MatrixStaticStorage<4, 4>::getNewPooled());
+
+    multiplier.getValue(0, 0) = xAxis.getX();
+    multiplier.getValue(0, 1) = yAxis.getX();
+    multiplier.getValue(0, 2) = zAxis.getX();
+    multiplier.getValue(0, 3) = translation.getX();
+
+    multiplier.getValue(1, 0) = xAxis.getY();
+    multiplier.getValue(1, 1) = yAxis.getY();
+    multiplier.getValue(1, 2) = zAxis.getY();
+    multiplier.getValue(1, 3) = translation.getY();
+
+    multiplier.getValue(2, 0) = xAxis.getZ();
+    multiplier.getValue(2, 1) = yAxis.getZ();
+    multiplier.getValue(2, 2) = zAxis.getZ();
+    multiplier.getValue(2, 3) = translation.getZ();
+
+    multiplier.getValue(3, 0) = xAxis.getW();
+    multiplier.getValue(3, 1) = yAxis.getW();
+    multiplier.getValue(3, 2) = zAxis.getW();
+    multiplier.getValue(3, 3) = translation.getW();
+
+    return multiplier;
+}
+
+Matrix CoordinateVector::getObserverConvert(const CoordinateVector &eye, const CoordinateVector &target, const CoordinateVector &up)
+{
+    CoordinateVector zAxis = eye - target;
+    CoordinateVector xAxis = up * zAxis;
+    CoordinateVector yAxis = zAxis * xAxis;
+
+    xAxis = xAxis.getNormalized();
+    yAxis = yAxis.getNormalized();
+    zAxis = zAxis.getNormalized();
+
+    return getConvertMatrix(
+        {
+            xAxis.getX(),
+            yAxis.getX(),
+            zAxis.getX(),
+            0,
+        },
+        {
+            xAxis.getY(),
+            yAxis.getY(),
+            zAxis.getY(),
+            0,
+        },
+        {
+            xAxis.getZ(),
+            yAxis.getZ(),
+            zAxis.getZ(),
+            0,
+        },
+        {
+            -xAxis.scalarMultiply(eye),
+            -yAxis.scalarMultiply(eye),
+            -zAxis.scalarMultiply(eye),
+            1,
+        });
+}
+
+Matrix CoordinateVector::getProjectionConvert(const double fov, const double aspect, const double zFar, const double zNear)
+{
+    return getConvertMatrix(
+        {
+            1.0 / (aspect * tan(fov / 2)),
+            0,
+            0,
+            0,
+        },
+        {
+            0,
+            1.0 / tan(fov / 2),
+            0,
+            0,
+        },
+        {
+            0,
+            0,
+            zFar / (zNear - zFar),
+            -1,
+        },
+        {
+            0,
+            0,
+            (zNear * zFar) / (zNear - zFar),
+            0,
+        });
+}
+
+Matrix CoordinateVector::getWindowConvert(const double width, const double height, const double xMin, const double yMin)
+{
+    return getConvertMatrix(
         {
             width / 2,
             0,
