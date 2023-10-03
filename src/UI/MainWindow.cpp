@@ -43,10 +43,18 @@ void MainWindow::startLoop()
                 break;
 
             case sf::Event::Resized:
+            {
+                sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+                window.setView(sf::View(visibleArea));
+
                 scene.getCamera().getResolution() = Dot(event.size.width, event.size.height);
+                delete pixels;
+                pixels = new sf::Uint8[scene.cGetCamera().cGetResolution().x * scene.cGetCamera().cGetResolution().y * 4];
+                bufferTexture.create(scene.cGetCamera().cGetResolution().x, scene.cGetCamera().cGetResolution().y);
                 scene.modelConvert();
                 isDrawed = false;
                 break;
+            }
             case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::Up ||
                     event.key.code == sf::Keyboard::Right ||
