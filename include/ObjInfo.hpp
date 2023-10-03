@@ -9,6 +9,9 @@
 class ObjInfo
 {
 public:
+    ObjInfo();
+    ObjInfo(const ObjInfo& objInfo);
+
     void addVertex(const Vertex &vertex);
     void addTVertex(const TextureVertex &tVertex);
     void addNVertex(const NormalVertex &nVertex);

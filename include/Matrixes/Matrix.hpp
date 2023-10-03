@@ -15,7 +15,7 @@ class CoordinateVector;
 class Matrix
 {
 public:
-    Matrix(MatrixBaseStorage *p_storage);
+    Matrix(MatrixBaseStorage *p_storage, bool p_isCoordinateVector = false);
     ~Matrix();
 
     Matrix(const Matrix &m);
@@ -39,6 +39,9 @@ public:
 protected:
     std::optional<double> length;
     MatrixBaseStorage *storage;
+
+private:
+    bool isCoordinateVector;
 };
 
 Matrix operator+(const Matrix &m1, const Matrix &m2);

@@ -9,16 +9,22 @@ class CoordinateVector : public Matrix
 {
 public:
     CoordinateVector();
+    ~CoordinateVector();
     CoordinateVector(const CoordinateVector &vector);
     CoordinateVector(const Vertex &vertex);
     CoordinateVector(const double v1, const double v2, const double v3, const double w = 0);
 
     CoordinateVector &operator*=(const CoordinateVector &cv);
 
-    const double getX() const;
-    const double getY() const;
-    const double getZ() const;
-    const double getW() const;
+    const double cGetX() const;
+    const double cGetY() const;
+    const double cGetZ() const;
+    const double cGetW() const;
+
+    double &getX();
+    double &getY();
+    double &getZ();
+    double &getW();
 
     double scalarMultiply(const CoordinateVector &vector);
     const double getLength();

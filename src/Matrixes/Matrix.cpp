@@ -6,17 +6,19 @@
 
 #pragma region CONSTRUCTION
 
-Matrix::Matrix(MatrixBaseStorage *p_storage)
-    : storage(p_storage) {}
+Matrix::Matrix(MatrixBaseStorage *p_storage, bool p_isCoordinateVector)
+    : storage(p_storage), isCoordinateVector(p_isCoordinateVector) {}
 
 Matrix::~Matrix()
 {
-    delete storage;
+    if (!isCoordinateVector)
+        delete storage;
 }
 
 // TODO: FIX STRORAGE ALLOCATION
 Matrix::Matrix(const Matrix &m)
 {
+    isCoordinateVector = m.isCoordinateVector;
     storage = new MatrixDynamicStorage(m.getRows(), m.getCols());
 
     for (int i = 0; i < getRows(); ++i)

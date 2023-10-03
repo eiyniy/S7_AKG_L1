@@ -1,5 +1,15 @@
 #include <ObjInfo.hpp>
 
+ObjInfo::ObjInfo() {}
+
+ObjInfo::ObjInfo(const ObjInfo &objInfo)
+{
+    vertices = std::vector(objInfo.vertices);
+    tVertices = objInfo.tVertices;
+    nVertices = objInfo.nVertices;
+    polygons = objInfo.polygons;
+}
+
 void ObjInfo::addVertex(const Vertex &vertex)
 {
     vertices.push_back(vertex);

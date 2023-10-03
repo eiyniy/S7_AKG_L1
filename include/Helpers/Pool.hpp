@@ -27,5 +27,8 @@ public:
         return obj;
     }
 
-    inline void put(T *obj) { freeList.emplace_back(obj); }
+    inline void put(T *obj)
+    {
+        freeList.emplace_back(obj);
+    }
 };

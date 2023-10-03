@@ -2,29 +2,35 @@
 #include <MatrixStaticStorage.hpp>
 #include <Timer.hpp>
 #include <Vertex.hpp>
+#include <Pool.hpp>
 #include <iostream>
 
 CoordinateVector::CoordinateVector()
-    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled()) {}
+    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled(), true) {}
+
+CoordinateVector::~CoordinateVector()
+{
+    delete (MatrixStaticStorage<4, 1> *)storage;
+}
 
 CoordinateVector::CoordinateVector(const CoordinateVector &vector)
-    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled())
+    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled(), true)
 {
     for (int i = 0; i < getRows(); ++i)
         storage->get(i, 0) = vector.storage->get(i, 0);
 }
 
 CoordinateVector::CoordinateVector(const Vertex &vertex)
-    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled())
+    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled(), true)
 {
-    storage->get(0, 0) = vertex.getX();
-    storage->get(1, 0) = vertex.getY();
-    storage->get(2, 0) = vertex.getZ();
-    storage->get(3, 0) = vertex.getW().value_or(0);
+    storage->get(0, 0) = vertex.cGetX();
+    storage->get(1, 0) = vertex.cGetY();
+    storage->get(2, 0) = vertex.cGetZ();
+    storage->get(3, 0) = vertex.cGetW();
 }
 
 CoordinateVector::CoordinateVector(double v1, double v2, double v3, double w)
-    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled())
+    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled(), true)
 {
     storage->get(0, 0) = v1;
     storage->get(1, 0) = v2;
@@ -37,31 +43,51 @@ CoordinateVector &CoordinateVector::operator*=(const CoordinateVector &cv)
 {
     CoordinateVector temp;
 
-    temp.storage->get(0, 0) = (getY() * cv.getZ()) - (getZ() * cv.getY());
-    temp.storage->get(1, 0) = (getZ() * cv.getX()) - (getX() * cv.getZ());
-    temp.storage->get(2, 0) = (getX() * cv.getY()) - (getY() * cv.getX());
+    temp.storage->get(0, 0) = (cGetY() * cv.cGetZ()) - (cGetZ() * cv.cGetY());
+    temp.storage->get(1, 0) = (cGetZ() * cv.cGetX()) - (cGetX() * cv.cGetZ());
+    temp.storage->get(2, 0) = (cGetX() * cv.cGetY()) - (cGetY() * cv.cGetX());
     temp.storage->get(3, 0) = 1;
 
     return (*this = temp);
 }
 // */
 
-const double CoordinateVector::getX() const
+const double CoordinateVector::cGetX() const
 {
     return storage->get(0, 0);
 }
 
-const double CoordinateVector::getY() const
+const double CoordinateVector::cGetY() const
 {
     return storage->get(1, 0);
 }
 
-const double CoordinateVector::getZ() const
+const double CoordinateVector::cGetZ() const
 {
     return storage->get(2, 0);
 }
 
-const double CoordinateVector::getW() const
+const double CoordinateVector::cGetW() const
+{
+    return storage->get(3, 0);
+}
+
+double &CoordinateVector::getX()
+{
+    return storage->get(0, 0);
+}
+
+double &CoordinateVector::getY()
+{
+    return storage->get(1, 0);
+}
+
+double &CoordinateVector::getZ()
+{
+    return storage->get(2, 0);
+}
+
+double &CoordinateVector::getW()
 {
     return storage->get(3, 0);
 }
@@ -108,25 +134,25 @@ void CoordinateVector::convert(
 {
     Matrix multiplier{MatrixStaticStorage<4, 4>::getNewPooled()};
 
-    multiplier.getValue(0, 0) = xAxis.getX();
-    multiplier.getValue(0, 1) = yAxis.getX();
-    multiplier.getValue(0, 2) = zAxis.getX();
-    multiplier.getValue(0, 3) = translation.getX();
+    multiplier.getValue(0, 0) = xAxis.cGetX();
+    multiplier.getValue(0, 1) = yAxis.cGetX();
+    multiplier.getValue(0, 2) = zAxis.cGetX();
+    multiplier.getValue(0, 3) = translation.cGetX();
 
-    multiplier.getValue(1, 0) = xAxis.getY();
-    multiplier.getValue(1, 1) = yAxis.getY();
-    multiplier.getValue(1, 2) = zAxis.getY();
-    multiplier.getValue(1, 3) = translation.getY();
+    multiplier.getValue(1, 0) = xAxis.cGetY();
+    multiplier.getValue(1, 1) = yAxis.cGetY();
+    multiplier.getValue(1, 2) = zAxis.cGetY();
+    multiplier.getValue(1, 3) = translation.cGetY();
 
-    multiplier.getValue(2, 0) = xAxis.getZ();
-    multiplier.getValue(2, 1) = yAxis.getZ();
-    multiplier.getValue(2, 2) = zAxis.getZ();
-    multiplier.getValue(2, 3) = translation.getZ();
+    multiplier.getValue(2, 0) = xAxis.cGetZ();
+    multiplier.getValue(2, 1) = yAxis.cGetZ();
+    multiplier.getValue(2, 2) = zAxis.cGetZ();
+    multiplier.getValue(2, 3) = translation.cGetZ();
 
-    multiplier.getValue(3, 0) = xAxis.getW();
-    multiplier.getValue(3, 1) = yAxis.getW();
-    multiplier.getValue(3, 2) = zAxis.getW();
-    multiplier.getValue(3, 3) = translation.getW();
+    multiplier.getValue(3, 0) = xAxis.cGetW();
+    multiplier.getValue(3, 1) = yAxis.cGetW();
+    multiplier.getValue(3, 2) = zAxis.cGetW();
+    multiplier.getValue(3, 3) = translation.cGetW();
 
     *this *= multiplier;
 }
@@ -143,9 +169,9 @@ void CoordinateVector::moveConvert(const CoordinateVector &translation)
 void CoordinateVector::scaleConvert(const CoordinateVector &scale)
 {
     convert(
-        {scale.getX(), 0, 0, 0},
-        {0, scale.getY(), 0, 0},
-        {0, 0, scale.getZ(), 0},
+        {scale.cGetX(), 0, 0, 0},
+        {0, scale.cGetY(), 0, 0},
+        {0, 0, scale.cGetZ(), 0},
         {0, 0, 0, 1});
 }
 
@@ -193,21 +219,21 @@ void CoordinateVector::toObserverConvert(
 
     convert(
         {
-            xAxis.getX(),
-            yAxis.getX(),
-            zAxis.getX(),
+            xAxis.cGetX(),
+            yAxis.cGetX(),
+            zAxis.cGetX(),
             0,
         },
         {
-            xAxis.getY(),
-            yAxis.getY(),
-            zAxis.getY(),
+            xAxis.cGetY(),
+            yAxis.cGetY(),
+            zAxis.cGetY(),
             0,
         },
         {
-            xAxis.getZ(),
-            yAxis.getZ(),
-            zAxis.getZ(),
+            xAxis.cGetZ(),
+            yAxis.cGetZ(),
+            zAxis.cGetZ(),
             0,
         },
         {
@@ -294,25 +320,25 @@ Matrix CoordinateVector::getConvertMatrix(const CoordinateVector &xAxis, const C
 {
     auto multiplier = Matrix(MatrixStaticStorage<4, 4>::getNewPooled());
 
-    multiplier.getValue(0, 0) = xAxis.getX();
-    multiplier.getValue(0, 1) = yAxis.getX();
-    multiplier.getValue(0, 2) = zAxis.getX();
-    multiplier.getValue(0, 3) = translation.getX();
+    multiplier.getValue(0, 0) = xAxis.cGetX();
+    multiplier.getValue(0, 1) = yAxis.cGetX();
+    multiplier.getValue(0, 2) = zAxis.cGetX();
+    multiplier.getValue(0, 3) = translation.cGetX();
 
-    multiplier.getValue(1, 0) = xAxis.getY();
-    multiplier.getValue(1, 1) = yAxis.getY();
-    multiplier.getValue(1, 2) = zAxis.getY();
-    multiplier.getValue(1, 3) = translation.getY();
+    multiplier.getValue(1, 0) = xAxis.cGetY();
+    multiplier.getValue(1, 1) = yAxis.cGetY();
+    multiplier.getValue(1, 2) = zAxis.cGetY();
+    multiplier.getValue(1, 3) = translation.cGetY();
 
-    multiplier.getValue(2, 0) = xAxis.getZ();
-    multiplier.getValue(2, 1) = yAxis.getZ();
-    multiplier.getValue(2, 2) = zAxis.getZ();
-    multiplier.getValue(2, 3) = translation.getZ();
+    multiplier.getValue(2, 0) = xAxis.cGetZ();
+    multiplier.getValue(2, 1) = yAxis.cGetZ();
+    multiplier.getValue(2, 2) = zAxis.cGetZ();
+    multiplier.getValue(2, 3) = translation.cGetZ();
 
-    multiplier.getValue(3, 0) = xAxis.getW();
-    multiplier.getValue(3, 1) = yAxis.getW();
-    multiplier.getValue(3, 2) = zAxis.getW();
-    multiplier.getValue(3, 3) = translation.getW();
+    multiplier.getValue(3, 0) = xAxis.cGetW();
+    multiplier.getValue(3, 1) = yAxis.cGetW();
+    multiplier.getValue(3, 2) = zAxis.cGetW();
+    multiplier.getValue(3, 3) = translation.cGetW();
 
     return multiplier;
 }
@@ -329,21 +355,21 @@ Matrix CoordinateVector::getObserverConvert(const CoordinateVector &eye, const C
 
     return getConvertMatrix(
         {
-            xAxis.getX(),
-            yAxis.getX(),
-            zAxis.getX(),
+            xAxis.cGetX(),
+            yAxis.cGetX(),
+            zAxis.cGetX(),
             0,
         },
         {
-            xAxis.getY(),
-            yAxis.getY(),
-            zAxis.getY(),
+            xAxis.cGetY(),
+            yAxis.cGetY(),
+            zAxis.cGetY(),
             0,
         },
         {
-            xAxis.getZ(),
-            yAxis.getZ(),
-            zAxis.getZ(),
+            xAxis.cGetZ(),
+            yAxis.cGetZ(),
+            zAxis.cGetZ(),
             0,
         },
         {
@@ -414,7 +440,7 @@ Matrix CoordinateVector::getWindowConvert(const double width, const double heigh
 
 void CoordinateVector::log()
 {
-    std::cout << getX() << " " << getY() << " " << getZ() << " " << getW() << " " << std::endl;
+    std::cout << cGetX() << " " << cGetY() << " " << cGetZ() << " " << cGetW() << " " << std::endl;
 }
 
 CoordinateVector

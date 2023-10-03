@@ -29,20 +29,20 @@ inline MatrixStaticStorage<Rows, Cols>::MatrixStaticStorage()
 template <int Rows, int Cols>
 inline MatrixStaticStorage<Rows, Cols> *MatrixStaticStorage<Rows, Cols>::getNewPooled()
 {
-    return Pool<MatrixStaticStorage>::getInstance().get();
+    return Pool<MatrixStaticStorage<Rows, Cols>>::getInstance().get();
 }
 
 template <int Rows, int Cols>
 inline void MatrixStaticStorage<Rows, Cols>::operator delete(void *pt)
 {
-    auto matrixStoragePt = (MatrixStaticStorage *)pt;
-    for (auto cols : matrixStoragePt->values)
+    MatrixStaticStorage<Rows, Cols> *matrixStoragePt = (MatrixStaticStorage<Rows, Cols> *)pt;
+    for (std::array<double, Cols> &cols : matrixStoragePt->values)
     {
-        for (auto v : cols)
+        for (double &v : cols)
             v = 0;
     }
 
-    Pool<MatrixStaticStorage>::getInstance().put(matrixStoragePt);
+    Pool<MatrixStaticStorage<Rows, Cols>>::getInstance().put(matrixStoragePt);
 }
 
 template <int Rows, int Cols>
