@@ -92,7 +92,7 @@ void Matrix::log()
 Matrix operator+(const Matrix &m1, const Matrix &m2)
 {
     if (m1.getRows() != m2.getRows() || m1.getCols() != m2.getCols())
-        throw std::logic_error("Could not execute += operator");
+        throw std::logic_error("Could not execute + operator");
 
     auto newStorage = new MatrixDynamicStorage(m1.getRows(), m2.getCols());
     auto temp = Matrix(newStorage);
@@ -109,7 +109,7 @@ Matrix operator+(const Matrix &m1, const Matrix &m2)
 Matrix operator-(const Matrix &m1, const Matrix &m2)
 {
     if (m1.getRows() != m2.getRows() || m1.getCols() != m2.getCols())
-        throw std::logic_error("Could not execute -= operator");
+        throw std::logic_error("Could not execute - operator");
 
     auto newStorage = new MatrixDynamicStorage(m1.getRows(), m2.getCols());
     auto temp = Matrix(newStorage);

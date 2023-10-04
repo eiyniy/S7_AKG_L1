@@ -42,15 +42,9 @@ void Scene::moveConvert(AxisName axis, Direction direction, int dt)
 {
     std::vector<Vertex> &vertices = getObjInfoCopy().getVertices();
 
-    std::cout << "first: " << objInfo.cGetVertices().begin()->cGetX() << " "
-              << objInfo.cGetVertices().begin()->cGetY() << " "
-              << objInfo.cGetVertices().begin()->cGetZ() << " "
-              << objInfo.cGetVertices().begin()->cGetW() << std::endl;
-
     CoordinateVector transition;
 
-    double moveSpeedTimed = moveSpeed * dt != 0 ? (dt / defaultFrameTime) : 1;
-    std::cout << "speed " << moveSpeedTimed << std::endl;
+    double moveSpeedTimed = moveSpeed;// * dt != 0 ? (dt / defaultFrameTime) : 1;
 
     switch (axis)
     {
@@ -79,8 +73,10 @@ void Scene::moveConvert(AxisName axis, Direction direction, int dt)
 
     auto mConvert = CoordinateVector::getMoveConvert(transition);
 
-    camera.getTarget() = mConvert * (Matrix)camera.getTarget();
-    camera.getPosition() = mConvert * (Matrix)camera.getPosition();
+    // if (axis == AxisName::X || axis == AxisName::Y)
+        camera.getTarget() = mConvert * (Matrix)camera.getTarget();
+    // else
+        camera.getPosition() = mConvert * (Matrix)camera.getPosition();
 }
 
 void Scene::scaleConvert()

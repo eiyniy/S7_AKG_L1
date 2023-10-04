@@ -348,6 +348,7 @@ Matrix CoordinateVector::getObserverConvert(const CoordinateVector &eye, const C
     CoordinateVector zAxis = eye - target;
     CoordinateVector xAxis = up * zAxis;
     CoordinateVector yAxis = zAxis * xAxis;
+    // CoordinateVector yAxis = up;
 
     xAxis = xAxis.getNormalized();
     yAxis = yAxis.getNormalized();

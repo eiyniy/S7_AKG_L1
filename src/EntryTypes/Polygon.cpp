@@ -35,7 +35,10 @@ Polygon::Polygon(const std::string &line)
     while ((strPart = ObjParser::getNextPart(&iter, iterEnd, ' ')))
     {
         if (i >= 4)
+        {
+            sValues = Values(accumulator);
             moveValuesToDynamic();
+        }
 
         if (storageMode == StorageMode::Dynamic)
             dValues.value().push_back(VertexIndexes(strPart.value()));

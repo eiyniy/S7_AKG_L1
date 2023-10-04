@@ -1,4 +1,5 @@
 #include <Camera.hpp>
+#include <cmath>
 
 Camera::Camera(
     const CoordinateVector &p_position,
@@ -8,7 +9,7 @@ Camera::Camera(
     : position(p_position),
       target(p_target),
       resolution(p_resolution),
-      fov(p_fov)
+      fov(p_fov * M_PI / 180)
 {
 }
 
