@@ -105,7 +105,7 @@ void MainWindow::startLoop()
             if (isMoving)
             {
                 scene.moveConvert(moveAxis, moveDirection, dt);
-                // scene.modelConvert();
+                scene.modelConvert();
             }
 
             if (!isDrawed)
@@ -118,8 +118,6 @@ void MainWindow::startLoop()
 
 void MainWindow::draw()
 {
-    Timer::start();
-
     window.clear();
 
     auto xSize = scene.cGetCamera().cGetResolution().x;
@@ -132,7 +130,8 @@ void MainWindow::draw()
         if (el.getX() < 0 ||
             el.getX() > xSize ||
             el.getY() < 0 ||
-            el.getY() > ySize)
+            el.getY() > ySize ||
+            el.getZ() < 0)
             continue;
 
         int x = std::trunc(el.cGetX());
@@ -149,6 +148,4 @@ void MainWindow::draw()
     window.display();
 
     isDrawed = true;
-
-    Timer::stop();
 }

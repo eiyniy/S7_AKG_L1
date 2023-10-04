@@ -17,12 +17,17 @@ CoordinateVector &Camera::getPosition()
     return position;
 }
 
+CoordinateVector &Camera::getTarget()
+{
+    return target;
+}
+
 const CoordinateVector &Camera::cGetPosition() const
 {
     return position;
 }
 
-const CoordinateVector &Camera::getTarget() const
+const CoordinateVector &Camera::cGetTarget() const
 {
     return target;
 }

@@ -49,85 +49,6 @@ Matrix &Matrix::operator=(const Matrix &m)
     return *this;
 }
 
-Matrix &Matrix::operator+=(const Matrix &m)
-{
-    if (getRows() != m.getRows() || getCols() != m.getCols())
-        throw std::logic_error("Could not execute += operator");
-
-    for (int i = 0; i < getRows(); ++i)
-    {
-        for (int j = 0; j < getCols(); ++j)
-            storage->get(i, j) += m.storage->get(i, j);
-    }
-
-    return *this;
-}
-
-Matrix &Matrix::operator-=(const Matrix &m)
-{
-    if (getRows() != m.getRows() || getCols() != m.getCols())
-        throw std::logic_error("Could not execute -= operator");
-
-    for (int i = 0; i < getRows(); ++i)
-    {
-        for (int j = 0; j < getCols(); ++j)
-            storage->get(i, j) -= m.storage->get(i, j);
-    }
-
-    return *this;
-}
-
-Matrix &Matrix::operator*=(const Matrix &m)
-{
-    if (getCols() != m.getRows())
-        throw std::logic_error("Could not execute vector multiply");
-
-    auto newStorage = new MatrixDynamicStorage(getRows(), m.getCols());
-    auto temp = Matrix(newStorage);
-
-    for (int i = 0; i < temp.getRows(); ++i)
-    {
-        for (int j = 0; j < temp.getCols(); ++j)
-        {
-            temp.storage->get(i, j) = 0;
-
-            for (int k = 0; k < getCols(); ++k)
-            {
-                temp.storage->get(i, j) += (storage->get(i, k) * m.storage->get(k, j));
-                // std::cout << "(" << storage->get(i, k) << " * " << m.storage->get(k, j) << ")[" << (storage->get(i, k) * m.storage->get(k, j)) << "] + ";
-            }
-
-            // std::cout << " == " << temp.storage->get(i, j) << std::endl;
-        }
-    }
-
-    // temp.log();
-
-    return (*this = temp);
-}
-
-Matrix &Matrix::operator*=(const double v)
-{
-    for (int i = 0; i < getRows(); ++i)
-    {
-        for (int j = 0; j < getCols(); ++j)
-            storage->get(i, j) *= v;
-    }
-
-    return *this;
-}
-
-Matrix &Matrix::operator/=(const double v)
-{
-    for (int i = 0; i < getRows(); ++i)
-    {
-        for (int j = 0; j < getCols(); ++j)
-            storage->get(i, j) /= v;
-    }
-
-    return *this;
-}
-
 Matrix::operator CoordinateVector() const
 {
     return CoordinateVector(storage->get(0, 0), storage->get(1, 0), storage->get(2, 0), storage->get(3, 0));
@@ -168,29 +89,72 @@ void Matrix::log()
 
 #pragma region DUAL_OPERATORS
 
-Matrix
-operator+(const Matrix &m1, const Matrix &m2)
+Matrix operator+(const Matrix &m1, const Matrix &m2)
 {
-    Matrix temp(m1);
-    return (temp += m2);
+    if (m1.getRows() != m2.getRows() || m1.getCols() != m2.getCols())
+        throw std::logic_error("Could not execute += operator");
+
+    auto newStorage = new MatrixDynamicStorage(m1.getRows(), m2.getCols());
+    auto temp = Matrix(newStorage);
+
+    for (int i = 0; i < m1.getRows(); ++i)
+    {
+        for (int j = 0; j < m1.getCols(); ++j)
+            temp.getValue(i, j) = m1.getValue(i, j) + m2.getValue(i, j);
+    }
+
+    return temp;
 }
 
 Matrix operator-(const Matrix &m1, const Matrix &m2)
 {
-    Matrix temp(m1);
-    return (temp -= m2);
+    if (m1.getRows() != m2.getRows() || m1.getCols() != m2.getCols())
+        throw std::logic_error("Could not execute -= operator");
+
+    auto newStorage = new MatrixDynamicStorage(m1.getRows(), m2.getCols());
+    auto temp = Matrix(newStorage);
+
+    for (int i = 0; i < m1.getRows(); ++i)
+    {
+        for (int j = 0; j < m1.getCols(); ++j)
+            temp.getValue(i, j) = m1.getValue(i, j) - m2.getValue(i, j);
+    }
+
+    return temp;
 }
 
 Matrix operator*(const Matrix &m1, const Matrix &m2)
 {
-    Matrix temp(m1);
-    return (temp *= m2);
+    if (m1.getCols() != m2.getRows())
+        throw std::logic_error("Could not execute vector multiply");
+
+    auto newStorage = new MatrixDynamicStorage(m1.getRows(), m2.getCols());
+    auto temp = Matrix(newStorage);
+
+    for (int i = 0; i < temp.getRows(); ++i)
+    {
+        for (int k = 0; k < m1.getCols(); ++k)
+        {
+            for (int j = 0; j < temp.getCols(); ++j)
+                temp.getValue(i, j) += (m1.getValue(i, k) * m2.getValue(k, j));
+        }
+    }
+
+    return temp;
 }
 
 Matrix operator*(const Matrix &m, double v)
 {
-    Matrix temp(m);
-    return (temp *= v);
+    auto newStorage = new MatrixDynamicStorage(m.getRows(), m.getCols());
+    auto temp = Matrix(newStorage);
+
+    for (int i = 0; i < m.getRows(); ++i)
+    {
+        for (int j = 0; j < m.getCols(); ++j)
+            temp.getValue(i, j) = m.getValue(i, j) * v;
+    }
+
+    return temp;
 }
 
 Matrix operator*(double v, const Matrix &m)
@@ -200,8 +164,16 @@ Matrix operator*(double v, const Matrix &m)
 
 Matrix operator/(const Matrix &m, double v)
 {
-    Matrix temp(m);
-    return (temp /= v);
+    auto newStorage = new MatrixDynamicStorage(m.getRows(), m.getCols());
+    auto temp = Matrix(newStorage);
+
+    for (int i = 0; i < m.getRows(); ++i)
+    {
+        for (int j = 0; j < m.getCols(); ++j)
+            temp.getValue(i, j) = m.getValue(i, j) / v;
+    }
+
+    return temp;
 }
 
 #pragma endregion DUAL_OPERATORS

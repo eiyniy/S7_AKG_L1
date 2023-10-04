@@ -31,9 +31,9 @@ int main(int argc, char **argv)
     std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
     // auto camera = Camera({500, -1000, -200}, {objInfoPt->cGetVertices().at(0)}, {1280, 720}, 100);
-    auto camera = Camera({0, 0, -1000}, {objInfoPt->cGetVertices().at(0)}, {1280, 720}, 100);
-    auto up = CoordinateVector(0, 1, 0);
-    auto scene = Scene(*objInfoPt, camera, up, 1);
+    auto camera = Camera({0, 0, -2000, 1}, {0, 0, 0, 1}, {1280, 720}, 100);
+    auto up = CoordinateVector(0, -1, 0);
+    auto scene = Scene(*objInfoPt, camera, up, 10);
 
     auto mainWindow = MainWindow(scene);
     mainWindow.startLoop();

@@ -21,12 +21,6 @@ public:
     Matrix(const Matrix &m);
     Matrix &operator=(const Matrix &m);
 
-    Matrix &operator+=(const Matrix &m);
-    Matrix &operator-=(const Matrix &m);
-    Matrix &operator*=(const Matrix &m);
-    Matrix &operator*=(const double v);
-    Matrix &operator/=(const double v);
-
     operator CoordinateVector() const;
 
     const double getCols() const;
