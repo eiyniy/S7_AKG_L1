@@ -1,16 +1,16 @@
 #pragma once
 
 #include <BaseVertex.hpp>
-#include <vector>
 #include <string>
-#include <optional>
 
 class TextureVertex : public BaseVertex
 {
 public:
-    TextureVertex(const std::string &line);
+    TextureVertex(const double u, const double v = 0, const double w = 0);
+
+    static TextureVertex parse(const std::string &line);
 
     const double getU() const;
-    const std::optional<double> getV() const;
-    const std::optional<double> getW() const;
+    const double getV() const;
+    const double getW() const;
 };

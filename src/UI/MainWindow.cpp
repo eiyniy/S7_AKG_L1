@@ -23,7 +23,7 @@ MainWindow::MainWindow(Scene &p_scene)
 
 void MainWindow::startLoop()
 {
-    scene.modelConvert();
+    scene.modelConvert(scene.getObjInfoCopy().getVertices());
 
     sf::Clock clock;
     float dt = 0.f;
@@ -51,7 +51,7 @@ void MainWindow::startLoop()
                 delete pixels;
                 pixels = new sf::Uint8[scene.cGetCamera().cGetResolution().x * scene.cGetCamera().cGetResolution().y * 4];
                 bufferTexture.create(scene.cGetCamera().cGetResolution().x, scene.cGetCamera().cGetResolution().y);
-                scene.modelConvert();
+                scene.modelConvert(scene.getObjInfoCopy().getVertices());
                 isDrawed = false;
                 break;
             }
@@ -105,7 +105,7 @@ void MainWindow::startLoop()
             if (isMoving)
             {
                 scene.moveConvert(moveAxis, moveDirection, dt);
-                scene.modelConvert();
+                // scene.modelConvert();
             }
 
             if (!isDrawed)

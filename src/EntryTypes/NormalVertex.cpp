@@ -1,7 +1,14 @@
 #include <NormalVertex.hpp>
-#include <stdexcept>
+#include <array>
 
-NormalVertex::NormalVertex(const std::string &line) : BaseVertex(line) {}
+NormalVertex::NormalVertex(const double i, const double j, const double k)
+    : BaseVertex(i, j, k) {}
+
+NormalVertex NormalVertex::parse(const std::string &line)
+{
+    auto acc = BaseVertex::parse(line);
+    return NormalVertex(acc[0], acc[1], acc[2]);
+}
 
 const double NormalVertex::getI() const
 {

@@ -103,13 +103,13 @@ void ObjParser::parseEntry(const std::string &line, ObjInfo *result) const
     switch (type.value())
     {
     case EntryType::Vertex:
-        result->addVertex(Vertex(line));
+        result->addVertex(Vertex::parse(line));
         break;
     case EntryType::TextureVertex:
-        result->addTVertex(TextureVertex(line));
+        result->addTVertex(TextureVertex::parse(line));
         break;
     case EntryType::NormalVertex:
-        result->addNVertex(NormalVertex(line));
+        result->addNVertex(NormalVertex::parse(line));
         break;
     case EntryType::Polygon:
         result->addPolygon(Polygon(line));

@@ -11,11 +11,8 @@ class BaseVertex
 public:
     BaseVertex(const double p_v1, const double p_v2, const double p_v3, const double p_v4 = 0);
     BaseVertex(const BaseVertex &bv);
-    BaseVertex(const std::string &line);
 
-    static BaseVertex fromMatrix(const Matrix &m);
-
-    operator CoordinateVector() const;
+    static std::array<double, 4> parse(const std::string &line);
 
 protected:
     double v1, v2, v3, v4;

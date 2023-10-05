@@ -21,7 +21,6 @@ private:
     Scene &scene;
 
     sf::RenderWindow window;
-    // sf::Image buffer;
     sf::Uint8 *pixels;
     sf::Texture bufferTexture;
     sf::Sprite bufferSprite;

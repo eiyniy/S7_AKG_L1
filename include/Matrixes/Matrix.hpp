@@ -28,6 +28,39 @@ public:
 
     double &getValue(const int i, const int j) const;
 
+    static Matrix getConvertMatrix(
+        const CoordinateVector &xAxis,
+        const CoordinateVector &yAxis,
+        const CoordinateVector &zAxis,
+        const CoordinateVector &translation);
+
+    static Matrix getMoveConvert(
+        const CoordinateVector &translation);
+
+    static Matrix getScaleConvert(
+        const CoordinateVector &scale);
+
+    static Matrix getRotateConvert(
+        const AxisName axis,
+        const double angle);
+
+    static Matrix getObserverConvert(
+        const CoordinateVector &eye,
+        const CoordinateVector &target,
+        const CoordinateVector &up);
+
+    static Matrix getProjectionConvert(
+        const double fov,
+        const double aspect,
+        const double zFar,
+        const double zNear);
+
+    static Matrix getWindowConvert(
+        const double width,
+        const double height,
+        const double xMin,
+        const double yMin);
+
     void log();
 
 protected:

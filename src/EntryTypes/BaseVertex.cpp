@@ -11,7 +11,7 @@ BaseVertex::BaseVertex(const double p_v1, const double p_v2, const double p_v3, 
 BaseVertex::BaseVertex(const BaseVertex &bv)
     : v1(bv.v1), v2(bv.v2), v3(bv.v3), v4(bv.v4) {}
 
-BaseVertex::BaseVertex(const std::string &line)
+std::array<double, 4> BaseVertex::parse(const std::string &line)
 {
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Vertex &&
@@ -37,20 +37,13 @@ BaseVertex::BaseVertex(const std::string &line)
     if (i < 1)
         throw std::logic_error("Can't parse value");
 
-    v1 = accumulator[0].value(),
-    v2 = accumulator[1].value_or(0),
-    v3 = accumulator[2].value_or(0);
-    v4 = accumulator[3].value_or(1);
+    auto res = std::array{
+        accumulator[0].value(),
+        accumulator[1].value_or(0),
+        accumulator[2].value_or(0),
+        accumulator[3].value_or(1)};
 
     accumulator.fill(std::nullopt);
-}
 
-BaseVertex BaseVertex::fromMatrix(const Matrix &m)
-{
-    return BaseVertex(m.getValue(0, 0), m.getValue(1, 0), m.getValue(2, 0), m.getValue(3, 0));
-}
-
-BaseVertex::operator CoordinateVector() const
-{
-    return CoordinateVector(v1, v2, v3, v4);
+    return res;
 }

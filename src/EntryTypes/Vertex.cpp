@@ -1,9 +1,14 @@
 #include <Vertex.hpp>
 #include <ObjParser.hpp>
 
-Vertex::Vertex(const std::string &line) : BaseVertex(line) {}
+Vertex::Vertex(const double x, const double y, const double z, const double w)
+    : BaseVertex(x, y, z, w) {}
 
-Vertex::Vertex(const BaseVertex &bVertex) : BaseVertex(bVertex) {}
+Vertex Vertex::parse(const std::string &line)
+{
+    auto acc = BaseVertex::parse(line);
+    return Vertex(acc[0], acc[1], acc[2], acc[3]);
+}
 
 const double Vertex::cGetX() const
 {

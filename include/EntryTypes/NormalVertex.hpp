@@ -1,14 +1,14 @@
 #pragma once
 
 #include <BaseVertex.hpp>
-#include <vector>
 #include <string>
-#include <optional>
 
 class NormalVertex : public BaseVertex
 {
 public:
-    NormalVertex(const std::string &line);
+    NormalVertex(const double i, const double j, const double k);
+
+    static NormalVertex parse(const std::string &line);
 
     const double getI() const;
     const double getJ() const;

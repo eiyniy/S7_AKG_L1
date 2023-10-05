@@ -30,8 +30,9 @@ int main(int argc, char **argv)
     auto tsParseEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
-    // auto camera = Camera({500, -1000, -200}, {objInfoPt->cGetVertices().at(0)}, {1280, 720}, 100);
-    auto camera = Camera({0, 0, -2, 1}, {objInfoPt->cGetVertices().at(0)}, {1280, 720}, 90);
+    auto cPos = CoordinateVector(0, 0, -20, 1);
+    auto tPos = CoordinateVector(0, 0, 0, 1);
+    auto camera = Camera(cPos, tPos, {1280, 720}, 100);
     auto up = CoordinateVector(0, -1, 0);
     auto scene = Scene(*objInfoPt, camera, up, 1);
 
