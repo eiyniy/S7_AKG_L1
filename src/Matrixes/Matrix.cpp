@@ -58,12 +58,12 @@ Matrix::operator CoordinateVector() const
 
 #pragma region FUNCTIONS
 
-const double Matrix::getCols() const
+const int Matrix::getCols() const
 {
     return storage->cols;
 }
 
-const double Matrix::getRows() const
+const int Matrix::getRows() const
 {
     return storage->rows;
 }
@@ -120,27 +120,30 @@ Matrix Matrix::getScaleConvert(const CoordinateVector &scale)
 
 Matrix Matrix::getRotateConvert(const AxisName axis, const double angle)
 {
+    auto cosA = cos(angle);
+    auto sinA = sin(angle);
+
     switch (axis)
     {
     case AxisName::X:
         return getConvertMatrix(
             {1, 0, 0, 0},
-            {0, cos(angle), sin(angle), 0},
-            {0, -sin(angle), cos(angle), 0},
+            {0, cosA, sinA, 0},
+            {0, -sinA, cosA, 0},
             {0, 0, 0, 1});
         break;
     case AxisName::Y:
         return getConvertMatrix(
-            {cos(angle), 0, -sin(angle), 0},
+            {cosA, 0, -sinA, 0},
             {0, 1, 0, 0},
-            {sin(angle), 0, cos(angle), 0},
+            {sinA, 0, cosA, 0},
             {0, 0, 0, 1});
         break;
     case AxisName::Z:
         return getConvertMatrix(
-            {cos(angle), 0, -sin(angle), 0},
-            {0, 1, 0, 0},
-            {sin(angle), 0, cos(angle), 0},
+            {cosA, sinA, 0, 0},
+            {-sinA, cosA, 0, 0},
+            {0, 0, 1, 0},
             {0, 0, 0, 1});
         break;
     }
@@ -186,16 +189,18 @@ Matrix Matrix::getObserverConvert(const CoordinateVector &eye, const CoordinateV
 
 Matrix Matrix::getProjectionConvert(const double fov, const double aspect, const double zFar, const double zNear)
 {
+    auto halfTanFov = tan(fov / 2);
+
     return getConvertMatrix(
         {
-            1.0 / (aspect * tan(fov / 2)),
+            1.0 / (aspect * halfTanFov),
             0,
             0,
             0,
         },
         {
             0,
-            1.0 / tan(fov / 2),
+            1.0 / halfTanFov,
             0,
             0,
         },

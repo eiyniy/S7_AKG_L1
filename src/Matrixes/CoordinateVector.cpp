@@ -3,6 +3,7 @@
 #include <Timer.hpp>
 #include <Vertex.hpp>
 #include <Pool.hpp>
+#include <Converter.hpp>
 #include <iostream>
 
 CoordinateVector::CoordinateVector()
@@ -106,15 +107,15 @@ const double CoordinateVector::getLength()
 
     length = sqrt(pow(storage->get(0, 0), 2) + pow(storage->get(1, 0), 2) + pow(storage->get(2, 0), 2));
 
-    return length.value();
+    return *length;
 }
 
 CoordinateVector CoordinateVector::getNormalized()
 {
-    if (getLength() != 0)
+    if (getLength() != 0.f)
     {
         auto matrix = *this * (1 / getLength());
-        return *static_cast<CoordinateVector *>(&matrix);
+        return Converter::matrixToCVector(matrix);
     }
     else
         return CoordinateVector();
@@ -123,6 +124,18 @@ CoordinateVector CoordinateVector::getNormalized()
 void CoordinateVector::log() const
 {
     std::cout << cGetX() << " " << cGetY() << " " << cGetZ() << " " << cGetW() << " " << std::endl;
+}
+
+CoordinateVector operator+(const CoordinateVector &cv1, const CoordinateVector &cv2)
+{
+    CoordinateVector temp = cv1;
+
+    temp.getX() += cv2.cGetX();
+    temp.getY() += cv2.cGetY();
+    temp.getZ() += cv2.cGetZ();
+    temp.getW() += cv2.cGetW();
+
+    return temp;
 }
 
 CoordinateVector operator*(const CoordinateVector &cv1, const CoordinateVector &cv2)

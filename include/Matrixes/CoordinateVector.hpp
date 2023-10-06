@@ -32,5 +32,6 @@ public:
     void log() const;
 };
 
+CoordinateVector operator+(const CoordinateVector &cv1, const CoordinateVector &cv2);
 CoordinateVector operator*(const CoordinateVector &cv1, const CoordinateVector &cv2);
 CoordinateVector operator/(const CoordinateVector &cv1, const double v);

@@ -12,8 +12,12 @@ MainWindow::MainWindow(Scene &p_scene)
       isObjectMoving(false)
 {
     window.setFramerateLimit(scene.defaultFps);
-    pixels = new sf::Uint8[scene.cGetCamera().cGetResolution().x * scene.cGetCamera().cGetResolution().y * 4];
-    bufferTexture.create(scene.cGetCamera().cGetResolution().x, scene.cGetCamera().cGetResolution().y);
+
+    auto resolution = scene.cGetCamera().cGetResolution();
+
+    pixels = new sf::Uint8[resolution.x * resolution.y * 4];
+    bufferTexture.create(resolution.x, resolution.y);
+
     bufferSprite.setTexture(bufferTexture);
 }
 
@@ -48,9 +52,9 @@ void MainWindow::startLoop()
             scene.getCamera().getResolution() = Dot(event.size.width, event.size.height);
 
             delete[] pixels;
-            pixels = new sf::Uint8[scene.cGetCamera().cGetResolution().x * scene.cGetCamera().cGetResolution().y * 4];
+            pixels = new sf::Uint8[event.size.width * event.size.height * 4];
 
-            bufferTexture.create(scene.cGetCamera().cGetResolution().x, scene.cGetCamera().cGetResolution().y);
+            bufferTexture.create(event.size.width, event.size.height);
 
             scene.modelConvert(scene.cGetObjInfoVerticesCopy());
             // scene.modelConvert(scene.getFloorCopy());
@@ -109,10 +113,7 @@ void MainWindow::startLoop()
         {
             auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
 
-            scene.getWorldShift().getX() += transition.cGetX();
-            scene.getWorldShift().getY() += transition.cGetY();
-            scene.getWorldShift().getZ() += transition.cGetZ();
-            scene.getWorldShift().getW() += transition.cGetW();
+            scene.getWorldShift() = scene.getWorldShift() + transition;
 
             scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.cGetWorldShift());
             // scene.modelConvert(scene.getFloorCopy());

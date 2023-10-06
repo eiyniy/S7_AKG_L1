@@ -28,7 +28,7 @@ public:
 
     CoordinateVector getMoveConvert(AxisName axis, Direction direction, int dt);
 
-    void modelConvert(const std::vector<Vertex> &vertices, std::optional<CoordinateVector> moveConvert = std::nullopt);
+    void modelConvert(const std::vector<Vertex> &vertices, const std::optional<CoordinateVector> &moveConvert = std::nullopt);
     void moveCamera(CoordinateVector &transition);
 
     const std::vector<Vertex> &cGetObjInfoVertices() const;

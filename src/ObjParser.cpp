@@ -6,13 +6,14 @@
 #include <functional>
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 ObjParser::ObjParser(std::string p_pathToFile)
 {
     if (!std::filesystem::exists(p_pathToFile))
         throw std::logic_error("Could not open file");
 
-    pathToFile = p_pathToFile;
+    std::swap(pathToFile, p_pathToFile);
 
     readStream.open(pathToFile);
     if (!readStream.is_open())
@@ -100,7 +101,7 @@ void ObjParser::parseEntry(const std::string &line, ObjInfo *result) const
     if (!(type = getEntryType(line)))
         return;
 
-    switch (type.value())
+    switch (*type)
     {
     case EntryType::Vertex:
         result->addVertex(Vertex::parse(line));

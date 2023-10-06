@@ -12,6 +12,19 @@ BaseVertex::BaseVertex(const double p_v1, const double p_v2, const double p_v3, 
 BaseVertex::BaseVertex(const BaseVertex &bv)
     : v1(bv.v1), v2(bv.v2), v3(bv.v3), v4(bv.v4) {}
 
+BaseVertex &BaseVertex::operator=(const BaseVertex &bv)
+{
+    if (this == &bv)
+        return *this;
+
+    v1 = bv.v1;
+    v2 = bv.v2;
+    v3 = bv.v3;
+    v4 = bv.v4;
+
+    return *this;
+}
+
 std::array<double, 4> BaseVertex::parse(const std::string &line)
 {
     auto entryType = ObjParser::getEntryType(line);

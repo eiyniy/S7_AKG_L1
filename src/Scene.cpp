@@ -27,13 +27,12 @@ Scene::Scene(
     cFloor.emplace_back(Vertex(0, 0, 0));
 }
 
-void Scene::modelConvert(const std::vector<Vertex> &vertices, std::optional<CoordinateVector> moveConvert)
+void Scene::modelConvert(const std::vector<Vertex> &vertices, const std::optional<CoordinateVector> &moveConvert)
 {
     objInfoVertices = std::vector<Vertex>();
     objInfoVertices.reserve(vertices.size());
 
     auto convertMatrix =
-        // Matrix::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) *
         Matrix::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2, 1) *
         Matrix::getObserverConvert(camera.getPosition(), camera.cGetTarget(), up);
 

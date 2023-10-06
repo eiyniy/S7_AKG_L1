@@ -23,8 +23,8 @@ public:
 
     operator CoordinateVector() const;
 
-    const double getCols() const;
-    const double getRows() const;
+    const int getCols() const;
+    const int getRows() const;
 
     double &getValue(const int i, const int j) const;
 
