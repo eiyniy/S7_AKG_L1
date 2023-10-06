@@ -4,9 +4,11 @@
 #include <Timer.hpp>
 
 MainWindow::MainWindow(Scene &p_scene)
-    : window({sf::VideoMode(p_scene.cGetCamera().cGetResolution().x,
-                            p_scene.cGetCamera().cGetResolution().y),
-              "SFML Graphics"}),
+    : window(sf::RenderWindow(
+          sf::VideoMode(
+              p_scene.cGetCamera().cGetResolution().x,
+              p_scene.cGetCamera().cGetResolution().y),
+          "SFML Graphics")),
       scene(p_scene),
       isCameraMoving(false),
       isObjectMoving(false)
