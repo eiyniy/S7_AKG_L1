@@ -1,27 +1,20 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "Mac",
             "includePath": [
-                "C:/msys64/mingw64/include/gtk-3.0",
-                "C:/msys64/mingw64/include/glib-2.0",
-                "C:/msys64/mingw64/include/**",
-                "C:/msys64/mingw64/lib/**",
-                "${workspaceFolder}/include/**",
-                "${workspaceFolder}/include",
-                "${workspaceFolder}/include/EntryTypes",
-                "${workspaceFolder}/include/Matrixes",
-                "${workspaceFolder}/include/Helpers"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/build/Clang 15.0.0 x86_64-apple-darwin23.0.0/Release/_deps/sfml-src/include"
             ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
+            "defines": [],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
             ],
-            "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
-            "cStandard": "c17",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "windows-gcc-x64"
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "gnu23",
+            "cppStandard": "gnu++23",
+            "intelliSenseMode": "macos-clang-x64",
+            "compilerArgs": []
         }
     ],
     "version": 4
