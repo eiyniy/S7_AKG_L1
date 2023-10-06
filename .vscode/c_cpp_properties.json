@@ -11,8 +11,7 @@
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/include/EntryTypes",
                 "${workspaceFolder}/include/Matrixes",
-                "${workspaceFolder}/include/Helpers",
-                "${workspaceFolder}/include/Matrixes"
+                "${workspaceFolder}/include/Helpers"
             ],
             "defines": [
                 "_DEBUG",

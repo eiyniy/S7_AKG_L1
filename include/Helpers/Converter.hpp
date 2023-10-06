@@ -7,6 +7,7 @@
 class Converter
 {
 public:
-    static Vertex coordinateVectorToVertex(CoordinateVector &value);
-    static Matrix coordinateVectorToMatrix(CoordinateVector &value);
+    static Vertex cVectorToVertex(const CoordinateVector &value);
+    static Matrix cVectorToMatrix(const CoordinateVector &value);
+    static CoordinateVector vertexToCVector(const Vertex &value);
 };

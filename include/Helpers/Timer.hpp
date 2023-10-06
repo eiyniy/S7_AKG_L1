@@ -4,8 +4,7 @@
 
 class Timer
 {
-    // static std::chrono::time_point<std::chrono::high_resolution_clock> timeStart;
-    static std::chrono::_V2::system_clock::time_point timeStart;
+    static std::chrono::time_point<std::chrono::high_resolution_clock> timeStart;
     static long long nsCount;
     static int callsCount;
 

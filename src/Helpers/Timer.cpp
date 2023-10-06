@@ -1,7 +1,6 @@
 #include <Timer.hpp>
 
-// std::chrono::time_point<std::chrono::high_resolution_clock> Timer::timeStart;
-std::chrono::_V2::system_clock::time_point Timer::timeStart;
+std::chrono::time_point<std::chrono::high_resolution_clock> Timer::timeStart;
 long long Timer::nsCount;
 int Timer::callsCount;
 

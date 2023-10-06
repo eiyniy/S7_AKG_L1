@@ -18,12 +18,12 @@ MainWindow::MainWindow(Scene &p_scene)
     pixels = new sf::Uint8[scene.cGetCamera().cGetResolution().x * scene.cGetCamera().cGetResolution().y * 4];
     bufferTexture.create(scene.cGetCamera().cGetResolution().x, scene.cGetCamera().cGetResolution().y);
     bufferSprite.setTexture(bufferTexture);
-    // buffer.create(scene.cGetCamera().cGetResolution().x, scene.cGetCamera().cGetResolution().y, sf::Color::Black);
 }
 
 void MainWindow::startLoop()
 {
     scene.modelConvert(scene.getObjInfoCopy().getVertices());
+    scene.modelConvert(scene.getFloorCopy());
 
     sf::Clock clock;
     float dt = 0.f;
@@ -52,6 +52,7 @@ void MainWindow::startLoop()
                 pixels = new sf::Uint8[scene.cGetCamera().cGetResolution().x * scene.cGetCamera().cGetResolution().y * 4];
                 bufferTexture.create(scene.cGetCamera().cGetResolution().x, scene.cGetCamera().cGetResolution().y);
                 scene.modelConvert(scene.getObjInfoCopy().getVertices());
+                scene.modelConvert(scene.getFloorCopy());
                 isDrawed = false;
                 break;
             }
@@ -104,8 +105,9 @@ void MainWindow::startLoop()
 
             if (isMoving)
             {
-                scene.moveConvert(moveAxis, moveDirection, dt);
-                // scene.modelConvert();
+                auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
+                scene.modelConvert(scene.getObjInfoCopy().getVertices());
+                scene.modelConvert(scene.getFloorCopy());
             }
 
             if (!isDrawed)
@@ -124,6 +126,9 @@ void MainWindow::draw()
     auto ySize = scene.cGetCamera().cGetResolution().y;
 
     std::fill(pixels, pixels + xSize * ySize * 4, 0x00u);
+
+    for (auto el : scene.getDrawableFloor())
+        window.draw(el.data(), 2, sf::Lines);
 
     for (auto el : scene.cGetObjInfo().cGetVertices())
     {

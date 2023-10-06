@@ -14,14 +14,30 @@ Scene::Scene(
       worldShift(0, 0, 0, 1)
 {
     objInfo = ObjInfo(cObjInfo);
+
+    cFloor.push_back(Vertex(-100, 0, 0));
+    cFloor.push_back(Vertex(0, 0, 0));
+    cFloor.push_back(Vertex(100, 0, 0));
+    cFloor.push_back(Vertex(0, 0, 0));
+    cFloor.push_back(Vertex(0, -100, 0));
+    cFloor.push_back(Vertex(0, 0, 0));
+    cFloor.push_back(Vertex(0, 100, 0));
+    cFloor.push_back(Vertex(0, 0, 0));
+    cFloor.push_back(Vertex(0, 0, -100));
+    cFloor.push_back(Vertex(0, 0, 0));
+    cFloor.push_back(Vertex(0, 0, 100));
+    cFloor.push_back(Vertex(0, 0, 0));
 }
 
-void Scene::modelConvert(std::vector<Vertex> &vertices)
+void Scene::modelConvert(std::vector<Vertex> &vertices, std::optional<CoordinateVector> moveConvert)
 {
     auto convertMatrix =
-        CoordinateVector::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) *
-        CoordinateVector::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2, 1) *
-        CoordinateVector::getObserverConvert(camera.getPosition(), camera.cGetTarget(), up);
+        Matrix::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) *
+        Matrix::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2, 1) *
+        Matrix::getObserverConvert(camera.getPosition(), camera.cGetTarget(), up);
+
+    if (moveConvert.has_value())
+        convertMatrix = convertMatrix * Matrix::getMoveConvert(moveConvert.value());
 
     for (auto it = vertices.begin(); it < vertices.end(); ++it)
     {
@@ -34,11 +50,11 @@ void Scene::modelConvert(std::vector<Vertex> &vertices)
         cv.getValue(2, 0) /= cv.getValue(3, 0);
         cv.getValue(3, 0) /= cv.getValue(3, 0);
 
-        *it = Converter::coordinateVectorToVertex(cv);
+        *it = Converter::cVectorToVertex(cv);
     }
 }
 
-void Scene::moveConvert(AxisName axis, Direction direction, int dt)
+CoordinateVector Scene::getMoveConvert(AxisName axis, Direction direction, int dt)
 {
     std::vector<Vertex> &vertices = getObjInfoCopy().getVertices();
 
@@ -71,51 +87,31 @@ void Scene::moveConvert(AxisName axis, Direction direction, int dt)
         break;
     }
 
-    worldShift.getX() += transition.cGetX();
-    worldShift.getY() += transition.cGetY();
-    worldShift.getZ() += transition.cGetZ();
+    // worldShift.getX() += transition.cGetX();
+    // worldShift.getY() += transition.cGetY();
+    // worldShift.getZ() += transition.cGetZ();
     // worldShift.getW() += transition.cGetW();
 
-    // auto mConvert = CoordinateVector::getMoveConvert(transition);
+    auto mConvert = CoordinateVector::getMoveConvert(transition);
 
     // if (axis == AxisName::X || axis == AxisName::Y)
-    // camera.getTarget() = mConvert * (Matrix)camera.getTarget();
+    camera.getTarget() = mConvert * (Matrix)camera.getTarget();
     // else
-    // camera.getPosition() = mConvert * (Matrix)camera.getPosition();
+    camera.getPosition() = mConvert * (Matrix)camera.getPosition();
 
-    auto convertMatrix =
-        CoordinateVector::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) *
-        CoordinateVector::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2, 1) *
-        CoordinateVector::getObserverConvert(camera.getPosition(), camera.cGetTarget(), up) *
-        CoordinateVector::getMoveConvert(worldShift);
-
-    for (auto it = vertices.begin(); it < vertices.end(); ++it)
-    {
-        auto cv = CoordinateVector(it->getX(), it->getY(), it->getZ(), it->getW());
-
-        cv = convertMatrix * (Matrix)cv;
-
-        cv.getValue(0, 0) /= cv.getValue(3, 0);
-        cv.getValue(1, 0) /= cv.getValue(3, 0);
-        cv.getValue(2, 0) /= cv.getValue(3, 0);
-        cv.getValue(3, 0) /= cv.getValue(3, 0);
-
-        *it = Converter::coordinateVectorToVertex(cv);
-    }
-}
-
-void Scene::scaleConvert()
-{
-}
-
-void Scene::rotateConvert()
-{
+    return worldShift;
 }
 
 ObjInfo &Scene::getObjInfoCopy()
 {
     objInfo = ObjInfo(cObjInfo);
     return objInfo;
+}
+
+std::vector<Vertex> &Scene::getFloorCopy()
+{
+    floor = std::vector<Vertex>(cFloor);
+    return floor;
 }
 
 const ObjInfo &Scene::cGetObjInfo() const
@@ -133,14 +129,15 @@ Camera &Scene::getCamera()
     return camera;
 }
 
-std::vector<std::array<sf::Vertex, 2>> Scene::getFloor()
+std::vector<std::array<sf::Vertex, 2>> Scene::getDrawableFloor()
 {
-    auto res = std::vector<std::array<sf::Vertex, 2>>(floor.size());
+    auto res = std::vector<std::array<sf::Vertex, 2>>(floor.size() / 2);
 
-    for (int i = 0; i < floor.size(); ++i)
+    for (int i = 0, j = 0; i < floor.size(), j < res.size(); i += 2, ++j)
     {
-        // floor[i] = Vertex(floor[i].cGetX(), floor[i].cGetX(), floor[i].cGetX(), floor[i].cGetX());
+        res[j][0] = sf::Vertex(sf::Vector2f(floor[i].cGetX(), floor[i].cGetY()));
+        res[j][1] = sf::Vertex(sf::Vector2f(floor[i + 1].cGetX(), floor[i + 1].cGetY()));
     }
 
-    // modelConvert(floor.)
+    return res;
 }
