@@ -2,11 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 
 set(LOCAL_PROJECT_NAME        "L1")
 set(LOCAL_PROJECT_VERSION     "0.0.1")
-set(LOCAL_PROJECT_DESCRIPTION "Description")
 
 project(${LOCAL_PROJECT_NAME}
         VERSION ${LOCAL_PROJECT_VERSION}
-        DESCRIPTION ${LOCAL_PROJECT_DESCRIPTION}
         LANGUAGES CXX)
 
 file(GLOB_RECURSE SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
@@ -27,20 +25,20 @@ HEADER_DIRECTORIES(header_dir_list)
 list(LENGTH header_dir_list header_dir_list_count)
 message(STATUS "[INFO] Found ${header_dir_list_count} header directories.")
 
-include(FetchContent)
-set(BUILD_SHARED_LIBS OFF)
-FetchContent_Declare(
- SFML
- GIT_REPOSITORY https://github.com/SFML/SFML.git
- GIT_TAG 2.6.0
-)
-FetchContent_MakeAvailable(SFML)
+# include(FetchContent)
+# set(BUILD_SHARED_LIBS OFF)
+# FetchContent_Declare(
+#  SFML
+#  GIT_REPOSITORY https://github.com/SFML/SFML.git
+#  GIT_TAG 2.6.0
+# )
+# FetchContent_MakeAvailable(SFML)
+
+set(SFML_STATIC_LIBRARIES TRUE)
+find_package(SFML 2.6 COMPONENTS system window graphics REQUIRED)
+include_directories(${SFML_INCLUDE_DIRS})
 
 add_executable(${LOCAL_PROJECT_NAME} ${SOURCES})
 
-# target_link_directories(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_LIBRARY_DIRS})
-# target_include_directories(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_INCLUDE_DIRS} ${header_dir_list})
-# target_compile_definitions(${LOCAL_PROJECT_NAME} PRIVATE ${GTKMM_CFLAGS_OTHER})
-
-target_link_libraries(${LOCAL_PROJECT_NAME} PRIVATE sfml-graphics)
+target_link_libraries(${LOCAL_PROJECT_NAME} PRIVATE sfml-system sfml-window sfml-graphics)
 target_include_directories(${LOCAL_PROJECT_NAME} PRIVATE ${header_dir_list})
