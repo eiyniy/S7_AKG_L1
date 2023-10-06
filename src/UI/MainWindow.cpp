@@ -8,11 +8,8 @@ MainWindow::MainWindow(Scene &p_scene)
                             p_scene.cGetCamera().cGetResolution().y),
               "SFML Graphics"}),
       scene(p_scene),
-      isDrawed(false),
-      isMoving(false),
-      isXPressed(false),
-      isYPressed(false),
-      isZPressed(false)
+      isCameraMoving(false),
+      isObjectMoving(false)
 {
     window.setFramerateLimit(scene.defaultFps);
     pixels = new sf::Uint8[scene.cGetCamera().cGetResolution().x * scene.cGetCamera().cGetResolution().y * 4];
@@ -22,99 +19,107 @@ MainWindow::MainWindow(Scene &p_scene)
 
 void MainWindow::startLoop()
 {
-    scene.modelConvert(scene.getObjInfoCopy().getVertices());
-    scene.modelConvert(scene.getFloorCopy());
+    scene.modelConvert(scene.cGetObjInfoVerticesCopy());
+    // scene.modelConvert(scene.getFloorCopy());
 
     sf::Clock clock;
     float dt = 0.f;
 
+    auto moveAxis = AxisName::X;
+    auto moveDirection = Direction::Forward;
+
+    sf::Event event;
+
     while (window.isOpen())
     {
-        auto moveAxis = AxisName::X;
-        auto moveDirection = Direction::Forward;
+        window.pollEvent(event);
 
-        sf::Event event;
-        while (window.pollEvent(event))
+        switch (event.type)
         {
-            switch (event.type)
+        case sf::Event::Closed:
+            window.close();
+            break;
+
+        case sf::Event::Resized:
+        {
+            sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+            window.setView(sf::View(visibleArea));
+
+            scene.getCamera().getResolution() = Dot(event.size.width, event.size.height);
+
+            delete[] pixels;
+            pixels = new sf::Uint8[scene.cGetCamera().cGetResolution().x * scene.cGetCamera().cGetResolution().y * 4];
+
+            bufferTexture.create(scene.cGetCamera().cGetResolution().x, scene.cGetCamera().cGetResolution().y);
+
+            scene.modelConvert(scene.cGetObjInfoVerticesCopy());
+            // scene.modelConvert(scene.getFloorCopy());
+
+            break;
+        }
+        case sf::Event::KeyPressed:
+            if (event.key.code == sf::Keyboard::Up ||
+                event.key.code == sf::Keyboard::Right ||
+                event.key.code == sf::Keyboard::Down ||
+                event.key.code == sf::Keyboard::Left)
             {
-            case sf::Event::Closed:
-                window.close();
-                break;
+                if (!event.key.control)
+                    isCameraMoving = true;
+                else
+                    isObjectMoving = true;
 
-            case sf::Event::Resized:
-            {
-                sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-                window.setView(sf::View(visibleArea));
-
-                scene.getCamera().getResolution() = Dot(event.size.width, event.size.height);
-                delete pixels;
-                pixels = new sf::Uint8[scene.cGetCamera().cGetResolution().x * scene.cGetCamera().cGetResolution().y * 4];
-                bufferTexture.create(scene.cGetCamera().cGetResolution().x, scene.cGetCamera().cGetResolution().y);
-                scene.modelConvert(scene.getObjInfoCopy().getVertices());
-                scene.modelConvert(scene.getFloorCopy());
-                isDrawed = false;
-                break;
-            }
-            case sf::Event::KeyPressed:
-                if (event.key.code == sf::Keyboard::Up ||
-                    event.key.code == sf::Keyboard::Right ||
-                    event.key.code == sf::Keyboard::Down ||
-                    event.key.code == sf::Keyboard::Left)
-                {
-                    if (isXPressed || isYPressed || isZPressed)
-                    {
-                        isMoving = true;
-                        isDrawed = false;
-                    }
-
-                    if (isXPressed)
-                        moveAxis = AxisName::X;
-                    else if (isYPressed)
-                        moveAxis = AxisName::Y;
-                    else if (isZPressed)
-                        moveAxis = AxisName::Z;
-                }
-
-                if (event.key.code == sf::Keyboard::X)
-                    isXPressed = true;
-                else if (event.key.code == sf::Keyboard::Y)
-                    isYPressed = true;
-                else if (event.key.code == sf::Keyboard::Z)
-                    isZPressed = true;
-                else if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::Right)
+                if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::Right)
                     moveDirection = Direction::Forward;
                 else if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::Left)
                     moveDirection = Direction::Backward;
-
-                break;
-            case sf::Event::KeyReleased:
-                if (event.key.code == sf::Keyboard::X)
-                    isXPressed = false;
-                else if (event.key.code == sf::Keyboard::Y)
-                    isYPressed = false;
-                else if (event.key.code == sf::Keyboard::Z)
-                    isZPressed = false;
-                else if (event.key.code == sf::Keyboard::Up ||
-                         event.key.code == sf::Keyboard::Right ||
-                         event.key.code == sf::Keyboard::Down ||
-                         event.key.code == sf::Keyboard::Left)
-                    isMoving = false;
-                break;
             }
+            else if (event.key.code == sf::Keyboard::X)
+                moveAxis = AxisName::X;
+            else if (event.key.code == sf::Keyboard::Y)
+                moveAxis = AxisName::Y;
+            else if (event.key.code == sf::Keyboard::Z)
+                moveAxis = AxisName::Z;
 
-            if (isMoving)
+            break;
+
+        case sf::Event::KeyReleased:
+            if (event.key.code == sf::Keyboard::Up ||
+                event.key.code == sf::Keyboard::Right ||
+                event.key.code == sf::Keyboard::Down ||
+                event.key.code == sf::Keyboard::Left)
             {
-                auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
-                scene.modelConvert(scene.getObjInfoCopy().getVertices());
-                scene.modelConvert(scene.getFloorCopy());
+                isCameraMoving = false;
+                isObjectMoving = false;
             }
 
-            if (!isDrawed)
-                draw();
+            break;
 
-            dt = clock.restart().asMilliseconds();
+        default:
+            break;
         }
+
+        if (isCameraMoving)
+        {
+            auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
+            scene.moveCamera(transition);
+            scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.cGetWorldShift());
+            // scene.modelConvert(scene.getFloorCopy());
+        }
+        else if (isObjectMoving)
+        {
+            auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
+
+            scene.getWorldShift().getX() += transition.cGetX();
+            scene.getWorldShift().getY() += transition.cGetY();
+            scene.getWorldShift().getZ() += transition.cGetZ();
+            scene.getWorldShift().getW() += transition.cGetW();
+
+            scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.cGetWorldShift());
+            // scene.modelConvert(scene.getFloorCopy());
+        }
+
+        draw();
+        dt = clock.restart().asMilliseconds();
     }
 }
 
@@ -127,18 +132,11 @@ void MainWindow::draw()
 
     std::fill(pixels, pixels + xSize * ySize * 4, 0x00u);
 
-    for (auto el : scene.getDrawableFloor())
-        window.draw(el.data(), 2, sf::Lines);
+    // for (auto el : scene.getDrawableFloor())
+    //     window.draw(el.data(), 2, sf::Lines);
 
-    for (auto el : scene.cGetObjInfo().cGetVertices())
+    for (auto el : scene.cGetObjInfoVertices())
     {
-        if (el.getX() < 0 ||
-            el.getX() > xSize ||
-            el.getY() < 0 ||
-            el.getY() > ySize ||
-            el.getZ() < 0)
-            continue;
-
         int x = std::trunc(el.cGetX());
         int y = std::trunc(el.cGetY());
 
@@ -151,6 +149,4 @@ void MainWindow::draw()
     bufferTexture.update(pixels);
     window.draw(bufferSprite);
     window.display();
-
-    isDrawed = true;
 }

@@ -13,10 +13,8 @@ public:
 private:
     void draw();
 
-    bool isDrawed;
-
-    bool isXPressed, isYPressed, isZPressed;
-    bool isMoving;
+    bool isCameraMoving;
+    bool isObjectMoving;
 
     Scene &scene;
 

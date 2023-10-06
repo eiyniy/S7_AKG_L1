@@ -13,29 +13,33 @@ private:
     const ObjInfo &cObjInfo;
     std::vector<Vertex> cFloor;
     const CoordinateVector &up;
-    const int moveSpeed;
+    const double moveSpeed;
 
     std::vector<Vertex> floor;
+    std::vector<Vertex> objInfoVertices;
     CoordinateVector worldShift;
-    ObjInfo objInfo;
     Camera &camera;
 
 public:
     const int defaultFps = 60;
     const int defaultFrameTime = (1.f / defaultFps) * 1000;
 
-    Scene(ObjInfo &p_objInfo, Camera &p_camera, const CoordinateVector &p_up, const int p_moveSpeed);
+    Scene(ObjInfo &p_objInfo, Camera &p_camera, const CoordinateVector &p_up, const double p_moveSpeed);
 
     CoordinateVector getMoveConvert(AxisName axis, Direction direction, int dt);
 
-    void modelConvert(std::vector<Vertex> &vertices, std::optional<CoordinateVector> moveConvert = std::nullopt);
+    void modelConvert(const std::vector<Vertex> &vertices, std::optional<CoordinateVector> moveConvert = std::nullopt);
+    void moveCamera(CoordinateVector &transition);
 
-    const ObjInfo &cGetObjInfo() const;
+    const std::vector<Vertex> &cGetObjInfoVertices() const;
     const Camera &cGetCamera() const;
+    const CoordinateVector &cGetWorldShift() const;
+    const std::vector<Vertex> &cGetObjInfoVerticesCopy() const;
 
-    ObjInfo &getObjInfoCopy();
     std::vector<Vertex> &getFloorCopy();
+
     Camera &getCamera();
+    CoordinateVector &getWorldShift();
 
     std::vector<std::array<sf::Vertex, 2>> getDrawableFloor();
 };

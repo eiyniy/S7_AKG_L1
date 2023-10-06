@@ -4,6 +4,7 @@
 #include <MatrixStaticStorage.hpp>
 #include <array>
 #include <stdexcept>
+#include <iostream>
 
 BaseVertex::BaseVertex(const double p_v1, const double p_v2, const double p_v3, const double p_v4)
     : v1(p_v1), v2(p_v2), v3(p_v3), v4(p_v4) {}
@@ -46,4 +47,9 @@ std::array<double, 4> BaseVertex::parse(const std::string &line)
     accumulator.fill(std::nullopt);
 
     return res;
+}
+
+void BaseVertex::log() const
+{
+    std::cout << v1 << ' ' << v2 << ' ' << v3 << ' ' << v4 << std::endl;
 }

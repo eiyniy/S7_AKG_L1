@@ -14,6 +14,8 @@ public:
 
     static std::array<double, 4> parse(const std::string &line);
 
+    void log() const;
+
 protected:
     double v1, v2, v3, v4;
 };

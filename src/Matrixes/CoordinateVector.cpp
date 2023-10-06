@@ -29,19 +29,22 @@ CoordinateVector::CoordinateVector(double v1, double v2, double v3, double w)
     storage->get(3, 0) = w;
 }
 
-// /*
-CoordinateVector &CoordinateVector::operator*=(const CoordinateVector &cv)
+CoordinateVector &CoordinateVector::operator=(const CoordinateVector &cv)
 {
-    CoordinateVector temp;
+    if (this == &cv)
+        return *this;
 
-    temp.storage->get(0, 0) = (cGetY() * cv.cGetZ()) - (cGetZ() * cv.cGetY());
-    temp.storage->get(1, 0) = (cGetZ() * cv.cGetX()) - (cGetX() * cv.cGetZ());
-    temp.storage->get(2, 0) = (cGetX() * cv.cGetY()) - (cGetY() * cv.cGetX());
-    temp.storage->get(3, 0) = 1;
+    if (storage == nullptr || getRows() != cv.getRows() || getCols() != cv.getCols())
+        storage = MatrixStaticStorage<4, 1>::getNewPooled();
 
-    return (*this = temp);
+    for (int i = 0; i < getRows(); ++i)
+    {
+        for (int j = 0; j < getCols(); ++j)
+            storage->get(i, j) = cv.storage->get(i, j);
+    }
+
+    return *this;
 }
-// */
 
 const double CoordinateVector::cGetX() const
 {
@@ -88,7 +91,7 @@ double CoordinateVector::scalarMultiply(const CoordinateVector &vector)
     if (this->getCols() != vector.getCols())
         throw std::logic_error("Can't execute scalar multiply");
 
-    double result;
+    double result = 0;
 
     for (int i = 0; i < this->getRows(); ++i)
         result += storage->get(i, 0) * vector.storage->get(i, 0);
@@ -99,7 +102,7 @@ double CoordinateVector::scalarMultiply(const CoordinateVector &vector)
 const double CoordinateVector::getLength()
 {
     if (length.has_value())
-        return length.value();
+        return *length;
 
     length = sqrt(pow(storage->get(0, 0), 2) + pow(storage->get(1, 0), 2) + pow(storage->get(2, 0), 2));
 
@@ -117,14 +120,31 @@ CoordinateVector CoordinateVector::getNormalized()
         return CoordinateVector();
 }
 
-void CoordinateVector::log()
+void CoordinateVector::log() const
 {
     std::cout << cGetX() << " " << cGetY() << " " << cGetZ() << " " << cGetW() << " " << std::endl;
 }
 
-CoordinateVector
-operator*(const CoordinateVector &cv1, const CoordinateVector &cv2)
+CoordinateVector operator*(const CoordinateVector &cv1, const CoordinateVector &cv2)
 {
-    CoordinateVector temp(cv1);
-    return (temp *= cv2);
+    CoordinateVector temp;
+
+    temp.getValue(0, 0) = (cv1.cGetY() * cv2.cGetZ()) - (cv1.cGetZ() * cv2.cGetY());
+    temp.getValue(1, 0) = (cv1.cGetZ() * cv2.cGetX()) - (cv1.cGetX() * cv2.cGetZ());
+    temp.getValue(2, 0) = (cv1.cGetX() * cv2.cGetY()) - (cv1.cGetY() * cv2.cGetX());
+    temp.getValue(3, 0) = 1;
+
+    return temp;
+}
+
+CoordinateVector operator/(const CoordinateVector &cv1, const double v)
+{
+    CoordinateVector temp = cv1;
+
+    temp.getX() /= v;
+    temp.getY() /= v;
+    temp.getZ() /= v;
+    temp.getW() /= v;
+
+    return temp;
 }

@@ -13,7 +13,7 @@ public:
     CoordinateVector(const CoordinateVector &vector);
     CoordinateVector(const double v1, const double v2, const double v3, const double w = 0);
 
-    CoordinateVector &operator*=(const CoordinateVector &cv);
+    CoordinateVector &operator=(const CoordinateVector &cv);
 
     const double cGetX() const;
     const double cGetY() const;
@@ -29,7 +29,8 @@ public:
     const double getLength();
     CoordinateVector getNormalized();
 
-    void log();
+    void log() const;
 };
 
 CoordinateVector operator*(const CoordinateVector &cv1, const CoordinateVector &cv2);
+CoordinateVector operator/(const CoordinateVector &cv1, const double v);

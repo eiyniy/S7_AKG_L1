@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <iostream>
 
 template <typename T>
 class Pool
