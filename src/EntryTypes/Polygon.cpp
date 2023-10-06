@@ -41,9 +41,9 @@ Polygon::Polygon(const std::string &line)
         }
 
         if (storageMode == StorageMode::Dynamic)
-            dValues.value().push_back(VertexIndexes(strPart.value()));
+            dValues.value().push_back(VertexIndexes(*strPart));
         else
-            accumulator[i] = VertexIndexes(strPart.value());
+            accumulator[i] = VertexIndexes(*strPart);
 
         ++i;
     }
@@ -63,8 +63,8 @@ void Polygon::moveValuesToDynamic()
 
     dValues = std::vector<VertexIndexes>(4);
 
-    dValues.value()[0] = sValues.value().v1;
-    dValues.value()[1] = sValues.value().v2;
-    dValues.value()[2] = sValues.value().v3;
-    dValues.value()[3] = sValues.value().v4.value();
+    dValues->at(0) = sValues->v1;
+    dValues->at(1) = sValues->v2;
+    dValues->at(2) = sValues->v3;
+    dValues->at(3) = *sValues->v4;
 }

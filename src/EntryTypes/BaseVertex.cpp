@@ -31,7 +31,7 @@ std::array<double, 4> BaseVertex::parse(const std::string &line)
     int i = 0;
     while ((strPart = ObjParser::getNextPart(&iter, line.end(), ' ')))
     {
-        accumulator[i] = stod(strPart.value());
+        accumulator[i] = stod(*strPart);
         ++i;
     }
 

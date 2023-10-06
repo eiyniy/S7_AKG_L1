@@ -38,7 +38,7 @@ void Scene::modelConvert(const std::vector<Vertex> &vertices, std::optional<Coor
         Matrix::getObserverConvert(camera.getPosition(), camera.cGetTarget(), up);
 
     if (moveConvert.has_value())
-        convertMatrix = convertMatrix * Matrix::getMoveConvert(moveConvert.value());
+        convertMatrix = convertMatrix * Matrix::getMoveConvert(*moveConvert);
 
     static CoordinateVector cv;
 

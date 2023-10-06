@@ -17,7 +17,7 @@ VertexIndexes::VertexIndexes(std::string &str)
     int i = 0;
     while ((strPart = ObjParser::getNextPart(&iter, iterEnd, '/', true)))
     {
-        accumulator[i] = Math::optStoi(strPart.value());
+        accumulator[i] = Math::optStoi(*strPart);
         ++i;
     }
 
@@ -31,4 +31,4 @@ VertexIndexes::VertexIndexes(std::string &str)
     accumulator.fill(std::nullopt);
 }
 
-VertexIndexes::VertexIndexes() {}
+VertexIndexes::VertexIndexes() = default;
