@@ -21,8 +21,8 @@ private:
     Camera &camera;
 
 public:
-    const int defaultFps = 60;
-    const int defaultFrameTime = (1.f / defaultFps) * 1000;
+    const int defaultFps = 165;
+    const double defaultFrameTime = (1.f * 1000.f / 60);
 
     Scene(ObjInfo &p_objInfo, Camera &p_camera, const CoordinateVector &p_up, const double p_moveSpeed);
 

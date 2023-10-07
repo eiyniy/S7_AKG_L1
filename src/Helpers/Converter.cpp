@@ -22,7 +22,11 @@ CoordinateVector Converter::matrixToCVector(const Matrix<4, 1> &value)
     if (value.cols != 1 || value.rows != 4)
         throw std::invalid_argument("Could not convert value");
 
-    return CoordinateVector(value.getValue(0, 0), value.getValue(1, 0), value.getValue(2, 0), value.getValue(3, 0));
+    return CoordinateVector(
+        value.cGetValue(0, 0), 
+        value.cGetValue(1, 0), 
+        value.cGetValue(2, 0), 
+        value.cGetValue(3, 0));
 }
 
 Vertex Converter::cVectorToVertex(const CoordinateVector &value)
