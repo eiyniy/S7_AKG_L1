@@ -1,10 +1,10 @@
 #pragma once
 
-#include <MatrixBaseStorage.hpp>
 #include <Types.hpp>
 #include <vector>
 #include <stdexcept>
 #include <optional>
+#include <array>
 #include <cmath>
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -12,21 +12,17 @@
 
 class CoordinateVector;
 
+template <int Rows, int Cols>
 class Matrix
 {
 public:
-    Matrix(MatrixBaseStorage *p_storage, bool p_isCoordinateVector = false);
+    Matrix();
     ~Matrix();
 
     Matrix(const Matrix &m);
     Matrix &operator=(const Matrix &m);
 
-    operator CoordinateVector() const;
-
-    const int getCols() const;
-    const int getRows() const;
-
-    double &getValue(const int i, const int j) const;
+    double &getValue(const int i, const int j);
 
     static Matrix getConvertMatrix(
         const CoordinateVector &xAxis,
@@ -63,17 +59,27 @@ public:
 
     void log();
 
-protected:
-    std::optional<double> length;
-    MatrixBaseStorage *storage;
+    const int rows, cols;
 
-private:
-    bool isCoordinateVector;
+protected:
+    std::array<std::array<double, Cols>, Rows> values;
+    std::optional<double> length;
 };
 
-Matrix operator+(const Matrix &m1, const Matrix &m2);
-Matrix operator-(const Matrix &m1, const Matrix &m2);
-Matrix operator*(const Matrix &m1, const Matrix &m2);
-Matrix operator*(const Matrix &m, double v);
-Matrix operator*(double v, const Matrix &m);
-Matrix operator/(const Matrix &m, double v);
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator+(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2);
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator-(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2);
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator*(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2);
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator*(const Matrix<Rows, Cols> &m, double v);
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator*(double v, const Matrix<Rows, Cols> &m);
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator/(const Matrix<Rows, Cols> &m, double v);

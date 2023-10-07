@@ -1,33 +1,26 @@
 #include <CoordinateVector.hpp>
-#include <MatrixStaticStorage.hpp>
 #include <Timer.hpp>
 #include <Vertex.hpp>
 #include <Pool.hpp>
 #include <Converter.hpp>
 #include <iostream>
 
-CoordinateVector::CoordinateVector()
-    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled(), true) {}
-
-CoordinateVector::~CoordinateVector()
-{
-    delete (MatrixStaticStorage<4, 1> *)storage;
-}
+CoordinateVector::CoordinateVector() : Matrix<4, 1>(){};
 
 CoordinateVector::CoordinateVector(const CoordinateVector &vector)
-    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled(), true)
+    : Matrix<4, 1>()
 {
-    for (int i = 0; i < getRows(); ++i)
-        storage->get(i, 0) = vector.storage->get(i, 0);
+    for (int i = 0; i < rows; ++i)
+        values[i][0] = vector.values[i][0];
 }
 
 CoordinateVector::CoordinateVector(double v1, double v2, double v3, double w)
-    : Matrix(MatrixStaticStorage<4, 1>::getNewPooled(), true)
+    : Matrix<4, 1>()
 {
-    storage->get(0, 0) = v1;
-    storage->get(1, 0) = v2;
-    storage->get(2, 0) = v3;
-    storage->get(3, 0) = w;
+    values[0][0] = v1;
+    values[1][0] = v2;
+    values[2][0] = v3;
+    values[3][0] = w;
 }
 
 CoordinateVector &CoordinateVector::operator=(const CoordinateVector &cv)
@@ -35,67 +28,61 @@ CoordinateVector &CoordinateVector::operator=(const CoordinateVector &cv)
     if (this == &cv)
         return *this;
 
-    if (storage == nullptr || getRows() != cv.getRows() || getCols() != cv.getCols())
-        storage = MatrixStaticStorage<4, 1>::getNewPooled();
-
-    for (int i = 0; i < getRows(); ++i)
-    {
-        for (int j = 0; j < getCols(); ++j)
-            storage->get(i, j) = cv.storage->get(i, j);
-    }
+    for (int i = 0; i < rows; ++i)
+        values[i][0] = cv.values[i][0];
 
     return *this;
 }
 
 const double CoordinateVector::cGetX() const
 {
-    return storage->get(0, 0);
+    return values[0][0];
 }
 
 const double CoordinateVector::cGetY() const
 {
-    return storage->get(1, 0);
+    return values[1][0];
 }
 
 const double CoordinateVector::cGetZ() const
 {
-    return storage->get(2, 0);
+    return values[2][0];
 }
 
 const double CoordinateVector::cGetW() const
 {
-    return storage->get(3, 0);
+    return values[3][0];
 }
 
 double &CoordinateVector::getX()
 {
-    return storage->get(0, 0);
+    return values[0][0];
 }
 
 double &CoordinateVector::getY()
 {
-    return storage->get(1, 0);
+    return values[1][0];
 }
 
 double &CoordinateVector::getZ()
 {
-    return storage->get(2, 0);
+    return values[2][0];
 }
 
 double &CoordinateVector::getW()
 {
-    return storage->get(3, 0);
+    return values[3][0];
 }
 
 double CoordinateVector::scalarMultiply(const CoordinateVector &vector)
 {
-    if (this->getCols() != vector.getCols())
+    if (this->cols != vector.cols)
         throw std::logic_error("Can't execute scalar multiply");
 
     double result = 0;
 
-    for (int i = 0; i < this->getRows(); ++i)
-        result += storage->get(i, 0) * vector.storage->get(i, 0);
+    for (int i = 0; i < this->rows; ++i)
+        result += values[i][0] * vector.values[i][0];
 
     return result;
 }
@@ -105,7 +92,10 @@ const double CoordinateVector::getLength()
     if (length.has_value())
         return *length;
 
-    length = sqrt(pow(storage->get(0, 0), 2) + pow(storage->get(1, 0), 2) + pow(storage->get(2, 0), 2));
+    length = sqrt(
+        pow(values[0][0], 2) +
+        pow(values[1][0], 2) +
+        pow(values[2][0], 2));
 
     return *length;
 }

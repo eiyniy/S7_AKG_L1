@@ -1,30 +1,29 @@
 #include <iostream>
 #include <Matrix.hpp>
 #include <CoordinateVector.hpp>
-#include <MatrixDynamicStorage.hpp>
-#include <MatrixStaticStorage.hpp>
 
 #pragma region CONSTRUCTION
 
-Matrix::Matrix(MatrixBaseStorage *p_storage, bool p_isCoordinateVector)
-    : storage(p_storage), isCoordinateVector(p_isCoordinateVector) {}
+template <int Rows, int Cols>
+Matrix<Rows, Cols>::Matrix()
+    : rows(Rows), cols(Cols){};
 
-Matrix::~Matrix()
+template <int Rows, int Cols>
+Matrix<Rows, Cols>::~Matrix()
 {
-    if (!isCoordinateVector)
-        delete storage;
 }
 
 // TODO: FIX STRORAGE ALLOCATION
-Matrix::Matrix(const Matrix &m)
+template <int Rows, int Cols>
+Matrix<Rows, Cols>::Matrix(const Matrix &m)
+    : rows(Rows), cols(Cols)
 {
-    isCoordinateVector = m.isCoordinateVector;
-    storage = new MatrixDynamicStorage(m.getRows(), m.getCols());
+    values = std::array<std::array<double, Cols>, Rows>();
 
-    for (int i = 0; i < getRows(); ++i)
+    for (int i = 0; i < rows; ++i)
     {
-        for (int j = 0; j < getCols(); ++j)
-            storage->get(i, j) = m.storage->get(i, j);
+        for (int j = 0; j < cols; ++j)
+            values[i][j] = m.values[i][j];
     }
 }
 
@@ -32,50 +31,39 @@ Matrix::Matrix(const Matrix &m)
 
 #pragma region OPERATORS
 
-Matrix &Matrix::operator=(const Matrix &m)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> &Matrix<Rows, Cols>::operator=(const Matrix &m)
 {
     if (this == &m)
         return *this;
 
-    if (storage == nullptr || getRows() != m.getRows() || getCols() != m.getCols())
-        storage = new MatrixDynamicStorage(m.getRows(), m.getCols());
-
-    for (int i = 0; i < getRows(); ++i)
+    for (int i = 0; i < rows; ++i)
     {
-        for (int j = 0; j < getCols(); ++j)
-            storage->get(i, j) = m.storage->get(i, j);
+        for (int j = 0; j < cols; ++j)
+            values[i][j] = m.values[i][j];
     }
 
     return *this;
-}
-
-Matrix::operator CoordinateVector() const
-{
-    return CoordinateVector(storage->get(0, 0), storage->get(1, 0), storage->get(2, 0), storage->get(3, 0));
 }
 
 #pragma endregion OPERATORS
 
 #pragma region FUNCTIONS
 
-const int Matrix::getCols() const
+template <int Rows, int Cols>
+double &Matrix<Rows, Cols>::getValue(const int i, const int j)
 {
-    return storage->cols;
+    return values[i][j];
 }
 
-const int Matrix::getRows() const
+template <int Rows, int Cols>
+Matrix<Rows, Cols> Matrix<Rows, Cols>::getConvertMatrix(
+    const CoordinateVector &xAxis,
+    const CoordinateVector &yAxis,
+    const CoordinateVector &zAxis,
+    const CoordinateVector &translation)
 {
-    return storage->rows;
-}
-
-double &Matrix::getValue(const int i, const int j) const
-{
-    return storage->get(i, j);
-}
-
-Matrix Matrix::getConvertMatrix(const CoordinateVector &xAxis, const CoordinateVector &yAxis, const CoordinateVector &zAxis, const CoordinateVector &translation)
-{
-    auto multiplier = Matrix(MatrixStaticStorage<4, 4>::getNewPooled());
+    auto multiplier = Matrix<4, 4>();
 
     multiplier.getValue(0, 0) = xAxis.cGetX();
     multiplier.getValue(0, 1) = yAxis.cGetX();
@@ -100,7 +88,8 @@ Matrix Matrix::getConvertMatrix(const CoordinateVector &xAxis, const CoordinateV
     return multiplier;
 }
 
-Matrix Matrix::getMoveConvert(const CoordinateVector &translation)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> Matrix<Rows, Cols>::getMoveConvert(const CoordinateVector &translation)
 {
     return getConvertMatrix(
         {1, 0, 0, 0},
@@ -109,7 +98,8 @@ Matrix Matrix::getMoveConvert(const CoordinateVector &translation)
         translation);
 }
 
-Matrix Matrix::getScaleConvert(const CoordinateVector &scale)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> Matrix<Rows, Cols>::getScaleConvert(const CoordinateVector &scale)
 {
     return getConvertMatrix(
         {scale.cGetX(), 0, 0, 0},
@@ -118,7 +108,8 @@ Matrix Matrix::getScaleConvert(const CoordinateVector &scale)
         {0, 0, 0, 1});
 }
 
-Matrix Matrix::getRotateConvert(const AxisName axis, const double angle)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> Matrix<Rows, Cols>::getRotateConvert(const AxisName axis, const double angle)
 {
     auto cosA = cos(angle);
     auto sinA = sin(angle);
@@ -149,7 +140,8 @@ Matrix Matrix::getRotateConvert(const AxisName axis, const double angle)
     }
 }
 
-Matrix Matrix::getObserverConvert(const CoordinateVector &eye, const CoordinateVector &target, const CoordinateVector &up)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> Matrix<Rows, Cols>::getObserverConvert(const CoordinateVector &eye, const CoordinateVector &target, const CoordinateVector &up)
 {
     CoordinateVector zAxis = eye - target;
     CoordinateVector xAxis = up * zAxis;
@@ -187,7 +179,8 @@ Matrix Matrix::getObserverConvert(const CoordinateVector &eye, const CoordinateV
         });
 }
 
-Matrix Matrix::getProjectionConvert(const double fov, const double aspect, const double zFar, const double zNear)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> Matrix<Rows, Cols>::getProjectionConvert(const double fov, const double aspect, const double zFar, const double zNear)
 {
     auto halfTanFov = tan(fov / 2);
 
@@ -218,7 +211,8 @@ Matrix Matrix::getProjectionConvert(const double fov, const double aspect, const
         });
 }
 
-Matrix Matrix::getWindowConvert(const double width, const double height, const double xMin, const double yMin)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> Matrix<Rows, Cols>::getWindowConvert(const double width, const double height, const double xMin, const double yMin)
 {
     return getConvertMatrix(
         {
@@ -247,7 +241,8 @@ Matrix Matrix::getWindowConvert(const double width, const double height, const d
         });
 }
 
-void Matrix::log()
+template <int Rows, int Cols>
+void Matrix<Rows, Cols>::log()
 {
     for (auto i = 0; i < storage->rows; ++i)
     {
@@ -263,53 +258,56 @@ void Matrix::log()
 
 #pragma region DUAL_OPERATORS
 
-Matrix operator+(const Matrix &m1, const Matrix &m2)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator+(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2)
 {
-    if (m1.getRows() != m2.getRows() || m1.getCols() != m2.getCols())
+    if (m1.rows != m2.rows || m1.cols != m2.cols)
         throw std::logic_error("Could not execute + operator");
 
-    auto newStorage = new MatrixDynamicStorage(m1.getRows(), m2.getCols());
+    auto newStorage = new MatrixDynamicStorage(m1.rows, m2.cols);
     auto temp = Matrix(newStorage);
 
-    for (int i = 0; i < m1.getRows(); ++i)
+    for (int i = 0; i < m1.rows; ++i)
     {
-        for (int j = 0; j < m1.getCols(); ++j)
+        for (int j = 0; j < m1.cols; ++j)
             temp.getValue(i, j) = m1.getValue(i, j) + m2.getValue(i, j);
     }
 
     return temp;
 }
 
-Matrix operator-(const Matrix &m1, const Matrix &m2)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator-(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2)
 {
-    if (m1.getRows() != m2.getRows() || m1.getCols() != m2.getCols())
+    if (m1.rows != m2.rows || m1.cols != m2.cols)
         throw std::logic_error("Could not execute - operator");
 
-    auto newStorage = new MatrixDynamicStorage(m1.getRows(), m2.getCols());
+    auto newStorage = new MatrixDynamicStorage(m1.rows, m2.cols);
     auto temp = Matrix(newStorage);
 
-    for (int i = 0; i < m1.getRows(); ++i)
+    for (int i = 0; i < m1.rows; ++i)
     {
-        for (int j = 0; j < m1.getCols(); ++j)
+        for (int j = 0; j < m1.cols; ++j)
             temp.getValue(i, j) = m1.getValue(i, j) - m2.getValue(i, j);
     }
 
     return temp;
 }
 
-Matrix operator*(const Matrix &m1, const Matrix &m2)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator*(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2)
 {
-    if (m1.getCols() != m2.getRows())
+    if (m1.cols != m2.rows)
         throw std::logic_error("Could not execute vector multiply");
 
-    auto newStorage = new MatrixDynamicStorage(m1.getRows(), m2.getCols());
+    auto newStorage = new MatrixDynamicStorage(m1.rows, m2.cols);
     auto temp = Matrix(newStorage);
 
-    for (int i = 0; i < temp.getRows(); ++i)
+    for (int i = 0; i < temp.rows; ++i)
     {
-        for (int k = 0; k < m1.getCols(); ++k)
+        for (int k = 0; k < m1.cols; ++k)
         {
-            for (int j = 0; j < temp.getCols(); ++j)
+            for (int j = 0; j < temp.cols; ++j)
                 temp.getValue(i, j) += (m1.getValue(i, k) * m2.getValue(k, j));
         }
     }
@@ -317,33 +315,36 @@ Matrix operator*(const Matrix &m1, const Matrix &m2)
     return temp;
 }
 
-Matrix operator*(const Matrix &m, double v)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator*(const Matrix<Rows, Cols> &m, double v)
 {
-    auto newStorage = new MatrixDynamicStorage(m.getRows(), m.getCols());
+    auto newStorage = new MatrixDynamicStorage(m.rows, m.cols);
     auto temp = Matrix(newStorage);
 
-    for (int i = 0; i < m.getRows(); ++i)
+    for (int i = 0; i < m.rows; ++i)
     {
-        for (int j = 0; j < m.getCols(); ++j)
+        for (int j = 0; j < m.cols; ++j)
             temp.getValue(i, j) = m.getValue(i, j) * v;
     }
 
     return temp;
 }
 
-Matrix operator*(double v, const Matrix &m)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator*(double v, const Matrix<Rows, Cols> &m)
 {
     return (m * v);
 }
 
-Matrix operator/(const Matrix &m, double v)
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator/(const Matrix<Rows, Cols> &m, double v)
 {
-    auto newStorage = new MatrixDynamicStorage(m.getRows(), m.getCols());
+    auto newStorage = new MatrixDynamicStorage(m.rows, m.cols);
     auto temp = Matrix(newStorage);
 
-    for (int i = 0; i < m.getRows(); ++i)
+    for (int i = 0; i < m.rows; ++i)
     {
-        for (int j = 0; j < m.getCols(); ++j)
+        for (int j = 0; j < m.cols; ++j)
             temp.getValue(i, j) = m.getValue(i, j) / v;
     }
 
@@ -351,3 +352,6 @@ Matrix operator/(const Matrix &m, double v)
 }
 
 #pragma endregion DUAL_OPERATORS
+
+template class Matrix<4, 4>;
+template class Matrix<4, 1>;

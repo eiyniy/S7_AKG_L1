@@ -1,7 +1,6 @@
 #include <BaseVertex.hpp>
 #include <ObjParser.hpp>
 #include <Timer.hpp>
-#include <MatrixStaticStorage.hpp>
 #include <array>
 #include <stdexcept>
 #include <iostream>

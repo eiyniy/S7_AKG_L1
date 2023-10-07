@@ -5,11 +5,10 @@
 
 class Vertex;
 
-class CoordinateVector : public Matrix
+class CoordinateVector : public Matrix<4, 1>
 {
 public:
     CoordinateVector();
-    ~CoordinateVector();
     CoordinateVector(const CoordinateVector &vector);
     CoordinateVector(const double v1, const double v2, const double v3, const double w = 0);
 
