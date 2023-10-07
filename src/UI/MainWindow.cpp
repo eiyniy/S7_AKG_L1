@@ -130,10 +130,9 @@ void MainWindow::draw()
 {
     window.clear();
 
-    auto xSize = scene.cGetCamera().cGetResolution().x;
-    auto ySize = scene.cGetCamera().cGetResolution().y;
+    auto resolution = scene.cGetCamera().cGetResolution();
 
-    std::fill(pixels, pixels + xSize * ySize * 4, 0x00u);
+    std::fill(pixels, pixels + resolution.x * resolution.y * 4, 0x00u);
 
     // for (auto el : scene.getDrawableFloor())
     //     window.draw(el.data(), 2, sf::Lines);
@@ -143,10 +142,10 @@ void MainWindow::draw()
         int x = std::trunc(el.cGetX());
         int y = std::trunc(el.cGetY());
 
-        pixels[4 * (y * xSize + x)] = 255;     // R
-        pixels[4 * (y * xSize + x) + 1] = 255; // G
-        pixels[4 * (y * xSize + x) + 2] = 0;   // B
-        pixels[4 * (y * xSize + x) + 3] = 255; // A
+        pixels[4 * (y * resolution.x + x)] = 255;     // R
+        pixels[4 * (y * resolution.x + x) + 1] = 255; // G
+        pixels[4 * (y * resolution.x + x) + 2] = 0;   // B
+        pixels[4 * (y * resolution.x + x) + 3] = 255; // A
     }
 
     bufferTexture.update(pixels);

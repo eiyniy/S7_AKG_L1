@@ -33,11 +33,11 @@ void Scene::modelConvert(const std::vector<Vertex> &vertices, const std::optiona
     objInfoVertices.reserve(vertices.size());
 
     auto convertMatrix =
-        Matrix::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2, 1) *
-        Matrix::getObserverConvert(camera.getPosition(), camera.cGetTarget(), up);
+        Matrix<4, 4>::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2, 1) *
+        Matrix<4, 4>::getObserverConvert(camera.getPosition(), camera.cGetTarget(), up);
 
     if (moveConvert.has_value())
-        convertMatrix = convertMatrix * Matrix::getMoveConvert(*moveConvert);
+        convertMatrix = convertMatrix * Matrix<4, 4>::getMoveConvert(*moveConvert);
 
     static CoordinateVector cv;
 
@@ -45,7 +45,7 @@ void Scene::modelConvert(const std::vector<Vertex> &vertices, const std::optiona
     {
         cv = Converter::vertexToCVector(*it);
 
-        cv = convertMatrix * (Matrix)cv;
+        cv = Converter::matrixToCVector(convertMatrix * Converter::cVectorToMatrix(cv));
 
         if (cv.cGetW() < 0)
             continue;
@@ -57,7 +57,7 @@ void Scene::modelConvert(const std::vector<Vertex> &vertices, const std::optiona
             // cv.cGetZ() < 0 || cv.cGetZ() > 1)
             continue;
 
-        cv = Matrix::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) * (Matrix)cv;
+        cv = Converter::matrixToCVector(Matrix<4, 4>::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) * cv);
 
         objInfoVertices.emplace_back(Converter::cVectorToVertex(cv));
     }
@@ -68,8 +68,8 @@ void Scene::moveCamera(CoordinateVector &transition)
     auto mConvert = CoordinateVector::getMoveConvert(transition);
     mConvert.getValue(3, 3) = 1;
 
-    camera.getTarget() = mConvert * (Matrix)camera.getTarget();
-    camera.getPosition() = mConvert * (Matrix)camera.getPosition();
+    camera.getTarget() = Converter::matrixToCVector(mConvert * camera.getTarget());
+    camera.getPosition() = Converter::matrixToCVector(mConvert * camera.getPosition());
 }
 
 CoordinateVector Scene::getMoveConvert(AxisName axis, Direction direction, int dt)

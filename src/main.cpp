@@ -7,7 +7,6 @@
 #include <MainWindow.hpp>
 #include <Scene.hpp>
 #include <Camera.hpp>
-#include <MatrixStaticStorage.hpp>
 #include <Converter.hpp>
 
 int main(int argc, char **argv)
@@ -35,7 +34,7 @@ int main(int argc, char **argv)
     auto tPos = Converter::vertexToCVector(*objInfoPt->cGetVertices().begin());
     auto camera = Camera(cPos, tPos, {1280, 720}, 100);
     auto up = CoordinateVector(0, -1, 0);
-    auto scene = Scene(*objInfoPt, camera, up, 1);
+    auto scene = Scene(*objInfoPt, camera, up, 2);
 
     auto mainWindow = MainWindow(scene);
     mainWindow.startLoop();

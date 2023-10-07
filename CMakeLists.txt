@@ -37,14 +37,14 @@ message(STATUS "[INFO] Found ${header_dir_list_count} header directories.")
 set(SFML_STATIC_LIBRARIES TRUE)
 find_package(SFML 2.6 COMPONENTS system window graphics REQUIRED)
 
-include(FetchContent)
-FetchContent_Declare(
-    PVS_CMakeModule
-    GIT_REPOSITORY "https://github.com/viva64/pvs-studio-cmake-module.git"
-    GIT_TAG        "master" 
-)
-FetchContent_MakeAvailable(PVS_CMakeModule)
-include("${pvs_cmakemodule_SOURCE_DIR}/PVS-Studio.cmake")
+# include(FetchContent)
+# FetchContent_Declare(
+#     PVS_CMakeModule
+#     GIT_REPOSITORY "https://github.com/viva64/pvs-studio-cmake-module.git"
+#     GIT_TAG        "master" 
+# )
+# FetchContent_MakeAvailable(PVS_CMakeModule)
+# include("${pvs_cmakemodule_SOURCE_DIR}/PVS-Studio.cmake")
 
 include_directories(${SFML_INCLUDE_DIRS})
 
@@ -54,7 +54,7 @@ target_link_libraries(${LOCAL_PROJECT_NAME} PRIVATE sfml-system sfml-window sfml
 target_include_directories(${LOCAL_PROJECT_NAME} PRIVATE ${header_dir_list})
 
 # include(../pvs-studio-cmake-module/PVS-Studio.cmake)
-pvs_studio_add_target(TARGET example2.analyze ALL
-                      OUTPUT FORMAT errorfile
-                      ANALYZE ${PROJECT_NAME}
-                      LOG target.err)
+# pvs_studio_add_target(TARGET example2.analyze ALL
+#                       OUTPUT FORMAT errorfile
+#                       ANALYZE ${PROJECT_NAME}
+#                       LOG target.err)

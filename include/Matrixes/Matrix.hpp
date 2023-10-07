@@ -1,10 +1,10 @@
 #pragma once
 
-#include <MatrixBaseStorage.hpp>
 #include <Types.hpp>
 #include <vector>
 #include <stdexcept>
 #include <optional>
+#include <array>
 #include <cmath>
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -12,50 +12,47 @@
 
 class CoordinateVector;
 
+template <int Rows, int Cols>
 class Matrix
 {
 public:
-    Matrix(MatrixBaseStorage *p_storage, bool p_isCoordinateVector = false);
+    Matrix();
     ~Matrix();
 
     Matrix(const Matrix &m);
     Matrix &operator=(const Matrix &m);
 
-    operator CoordinateVector() const;
+    double &getValue(const int i, const int j);
+    const double &cGetValue(const int i, const int j) const;
 
-    const int getCols() const;
-    const int getRows() const;
-
-    double &getValue(const int i, const int j) const;
-
-    static Matrix getConvertMatrix(
+    static Matrix<4, 4> getConvertMatrix(
         const CoordinateVector &xAxis,
         const CoordinateVector &yAxis,
         const CoordinateVector &zAxis,
         const CoordinateVector &translation);
 
-    static Matrix getMoveConvert(
+    static Matrix<4, 4> getMoveConvert(
         const CoordinateVector &translation);
 
-    static Matrix getScaleConvert(
+    static Matrix<4, 4> getScaleConvert(
         const CoordinateVector &scale);
 
-    static Matrix getRotateConvert(
+    static Matrix<4, 4> getRotateConvert(
         const AxisName axis,
         const double angle);
 
-    static Matrix getObserverConvert(
+    static Matrix<4, 4> getObserverConvert(
         const CoordinateVector &eye,
         const CoordinateVector &target,
         const CoordinateVector &up);
 
-    static Matrix getProjectionConvert(
+    static Matrix<4, 4> getProjectionConvert(
         const double fov,
         const double aspect,
         const double zFar,
         const double zNear);
 
-    static Matrix getWindowConvert(
+    static Matrix<4, 4> getWindowConvert(
         const double width,
         const double height,
         const double xMin,
@@ -63,17 +60,61 @@ public:
 
     void log();
 
-protected:
-    std::optional<double> length;
-    MatrixBaseStorage *storage;
+    const int rows, cols;
 
-private:
-    bool isCoordinateVector;
+protected:
+    std::array<std::array<double, Cols>, Rows> values;
+    std::optional<double> length;
 };
 
-Matrix operator+(const Matrix &m1, const Matrix &m2);
-Matrix operator-(const Matrix &m1, const Matrix &m2);
-Matrix operator*(const Matrix &m1, const Matrix &m2);
-Matrix operator*(const Matrix &m, double v);
-Matrix operator*(double v, const Matrix &m);
-Matrix operator/(const Matrix &m, double v);
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator+(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2);
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator-(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2);
+
+template <int Rows1, int Cols1, int Rows2, int Cols2>
+Matrix<Rows1, Cols2> operator*(const Matrix<Rows1, Cols1> &m1, const Matrix<Rows2, Cols2> &m2);
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator*(const Matrix<Rows, Cols> &m, double v);
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator*(double v, const Matrix<Rows, Cols> &m);
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator/(const Matrix<Rows, Cols> &m, double v);
+
+template <int Rows1, int Cols1, int Rows2, int Cols2>
+Matrix<Rows1, Cols2> operator*(const Matrix<Rows1, Cols1> &m1, const Matrix<Rows2, Cols2> &m2)
+{
+    if (m1.cols != m2.rows)
+        throw std::logic_error("Could not execute vector multiply");
+
+    auto temp = Matrix<Rows1, Cols2>();
+
+    for (int i = 0; i < temp.rows; ++i)
+    {
+        for (int k = 0; k < m1.cols; ++k)
+        {
+            for (int j = 0; j < temp.cols; ++j)
+                temp.getValue(i, j) += (m1.cGetValue(i, k) * m2.cGetValue(k, j));
+        }
+    }
+
+    return temp;
+}
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator*(const Matrix<Rows, Cols> &m, double v)
+{
+    auto temp = Matrix<Rows, Cols>();
+
+    for (int i = 0; i < m.rows; ++i)
+    {
+        for (int j = 0; j < m.cols; ++j)
+            temp.getValue(i, j) = m.cGetValue(i, j) * v;
+    }
+
+    return temp;
+}
