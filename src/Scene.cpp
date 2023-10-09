@@ -93,7 +93,7 @@ void Scene::modelConvert(
 
 void Scene::centralizeCamera()
 {
-    camera.getTarget() = Converter::vertexToCVector(cObjInfo.cGetCenter());
+    camera.getTarget() = Converter::vertexToCVector(cObjInfo.cGetCenter()) + cGetWorldShift();
 }
 
 void Scene::rotateCamera(const AxisName axisName, const double angle)
@@ -134,11 +134,8 @@ void Scene::rotateCameraAround(const AxisName axisName, const double angle)
 
 void Scene::moveCamera(const CoordinateVector &transition)
 {
-    auto mConvert = CoordinateVector::getMoveConvert(transition);
-    mConvert.getValue(3, 3) = 1;
-
-    camera.getPosition() = Converter::matrixToCVector(mConvert * camera.cGetPosition());
-    camera.getTarget() = Converter::matrixToCVector(mConvert * camera.cGetTarget());
+    camera.getTarget() = camera.cGetTarget() + transition;
+    camera.getPosition() = camera.cGetPosition() + transition;
 }
 
 CoordinateVector Scene::getMoveConvert(AxisName axis, Direction direction, int dt)

@@ -23,13 +23,11 @@ public:
     const std::vector<NormalVertex> &cGetNVertices() const;
     const std::vector<Polygon> &cGetPolygons() const;
 
-    Vertex &cGetCenter();
+    const Vertex cGetCenter() const;
 
 private:
     std::vector<Vertex> vertices;
     std::vector<TextureVertex> tVertices;
     std::vector<NormalVertex> nVertices;
     std::vector<Polygon> polygons;
-
-    std::optional<Vertex> center;
 };

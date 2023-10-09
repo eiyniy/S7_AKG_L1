@@ -48,11 +48,8 @@ const std::vector<Polygon> &ObjInfo::cGetPolygons() const
     return polygons;
 }
 
-Vertex &ObjInfo::cGetCenter()
+const Vertex ObjInfo::cGetCenter() const
 {
-    if (center.has_value())
-        return *center;
-
     double cx = 0, cy = 0, cz = 0;
 
     for (auto &&vertex : vertices)
@@ -64,7 +61,5 @@ Vertex &ObjInfo::cGetCenter()
 
     const auto vCount = vertices.size();
 
-    center = Vertex(cx / vCount, cy / vCount, cz / vCount);
-
-    return *center;
+    return Vertex(cx / vCount, cy / vCount, cz / vCount);
 }
