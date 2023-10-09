@@ -6,8 +6,14 @@
 class VertexIndexes
 {
 public:
-    VertexIndexes(std::string &str);
     VertexIndexes();
+    VertexIndexes(
+        const int p_vertexId,
+        const std::optional<int> p_tVertexId = std::nullopt,
+        const std::optional<int> p_nVertexId = std::nullopt);
+    VertexIndexes(std::string &str);
+
+    const int cGetVertexId() const;
 
 private:
     int vertexId;

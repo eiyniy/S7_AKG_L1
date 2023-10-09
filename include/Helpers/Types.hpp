@@ -34,3 +34,14 @@ public:
 
     int x, y;
 };
+
+class SphericalCoordinate
+{
+public:
+    SphericalCoordinate(
+        const double p_r,
+        const double p_a,
+        const double p_b);
+
+    double r, a, b;
+};

@@ -14,7 +14,10 @@ private:
     void draw();
 
     bool isCameraMoving;
+    bool isCameraRotating;
+    bool isCameraRotatingAround;
     bool isObjectMoving;
+    bool isCentering;
 
     Scene &scene;
 

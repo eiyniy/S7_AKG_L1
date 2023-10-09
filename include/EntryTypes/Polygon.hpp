@@ -7,9 +7,9 @@
 #include <optional>
 #include <array>
 
-struct Values
+struct SValues
 {
-    Values(const std::array<std::optional<VertexIndexes>, 4> &values);
+    SValues(const std::array<std::optional<VertexIndexes>, 4> &values);
 
     VertexIndexes v1;
     VertexIndexes v2;
@@ -21,12 +21,17 @@ class Polygon
 {
 public:
     Polygon(const std::string &line);
+    Polygon(const std::vector<VertexIndexes> indexes);
+
+    const int cGetVertexIndexesCount() const;
+    const VertexIndexes &cGetVertexIndexes(const int i) const;
 
 private:
     StorageMode storageMode;
+    int vertexIndexesCount;
 
     std::optional<std::vector<VertexIndexes>> dValues;
-    std::optional<Values> sValues;
+    std::optional<SValues> sValues;
 
     void moveValuesToDynamic();
 };

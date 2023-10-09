@@ -6,6 +6,16 @@
 #include <chrono>
 #include <array>
 
+VertexIndexes::VertexIndexes() = default;
+
+VertexIndexes::VertexIndexes(
+    const int p_vertexId,
+    const std::optional<int> p_tVertexId,
+    const std::optional<int> p_nVertexId)
+    : vertexId(p_vertexId),
+      tVertexId(p_tVertexId),
+      nVertexId(p_nVertexId) {}
+
 VertexIndexes::VertexIndexes(std::string &str)
 {
     std::optional<std::string> strPart;
@@ -31,4 +41,7 @@ VertexIndexes::VertexIndexes(std::string &str)
     accumulator.fill(std::nullopt);
 }
 
-VertexIndexes::VertexIndexes() = default;
+const int VertexIndexes::cGetVertexId() const
+{
+    return vertexId;
+}

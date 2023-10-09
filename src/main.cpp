@@ -30,18 +30,22 @@ int main(int argc, char **argv)
     auto tsParseEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
-    auto cPos = CoordinateVector(0, 0, -1000, 1);
-    auto tPos = Converter::vertexToCVector(*objInfoPt->cGetVertices().begin());
-    auto camera = Camera(cPos, tPos, {1280, 720}, 100);
-    auto up = CoordinateVector(0, -1, 0);
-    auto scene = Scene(*objInfoPt, camera, up, 2);
+    auto cameraPosition = CoordinateVector(0, 0, 10, 1);
+    // auto cameraTarget = CoordinateVector(Converter::vertexToCVector(*objInfoPt->cGetVertices().begin()));
+    auto cameraTarget = CoordinateVector(0, 0, 0, 1);
+    auto camera = Camera(cameraPosition, cameraTarget, {1280, 720}, 100);
+    auto up = CoordinateVector(0, 1, 0);
+    auto scene = Scene(*objInfoPt, camera, up, 0.1);
 
     auto mainWindow = MainWindow(scene);
     mainWindow.startLoop();
 
     delete objInfoPt;
 
-    std::cout << "Timer time - " << Timer::getNs() / 1000000 << "ms. Calls count - " << Timer::getCalls() << std::endl;
+    std::cout << "Timer time - " << Timer::getMcs() / 1000 << "ms. "
+              << "Calls count - " << Timer::getCalls() << std::endl
+              //   << "Time per frame - " << (Timer::getMcs() / 1000) / Timer::getCalls() << "ms"
+              << std::endl;
 
     return 0;
 }

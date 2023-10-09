@@ -1,3 +1,4 @@
+#include <optional>
 #include <ObjInfo.hpp>
 
 ObjInfo::ObjInfo() = default;
@@ -45,4 +46,25 @@ const std::vector<NormalVertex> &ObjInfo::cGetNVertices() const
 const std::vector<Polygon> &ObjInfo::cGetPolygons() const
 {
     return polygons;
+}
+
+Vertex &ObjInfo::cGetCenter()
+{
+    if (center.has_value())
+        return *center;
+
+    double cx = 0, cy = 0, cz = 0;
+
+    for (auto &&vertex : vertices)
+    {
+        cx += vertex.cGetX();
+        cy += vertex.cGetY();
+        cz += vertex.cGetZ();
+    }
+
+    const auto vCount = vertices.size();
+
+    center = Vertex(cx / vCount, cy / vCount, cz / vCount);
+
+    return *center;
 }

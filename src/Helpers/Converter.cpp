@@ -23,13 +23,19 @@ CoordinateVector Converter::matrixToCVector(const Matrix<4, 1> &value)
         throw std::invalid_argument("Could not convert value");
 
     return CoordinateVector(
-        value.cGetValue(0, 0), 
-        value.cGetValue(1, 0), 
-        value.cGetValue(2, 0), 
+        value.cGetValue(0, 0),
+        value.cGetValue(1, 0),
+        value.cGetValue(2, 0),
         value.cGetValue(3, 0));
 }
 
-Vertex Converter::cVectorToVertex(const CoordinateVector &value)
+Vertex Converter::cVectorToVertex(const CoordinateVector &value, const bool isOutOfScreen, const bool isWNegative)
 {
-    return Vertex(value.cGetX(), value.cGetY(), value.cGetZ(), value.cGetW());
+    return Vertex(
+        value.cGetX(),
+        value.cGetY(),
+        value.cGetZ(),
+        value.cGetW(),
+        isOutOfScreen,
+        isWNegative);
 }

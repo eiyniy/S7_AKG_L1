@@ -118,3 +118,20 @@ Matrix<Rows, Cols> operator*(const Matrix<Rows, Cols> &m, double v)
 
     return temp;
 }
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator+(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2)
+{
+    if (m1.rows != m2.rows || m1.cols != m2.cols)
+        throw std::logic_error("Could not execute + operator");
+
+    auto temp = Matrix<Rows, Cols>();
+
+    for (int i = 0; i < m1.rows; ++i)
+    {
+        for (int j = 0; j < m1.cols; ++j)
+            temp.getValue(i, j) = m1.cGetValue(i, j) + m2.cGetValue(i, j);
+    }
+
+    return temp;
+}

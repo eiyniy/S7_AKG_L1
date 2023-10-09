@@ -7,7 +7,7 @@
 class Converter
 {
 public:
-    static Vertex cVectorToVertex(const CoordinateVector &value);
+    static Vertex cVectorToVertex(const CoordinateVector &value, const bool isOutOfScreen, const bool isWNegative);
     static Matrix<4, 1> cVectorToMatrix(const CoordinateVector &value);
     static CoordinateVector vertexToCVector(const Vertex &value);
     static CoordinateVector matrixToCVector(const Matrix<4, 1> &value);

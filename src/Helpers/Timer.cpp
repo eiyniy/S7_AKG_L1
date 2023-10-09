@@ -17,9 +17,9 @@ void Timer::stop()
     ++callsCount;
 }
 
-const long long Timer::getNs()
+const long long Timer::getMcs()
 {
-    return nsCount;
+    return nsCount / 1000;
 }
 
 const int Timer::getCalls()

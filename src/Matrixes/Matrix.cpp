@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include <Matrix.hpp>
 #include <CoordinateVector.hpp>
 #include <Converter.hpp>
@@ -125,8 +126,10 @@ Matrix<4, 4> Matrix<Rows, Cols>::getScaleConvert(const CoordinateVector &scale)
 template <int Rows, int Cols>
 Matrix<4, 4> Matrix<Rows, Cols>::getRotateConvert(const AxisName axis, const double angle)
 {
-    auto cosA = cos(angle);
-    auto sinA = sin(angle);
+    const auto radAngle = angle * M_PI / 180;
+
+    const auto cosA = cos(radAngle);
+    const auto sinA = sin(radAngle);
 
     switch (axis)
     {
@@ -160,7 +163,6 @@ Matrix<4, 4> Matrix<Rows, Cols>::getObserverConvert(const CoordinateVector &eye,
     CoordinateVector zAxis = Converter::matrixToCVector(eye - target);
     CoordinateVector xAxis = up * zAxis;
     CoordinateVector yAxis = zAxis * xAxis;
-    // CoordinateVector yAxis = up;
 
     xAxis = xAxis.getNormalized();
     yAxis = yAxis.getNormalized();
@@ -271,23 +273,6 @@ void Matrix<Rows, Cols>::log()
 #pragma endregion FUNCTIONS
 
 #pragma region DUAL_OPERATORS
-
-template <int Rows, int Cols>
-Matrix<Rows, Cols> operator+(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2)
-{
-    if (m1.rows != m2.rows || m1.cols != m2.cols)
-        throw std::logic_error("Could not execute + operator");
-
-    auto temp = Matrix<Rows, Cols>();
-
-    for (int i = 0; i < m1.rows; ++i)
-    {
-        for (int j = 0; j < m1.cols; ++j)
-            temp.getValue(i, j) = m1.getValue(i, j) + m2.getValue(i, j);
-    }
-
-    return temp;
-}
 
 template <int Rows, int Cols>
 Matrix<Rows, Cols> operator-(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Cols> &m2)
