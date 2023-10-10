@@ -9,7 +9,11 @@
 class ObjInfo
 {
 public:
-    ObjInfo();
+    ObjInfo(
+        const int vReserve = 0,
+        const int vtReserve = 0,
+        const int vnReserve = 0,
+        const int pReserve = 0);
 
     void addVertex(const Vertex &vertex);
     void addTVertex(const TextureVertex &tVertex);
@@ -23,11 +27,18 @@ public:
     const std::vector<NormalVertex> &cGetNVertices() const;
     const std::vector<Polygon> &cGetPolygons() const;
 
-    const Vertex cGetCenter() const;
+    Vertex &getCenter();
+    Vertex &getMaxXZ();
+    Vertex &getMinXZ();
 
 private:
+    void calcGeometricParams();
+
     std::vector<Vertex> vertices;
     std::vector<TextureVertex> tVertices;
     std::vector<NormalVertex> nVertices;
     std::vector<Polygon> polygons;
+
+    std::optional<Vertex> center;
+    std::optional<Vertex> maxXZ, minXZ;
 };

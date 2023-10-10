@@ -19,7 +19,20 @@ Scene::Scene(
       objInfoVertices(),
       floorVertices()
 {
-    generateFloor(30, 10);
+    auto floorSize = Converter::matrixToCVector(
+        Converter::vertexToCVector(cObjInfo.getMaxXZ()) -
+        Converter::vertexToCVector(cObjInfo.getMinXZ()));
+
+    auto biggerDimensionSize =
+        floorSize.cGetX() > floorSize.cGetZ()
+            ? floorSize.cGetX()
+            : floorSize.cGetZ();
+    biggerDimensionSize *= 2;
+
+    const auto stepsCount = 20;
+    auto step = biggerDimensionSize / stepsCount;
+
+    generateFloor(stepsCount, ceil(step));
 }
 
 void Scene::generateFloor(const int size, const int step)
@@ -95,7 +108,7 @@ void Scene::modelConvert(
 
 void Scene::centralizeCamera()
 {
-    camera.getTarget() = Converter::vertexToCVector(cObjInfo.cGetCenter()) + cGetWorldShift();
+    camera.getTarget() = Converter::vertexToCVector(cObjInfo.getCenter()) + cGetWorldShift();
 }
 
 void Scene::rotateCamera(const AxisName axisName, const double angle)

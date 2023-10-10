@@ -78,12 +78,13 @@ std::optional<std::string> ObjParser::getNextPart(
 
 ObjInfo *ObjParser::parseEntries(const std::string &fileContent)
 {
+    std::istringstream ss(fileContent);
+
     auto info = new ObjInfo();
 
     auto iter = fileContent.cbegin();
     auto iterEnd = fileContent.cend();
 
-    std::istringstream ss(fileContent);
     std::string line;
 
     while (getline(ss, line, '\n'))
@@ -97,8 +98,8 @@ ObjInfo *ObjParser::parseEntries(const std::string &fileContent)
 
 void ObjParser::parseEntry(const std::string &line, ObjInfo *result) const
 {
-    std::optional<EntryType> type;
-    if (!(type = getEntryType(line)))
+    auto type = getEntryType(line);
+    if (!type.has_value())
         return;
 
     switch (*type)

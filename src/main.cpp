@@ -13,13 +13,15 @@ int main(int argc, char **argv)
 {
     std::cout << "Hello world!" << std::endl;
 
-    auto parser = ObjParser(argv[1]);
-
     auto tsStart = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+    auto parser = ObjParser(argv[1]);
 
     std::string *fileContentPt = parser.readFile();
 
     auto objInfoPt = parser.parseEntries(*fileContentPt);
+
+    auto tsParseEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     std::cout << "Vertices count - " << objInfoPt->cGetVertices().size() << std::endl;
     std::cout << "Texture vertices count - " << objInfoPt->cGetTVertices().size() << std::endl;
@@ -27,7 +29,6 @@ int main(int argc, char **argv)
     std::cout << "Polygons count - " << objInfoPt->cGetPolygons().size() << std::endl;
     std::cout << std::endl;
 
-    auto tsParseEnd = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
     auto cameraPosition = CoordinateVector(0, 0, 10, 1);
@@ -35,7 +36,7 @@ int main(int argc, char **argv)
     auto cameraTarget = CoordinateVector(0, 0, 0, 1);
     auto camera = Camera(cameraPosition, cameraTarget, {1280, 720}, 100);
     auto up = CoordinateVector(0, 1, 0);
-    auto scene = Scene(*objInfoPt, camera, up, 0.1, 0.5);
+    auto scene = Scene(*objInfoPt, camera, up, 1, 0.5);
 
     auto mainWindow = MainWindow(scene);
     mainWindow.startLoop();
