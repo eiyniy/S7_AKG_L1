@@ -7,12 +7,14 @@
 Scene::Scene(
     ObjInfo &p_objInfo,
     Camera &p_camera,
-    const CoordinateVector &p_up,
-    const double p_moveSpeed)
+    CoordinateVector &p_up,
+    const double p_moveSpeed,
+    const double p_rotationSpeed)
     : cObjInfo(p_objInfo),
       camera(p_camera),
       up(p_up),
       moveSpeed(p_moveSpeed),
+      rotationSpeed(p_rotationSpeed),
       worldShift(0, 0, 0, 1),
       objInfoVertices(),
       floorVertices()
@@ -103,30 +105,22 @@ void Scene::rotateCamera(const AxisName axisName, const double angle)
     camera.getTarget() = Converter::matrixToCVector(rConvert * camera.cGetTarget());
 }
 
-void Scene::rotateCameraAround(const AxisName axisName, const double angle)
+void Scene::rotateCameraAround(
+    const AxisName axisName,
+    const Direction direction,
+    const int dt)
 {
+    const double ratio = dt != 0 ? ((double)dt / defaultFrameTime) : 1.f;
+    const double rotationSpeedTimed = rotationSpeed * ratio;
+
     auto cameraRelative = Converter::matrixToCVector(camera.cGetPosition() - camera.cGetTarget());
     auto spherical = Math::decartToSpherical(cameraRelative);
 
-    switch (axisName)
-    {
-    case AxisName::X:
-        spherical.a = spherical.a + angle;
-        break;
-    case AxisName::Y:
-        spherical.b = spherical.b + angle;
-        break;
-    }
+    bool isCameraReversed = false;
+    spherical.move(axisName, direction, rotationSpeedTimed, isCameraReversed);
 
-    if (spherical.a < 0)
-        spherical.a = 180;
-    if (spherical.a > 180)
-        spherical.a = 0;
-
-    if (spherical.b < 0)
-        spherical.b = 360;
-    if (spherical.b > 360)
-        spherical.a = 0;
+    if (isCameraReversed)
+        up.getY() = -up.cGetY();
 
     cameraRelative = Math::sphericalToDecart(spherical);
     camera.getPosition() = cameraRelative + camera.cGetTarget();
@@ -138,12 +132,15 @@ void Scene::moveCamera(const CoordinateVector &transition)
     camera.getPosition() = camera.cGetPosition() + transition;
 }
 
-CoordinateVector Scene::getMoveConvert(AxisName axis, Direction direction, int dt)
+CoordinateVector Scene::getMoveConvert(
+    const AxisName axis,
+    const Direction direction,
+    const int dt)
 {
     CoordinateVector transition;
 
-    double ratio = dt != 0 ? ((double)dt / defaultFrameTime) : 1.f;
-    double moveSpeedTimed = moveSpeed * ratio;
+    const double ratio = dt != 0 ? ((double)dt / defaultFrameTime) : 1.f;
+    const double moveSpeedTimed = moveSpeed * ratio;
 
     switch (axis)
     {

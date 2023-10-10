@@ -43,5 +43,12 @@ public:
         const double p_a,
         const double p_b);
 
-    double r, a, b;
+    void move(
+        const AxisName axisName,
+        const Direction direction,
+        const double step,
+        bool &isCameraReversed);
+
+    double r,
+        a, b;
 };

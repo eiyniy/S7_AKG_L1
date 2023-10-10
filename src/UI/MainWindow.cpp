@@ -124,28 +124,15 @@ void MainWindow::startLoop()
         }
         else if (isCameraRotating || isCameraRotatingAround)
         {
-            double angle;
-
-            switch (moveDirection)
-            {
-            case Direction::Forward:
-                angle = 1;
-                break;
-
-            case Direction::Backward:
-                angle = -1;
-                break;
-            }
-
             if (isCameraRotating)
             {
-                scene.rotateCamera(moveAxis, angle);
+                // scene.rotateCamera(moveAxis, angle);
                 scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.getObjInfoVertices(), scene.cGetWorldShift());
                 scene.modelConvert(scene.cGetFloorVerticesCopy(), scene.getFloorVertices());
             }
             else if (isCameraRotatingAround)
             {
-                scene.rotateCameraAround(moveAxis, angle);
+                scene.rotateCameraAround(moveAxis, moveDirection, dt);
                 scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.getObjInfoVertices(), scene.cGetWorldShift());
                 scene.modelConvert(scene.cGetFloorVerticesCopy(), scene.getFloorVertices());
             }

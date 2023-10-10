@@ -10,20 +10,28 @@ std::optional<int> Math::optStoi(const std::string &str)
 
 SphericalCoordinate Math::decartToSpherical(const CoordinateVector &cv)
 {
+    const auto x = cv.cGetX();
+    const auto y = cv.cGetZ();
+    const auto z = cv.cGetY();
+
     static const auto toDegree = 180 / M_PI;
 
     const auto r = sqrt(
-        pow(cv.cGetX(), 2) +
-        pow(cv.cGetY(), 2) +
-        pow(cv.cGetZ(), 2));
+        pow(x, 2) +
+        pow(y, 2) +
+        pow(z, 2));
 
-    auto a = acos(cv.cGetZ() / r) * toDegree;
-    auto b = atan(cv.cGetY() / cv.cGetX()) * toDegree;
+    auto a = acos(z / r) * toDegree;
+    double b = atan(y / x) * toDegree;
+
+    if (x <= 0)
+        b += 180;
+    else if (x >= 0 && y < 0)
+        b += 360;
 
     // NaN check
     if (a != a)
         a = 0.f;
-
     if (b != b)
         b = 0.f;
 
@@ -40,8 +48,8 @@ CoordinateVector Math::sphericalToDecart(const SphericalCoordinate &sc)
     const auto sinA = sin(radA);
 
     const auto x = sc.r * sinA * cos(radB);
-    const auto y = sc.r * sinA * sin(radB);
-    const auto z = sc.r * cos(radA);
+    const auto z = sc.r * sinA * sin(radB);
+    const auto y = sc.r * cos(radA);
 
     return CoordinateVector(x, y, z, 1);
 }

@@ -12,8 +12,9 @@ class Scene
 private:
     ObjInfo &cObjInfo;
     ObjInfo cFloor;
-    const CoordinateVector &up;
+    CoordinateVector &up;
     const double moveSpeed;
+    const double rotationSpeed;
 
     std::vector<Vertex> floorVertices;
     std::vector<Vertex> objInfoVertices;
@@ -24,11 +25,19 @@ public:
     const int defaultFps = 165;
     const double defaultFrameTime = (1.f * 1000.f / 60);
 
-    Scene(ObjInfo &p_objInfo, Camera &p_camera, const CoordinateVector &p_up, const double p_moveSpeed);
+    Scene(
+        ObjInfo &p_objInfo,
+        Camera &p_camera,
+        CoordinateVector &p_up,
+        const double p_moveSpeed,
+        const double p_rotationSpeed);
 
     void generateFloor(const int size, const int step);
 
-    CoordinateVector getMoveConvert(AxisName axis, Direction direction, int dt);
+    CoordinateVector getMoveConvert(
+        const AxisName axis,
+        const Direction direction,
+        const int dt);
 
     void modelConvert(
         const std::vector<Vertex> &vertices,
@@ -37,7 +46,10 @@ public:
 
     void centralizeCamera();
     void rotateCamera(const AxisName axisName, const double angle);
-    void rotateCameraAround(const AxisName axisName, const double angle);
+    void rotateCameraAround(
+        const AxisName axisName,
+        const Direction direction,
+        const int dt);
     void moveCamera(const CoordinateVector &transition);
 
     const ObjInfo &cGetObjInfo() const;
