@@ -1,5 +1,4 @@
 #include <iostream>
-#include <thread>
 #include <MainWindow.hpp>
 #include <Timer.hpp>
 
@@ -28,17 +27,14 @@ MainWindow::MainWindow(Scene &p_scene)
 
 void MainWindow::startLoop()
 {
-    scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.getObjInfoVertices(), scene.cGetWorldShift());
-    scene.modelConvert(scene.cGetFloorVerticesCopy(), scene.getFloorVertices());
-
     sf::Clock clock;
     float dt = 0.f;
-
     auto moveAxis = AxisName::X;
     auto moveDirection = Direction::Forward;
 
-    sf::Event event;
+    scene.convertAllModels();
 
+    sf::Event event;
     while (window.isOpen())
     {
         window.pollEvent(event);
@@ -48,24 +44,17 @@ void MainWindow::startLoop()
         case sf::Event::Closed:
             window.close();
             break;
-
         case sf::Event::Resized:
-        {
-            sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-            window.setView(sf::View(visibleArea));
-
+            window.setView(sf::View({0, 0, (float)event.size.width, (float)event.size.height}));
+            bufferTexture.create(event.size.width, event.size.height);
             scene.getCamera().getResolution() = Dot(event.size.width, event.size.height);
 
             delete[] pixels;
             pixels = new sf::Uint8[event.size.width * event.size.height * 4];
 
-            bufferTexture.create(event.size.width, event.size.height);
-
-            scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.getObjInfoVertices(), scene.cGetWorldShift());
-            scene.modelConvert(scene.cGetFloorVerticesCopy(), scene.getFloorVertices());
+            scene.convertAllModels();
 
             break;
-        }
         case sf::Event::KeyPressed:
             if (event.key.code == sf::Keyboard::Up ||
                 event.key.code == sf::Keyboard::Right ||
@@ -80,7 +69,6 @@ void MainWindow::startLoop()
                     isCameraRotatingAround = true;
                 else if (!event.key.control && !event.key.alt)
                     isCameraMoving = true;
-
                 if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::Right)
                     moveDirection = Direction::Forward;
                 else if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::Left)
@@ -108,10 +96,9 @@ void MainWindow::startLoop()
                 isCameraRotatingAround = false;
                 isObjectMoving = false;
             }
+            else if (event.key.code == sf::Keyboard::C)
+                isCentering = false;
 
-            break;
-
-        default:
             break;
         }
 
@@ -119,186 +106,123 @@ void MainWindow::startLoop()
         {
             auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
             scene.moveCamera(transition);
-            scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.getObjInfoVertices(), scene.cGetWorldShift());
-            scene.modelConvert(scene.cGetFloorVerticesCopy(), scene.getFloorVertices());
         }
-        else if (isCameraRotating || isCameraRotatingAround)
+        else if (isCameraRotatingAround)
         {
-            if (isCameraRotating)
-            {
-                // scene.rotateCamera(moveAxis, angle);
-                scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.getObjInfoVertices(), scene.cGetWorldShift());
-                scene.modelConvert(scene.cGetFloorVerticesCopy(), scene.getFloorVertices());
-            }
-            else if (isCameraRotatingAround)
-            {
-                scene.rotateCameraAround(moveAxis, moveDirection, dt);
-                scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.getObjInfoVertices(), scene.cGetWorldShift());
-                scene.modelConvert(scene.cGetFloorVerticesCopy(), scene.getFloorVertices());
-            }
+            scene.rotateCameraAround(moveAxis, moveDirection, dt);
         }
         else if (isObjectMoving)
         {
             auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
-
-            scene.getWorldShift() = scene.getWorldShift() + transition;
-            scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.getObjInfoVertices(), scene.cGetWorldShift());
-            scene.modelConvert(scene.cGetFloorVerticesCopy(), scene.getFloorVertices());
+            scene.getObjectShift(scene.getSelectedObjectName()) = scene.getObjectShift(scene.getSelectedObjectName()) + transition;
         }
         else if (isCentering)
         {
-            isCentering = false;
             scene.centralizeCamera();
-            scene.modelConvert(scene.cGetObjInfoVerticesCopy(), scene.getObjInfoVertices(), scene.cGetWorldShift());
-            scene.modelConvert(scene.cGetFloorVerticesCopy(), scene.getFloorVertices());
         }
 
-        draw();
+        if (isCameraMoving || isCameraRotatingAround || isObjectMoving || isCentering)
+            scene.convertAllModels();
+
+        drawAllModels();
+        window.display();
+
         dt = clock.restart().asMilliseconds();
     }
 }
 
-void MainWindow::draw()
+void MainWindow::drawAllModels()
 {
     window.clear();
 
     auto resolution = scene.cGetCamera().cGetResolution();
-
     std::fill(pixels, pixels + resolution.x * resolution.y * 4, 0x00u);
 
-    auto vertices2 = scene.cGetFloorVertices();
+    drawModel(
+        *scene.getObject(scene.floorObjectName),
+        scene.getObjectConvertedVertices(scene.floorObjectName));
 
-    // /*
-    for (auto el : vertices2)
+    for (auto key : scene.getAllObjectNames())
     {
-        if (el.cGetIsOutOfScreen() || el.cGetIsWNegative())
+        if (key == scene.floorObjectName)
             continue;
 
-        int x = std::trunc(el.cGetX());
-        int y = std::trunc(el.cGetY());
+        drawModel(*scene.getObject(key), scene.getObjectConvertedVertices(key));
+    }
+
+    bufferTexture.update(pixels);
+    window.draw(bufferSprite);
+}
+
+void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &viewportVertices)
+{
+    auto color = objInfo.getColor();
+
+    /*
+    for (auto vertex : viewportVertices)
+    {
+        if (vertex.cGetIsOutOfScreen() || vertex.cGetIsWNegative())
+            continue;
+
+        int x = std::trunc(vertex.cGetX());
+        int y = std::trunc(vertex.cGetY());
 
         pixels[4 * (y * resolution.x + x)] = 255;     // R
         pixels[4 * (y * resolution.x + x) + 1] = 0;   // G
         pixels[4 * (y * resolution.x + x) + 2] = 0;   // B
         pixels[4 * (y * resolution.x + x) + 3] = 255; // A
     }
-    // */
-
-    // /*
-    auto drawVertices2 = std::vector<sf::Vertex>();
-
-    for (auto polygon : scene.cGetFloor().cGetPolygons())
-    {
-        auto vIndexesCount = polygon.cGetVertexIndexesCount();
-        bool isPolygonVisible = false;
-
-        for (int i = 0; i < vIndexesCount; ++i)
-            isPolygonVisible |= !vertices2[polygon.cGetVertexIndexes(i).cGetVertexId() - 1].cGetIsOutOfScreen();
-
-        if (!isPolygonVisible)
-            continue;
-
-        drawVertices2.clear();
-        drawVertices2.reserve(vIndexesCount);
-
-        for (int i = 0, j = -1; i < vIndexesCount; ++i)
-        {
-            auto vertex = vertices2[polygon.cGetVertexIndexes(i).cGetVertexId() - 1];
-            if (vertex.cGetIsWNegative())
-                continue;
-
-            drawVertices2.emplace_back(sf::Vertex(sf::Vector2f(vertex.cGetX(), vertex.cGetY()), sf::Color::Blue));
-            ++j;
-
-            if (drawVertices2.size() < 2)
-                continue;
-
-            auto line = std::array<sf::Vertex, 2>{
-                drawVertices2[j - 1],
-                drawVertices2[j]};
-
-            window.draw(line.data(), 2, sf::Lines);
-        }
-
-        if (!(vertices2[polygon.cGetVertexIndexes(0).cGetVertexId() - 1].cGetIsWNegative() &&
-              vertices2[polygon.cGetVertexIndexes(vIndexesCount - 1).cGetVertexId() - 1].cGetIsWNegative() &&
-              drawVertices2.size() > 1))
-            continue;
-
-        auto line = std::array<sf::Vertex, 2>{
-            *(drawVertices2.cend() - 1),
-            *drawVertices2.cbegin()};
-
-        window.draw(line.data(), 2, sf::Lines);
-    }
-    // */
-
-    auto vertices = scene.cGetObjInfoVertices();
-
-    /*
-    for (auto el : vertices)
-    {
-        if (el.cGetIsOutOfScreen() || el.cGetIsWNegative())
-            continue;
-
-        int x = std::trunc(el.cGetX());
-        int y = std::trunc(el.cGetY());
-
-        pixels[4 * (y * resolution.x + x)] = 255;     // R
-        pixels[4 * (y * resolution.x + x) + 1] = 255; // G
-        pixels[4 * (y * resolution.x + x) + 2] = 0;   // B
-        pixels[4 * (y * resolution.x + x) + 3] = 255; // A
-    }
     */
 
-    auto drawVertices = std::vector<sf::Vertex>();
-
-    for (auto polygon : scene.cGetObjInfo().cGetPolygons())
+    // /*
+    for (auto polygon : objInfo.cGetPolygons())
     {
         auto vIndexesCount = polygon.cGetVertexIndexesCount();
         bool isPolygonVisible = false;
 
         for (int i = 0; i < vIndexesCount; ++i)
-            isPolygonVisible |= !vertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1].cGetIsOutOfScreen();
+            isPolygonVisible |= !viewportVertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1].cGetIsOutOfScreen();
 
         if (!isPolygonVisible)
             continue;
 
-        drawVertices.clear();
-        drawVertices.reserve(vIndexesCount);
+        auto polygonVertices = std::vector<sf::Vertex>();
+        polygonVertices.reserve(vIndexesCount);
 
         for (int i = 0, j = -1; i < vIndexesCount; ++i)
         {
-            auto vertex = vertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1];
+            auto vertex = viewportVertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1];
             if (vertex.cGetIsWNegative())
                 continue;
 
-            drawVertices.emplace_back(sf::Vertex(sf::Vector2f(vertex.cGetX(), vertex.cGetY())));
+            polygonVertices.emplace_back(
+                sf::Vertex(
+                    sf::Vector2f(
+                        vertex.cGetX(),
+                        vertex.cGetY()),
+                    color));
             ++j;
 
-            if (drawVertices.size() < 2)
+            if (polygonVertices.size() < 2)
                 continue;
 
             auto line = std::array<sf::Vertex, 2>{
-                drawVertices[j - 1],
-                drawVertices[j]};
+                polygonVertices[j - 1],
+                polygonVertices[j]};
 
             window.draw(line.data(), 2, sf::Lines);
         }
 
-        if (!(vertices[polygon.cGetVertexIndexes(0).cGetVertexId() - 1].cGetIsWNegative() &&
-              vertices[polygon.cGetVertexIndexes(vIndexesCount - 1).cGetVertexId() - 1].cGetIsWNegative() &&
-              drawVertices.size() > 1))
+        if (!(viewportVertices[polygon.cGetVertexIndexes(0).cGetVertexId() - 1].cGetIsWNegative() &&
+              viewportVertices[polygon.cGetVertexIndexes(vIndexesCount - 1).cGetVertexId() - 1].cGetIsWNegative() &&
+              polygonVertices.size() > 1))
             continue;
 
         auto line = std::array<sf::Vertex, 2>{
-            *(drawVertices.cend() - 1),
-            *drawVertices.cbegin()};
+            *(polygonVertices.cend() - 1),
+            *polygonVertices.cbegin()};
 
         window.draw(line.data(), 2, sf::Lines);
     }
-
-    bufferTexture.update(pixels);
-    window.draw(bufferSprite);
-    window.display();
+    // */
 }

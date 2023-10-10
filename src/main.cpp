@@ -32,16 +32,14 @@ int main(int argc, char **argv)
     std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
     auto cameraPosition = CoordinateVector(0, 0, 10, 1);
-    // auto cameraTarget = CoordinateVector(Converter::vertexToCVector(*objInfoPt->cGetVertices().begin()));
     auto cameraTarget = CoordinateVector(0, 0, 0, 1);
     auto camera = Camera(cameraPosition, cameraTarget, {1280, 720}, 100);
     auto up = CoordinateVector(0, 1, 0);
-    auto scene = Scene(*objInfoPt, camera, up, 1, 0.5);
+    auto scene = Scene(camera, up, 0.5, 0.5);
+    scene.addObject("MainObject", objInfoPt);
 
     auto mainWindow = MainWindow(scene);
     mainWindow.startLoop();
-
-    delete objInfoPt;
 
     std::cout << "Timer time - " << Timer::getMcs() / 1000 << "ms. "
               << "Calls count - " << Timer::getCalls() << std::endl

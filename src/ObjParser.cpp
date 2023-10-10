@@ -80,7 +80,7 @@ ObjInfo *ObjParser::parseEntries(const std::string &fileContent)
 {
     std::istringstream ss(fileContent);
 
-    auto info = new ObjInfo();
+    auto info = new ObjInfo(sf::Color::White);
 
     auto iter = fileContent.cbegin();
     auto iterEnd = fileContent.cend();

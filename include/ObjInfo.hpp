@@ -4,12 +4,14 @@
 #include <TextureVertex.hpp>
 #include <NormalVertex.hpp>
 #include <Polygon.hpp>
+#include <SFML/Graphics.hpp>
 #include <vector>
 
 class ObjInfo
 {
 public:
     ObjInfo(
+        const sf::Color p_color,
         const int vReserve = 0,
         const int vtReserve = 0,
         const int vnReserve = 0,
@@ -31,6 +33,8 @@ public:
     Vertex &getMaxXZ();
     Vertex &getMinXZ();
 
+    const sf::Color &getColor() const;
+
 private:
     void calcGeometricParams();
 
@@ -41,4 +45,6 @@ private:
 
     std::optional<Vertex> center;
     std::optional<Vertex> maxXZ, minXZ;
+
+    const sf::Color color;
 };

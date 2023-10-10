@@ -2,10 +2,12 @@
 #include <ObjInfo.hpp>
 
 ObjInfo::ObjInfo(
+    const sf::Color p_color,
     const int vReserve,
     const int vtReserve,
     const int vnReserve,
     const int pReserve)
+    : color(p_color)
 {
     if (vReserve != 0)
         vertices.reserve(vReserve);
@@ -84,7 +86,7 @@ void ObjInfo::calcGeometricParams()
             xMin = x;
         if (z > zMax)
             zMax = z;
-        else if (z > zMin)
+        else if (z < zMin)
             zMin = z;
 
         cx += x;
@@ -121,4 +123,9 @@ Vertex &ObjInfo::getMinXZ()
         calcGeometricParams();
 
     return *minXZ;
+}
+
+const sf::Color &ObjInfo::getColor() const
+{
+    return color;
 }

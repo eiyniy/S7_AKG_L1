@@ -11,13 +11,14 @@ public:
     void startLoop();
 
 private:
-    void draw();
+    void drawAllModels();
+    void drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &viewportVertices);
 
-    bool isCameraMoving;
-    bool isCameraRotating;
-    bool isCameraRotatingAround;
-    bool isObjectMoving;
-    bool isCentering;
+    bool isCameraMoving,
+        isCameraRotating,
+        isCameraRotatingAround,
+        isObjectMoving,
+        isCentering;
 
     Scene &scene;
 

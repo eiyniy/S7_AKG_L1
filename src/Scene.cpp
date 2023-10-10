@@ -5,75 +5,122 @@
 #include <Math.hpp>
 
 Scene::Scene(
-    ObjInfo &p_objInfo,
     Camera &p_camera,
     CoordinateVector &p_up,
     const double p_moveSpeed,
     const double p_rotationSpeed)
-    : cObjInfo(p_objInfo),
-      camera(p_camera),
+    : camera(p_camera),
       up(p_up),
       moveSpeed(p_moveSpeed),
-      rotationSpeed(p_rotationSpeed),
-      worldShift(0, 0, 0, 1),
-      objInfoVertices(),
-      floorVertices()
+      rotationSpeed(p_rotationSpeed)
 {
-    auto floorSize = Converter::matrixToCVector(
-        Converter::vertexToCVector(cObjInfo.getMaxXZ()) -
-        Converter::vertexToCVector(cObjInfo.getMinXZ()));
+}
 
-    auto biggerDimensionSize =
-        floorSize.cGetX() > floorSize.cGetZ()
-            ? floorSize.cGetX()
-            : floorSize.cGetZ();
-    biggerDimensionSize *= 2;
+Scene::~Scene()
+{
+    for (auto pair : objects)
+        delete pair.second;
+}
 
-    const auto stepsCount = 20;
-    auto step = biggerDimensionSize / stepsCount;
+void Scene::generateFloor()
+{
+    double maxDimensionSize = 0;
 
-    generateFloor(stepsCount, ceil(step));
+    for (auto pair : objects)
+    {
+        if (pair.first == floorObjectName)
+            continue;
+
+        auto maxXZ = Converter::vertexToCVector(pair.second->getMaxXZ());
+        auto minXZ = Converter::vertexToCVector(pair.second->getMinXZ());
+
+        auto floorSize = Converter::matrixToCVector(maxXZ - minXZ);
+
+        auto biggerDimensionSize =
+            floorSize.cGetX() > floorSize.cGetZ()
+                ? floorSize.cGetX()
+                : floorSize.cGetZ();
+
+        if (biggerDimensionSize > maxDimensionSize)
+            maxDimensionSize = biggerDimensionSize;
+    }
+
+    maxDimensionSize *= 2;
+
+    auto step = maxDimensionSize / floorStepsCount;
+    generateFloor(floorStepsCount, ceil(step));
 }
 
 void Scene::generateFloor(const int size, const int step)
 {
+    auto color = sf::Color(125U, 125U, 125U, 125U);
+    auto floorPt = new ObjInfo(color);
+
+    objects.insert_or_assign(floorObjectName, floorPt);
+
+    objectsConvertedVertices.insert_or_assign(
+        floorObjectName,
+        std::vector<Vertex>(floorPt->cGetVertices().size()));
+
+    objectsShift.insert_or_assign(
+        floorObjectName,
+        CoordinateVector(0, 0, 0, 1));
+
     const auto evenSize = size % 2 == 0 ? size + 1 : size;
     const auto halfSize = evenSize / 2;
 
     for (int i = -halfSize; i <= halfSize; ++i)
     {
         for (int j = -halfSize; j <= halfSize; ++j)
-            cFloor.addVertex(Vertex(j * step, 0, i * step));
+            floorPt->addVertex(Vertex(j * step, 0, i * step));
     }
 
     for (int i = 0; i < evenSize - 1; ++i)
     {
         for (int j = 0; j < evenSize - 1; ++j)
         {
-            auto vertexesIndexes = std::vector<VertexIndexes>();
-            vertexesIndexes.reserve(4);
+            auto vertexesIndexes = std::vector<VertexIndexes>{
+                VertexIndexes(j * evenSize + i + 1),
+                VertexIndexes(j * evenSize + i + 2),
+                VertexIndexes((j + 1) * evenSize + i + 2),
+                VertexIndexes((j + 1) * evenSize + i + 1)};
 
-            vertexesIndexes.emplace_back(VertexIndexes(j * evenSize + i + 1));
-            vertexesIndexes.emplace_back(VertexIndexes(j * evenSize + i + 2));
-            vertexesIndexes.emplace_back(VertexIndexes((j + 1) * evenSize + i + 2));
-            vertexesIndexes.emplace_back(VertexIndexes((j + 1) * evenSize + i + 1));
+            floorPt->addPolygon(Polygon(vertexesIndexes));
+        }
+    }
+}
 
-            cFloor.addPolygon(Polygon(vertexesIndexes));
+void Scene::convertAllModels()
+{
+    for (auto pair : objects)
+    {
+        if (pair.first == floorObjectName)
+        {
+            convertModel(
+                objectsConvertedVertices.at(floorObjectName),
+                objects.at(floorObjectName)->cGetVertices());
+        }
+        else
+        {
+            convertModel(
+                objectsConvertedVertices.at(selectedObjectName),
+                objects.at(selectedObjectName)->cGetVertices(),
+                objectsShift.at(selectedObjectName));
         }
     }
 }
 
 // TODO: Replace rotateConvert with RotateInfo type {AxisName & angle}
-void Scene::modelConvert(
+void Scene::convertModel(
+    std::vector<Vertex> &result,
     const std::vector<Vertex> &vertices,
-    std::vector<Vertex> &drawVertices,
     const std::optional<CoordinateVector> &moveConvert)
 {
-    drawVertices.clear();
-    drawVertices.reserve(vertices.size());
+    result.clear();
+    result.reserve(vertices.size());
 
     auto convertMatrix =
-        Matrix<4, 4>::getProjectionConvert(camera.getFOV(), camera.getAspect(), 1500, 0.1) *
+        Matrix<4, 4>::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2000, 0.1) *
         Matrix<4, 4>::getObserverConvert(camera.getPosition(), camera.cGetTarget(), up);
 
     if (moveConvert.has_value())
@@ -100,20 +147,21 @@ void Scene::modelConvert(
             cv.cGetZ() < 0 || cv.cGetZ() > 1)
             isOutOfScreen = true;
 
-        cv = Converter::matrixToCVector(Matrix<4, 4>::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) * cv);
+        cv = Converter::matrixToCVector(
+            Matrix<4, 4>::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) * cv);
 
-        drawVertices.emplace_back(Converter::cVectorToVertex(cv, isOutOfScreen, isWNegative));
+        result.emplace_back(Converter::cVectorToVertex(cv, isOutOfScreen, isWNegative));
     }
 }
 
 void Scene::centralizeCamera()
 {
-    camera.getTarget() = Converter::vertexToCVector(cObjInfo.getCenter()) + cGetWorldShift();
+    camera.getTarget() = Converter::vertexToCVector(objects.at(selectedObjectName)->getCenter()) + objectsShift.at(selectedObjectName);
 }
 
 void Scene::rotateCamera(const AxisName axisName, const double angle)
 {
-    auto rConvert = CoordinateVector::getRotateConvert(axisName, angle);
+    auto rConvert = Matrix<4, 4>::getRotateConvert(axisName, angle);
 
     camera.getTarget() = Converter::matrixToCVector(rConvert * camera.cGetTarget());
 }
@@ -143,6 +191,53 @@ void Scene::moveCamera(const CoordinateVector &transition)
 {
     camera.getTarget() = camera.cGetTarget() + transition;
     camera.getPosition() = camera.cGetPosition() + transition;
+}
+
+ObjInfo *Scene::getObject(const std::string key)
+{
+    return objects.at(key);
+}
+
+void Scene::addObject(const std::string key, ObjInfo *object)
+{
+    if (key == floorObjectName)
+        throw std::invalid_argument("This object name is reserved!");
+
+    selectedObjectName = key;
+
+    objects[key] = object;
+
+    objectsConvertedVertices[key] = std::vector<Vertex>(
+        object->cGetVertices().size());
+
+    objectsShift[key] = CoordinateVector(0, 0, 0, 1);
+
+    generateFloor();
+}
+
+CoordinateVector &Scene::getObjectShift(const std::string key)
+{
+    return objectsShift.at(key);
+}
+
+std::vector<Vertex> &Scene::getObjectConvertedVertices(const std::string key)
+{
+    return objectsConvertedVertices.at(key);
+}
+
+const std::vector<std::string> Scene::getAllObjectNames() const
+{
+    auto res = std::vector<std::string>();
+
+    for (auto pair : objects)
+        res.emplace_back(pair.first);
+
+    return res;
+}
+
+const std::string Scene::getSelectedObjectName() const
+{
+    return selectedObjectName;
 }
 
 CoordinateVector Scene::getMoveConvert(
@@ -183,62 +278,12 @@ CoordinateVector Scene::getMoveConvert(
     return transition;
 }
 
-const std::vector<Vertex> &Scene::cGetObjInfoVerticesCopy() const
-{
-    return cObjInfo.cGetVertices();
-}
-
-const ObjInfo &Scene::cGetFloor() const
-{
-    return cFloor;
-}
-
-std::vector<Vertex> &Scene::getFloorVertices()
-{
-    return floorVertices;
-}
-
-const std::vector<Vertex> &Scene::cGetFloorVertices() const
-{
-    return floorVertices;
-}
-
-const std::vector<Vertex> &Scene::cGetFloorVerticesCopy() const
-{
-    return cFloor.cGetVertices();
-}
-
-const std::vector<Vertex> &Scene::cGetObjInfoVertices() const
-{
-    return objInfoVertices;
-}
-
-const ObjInfo &Scene::cGetObjInfo() const
-{
-    return cObjInfo;
-}
-
-std::vector<Vertex> &Scene::getObjInfoVertices()
-{
-    return objInfoVertices;
-}
-
 const Camera &Scene::cGetCamera() const
 {
     return camera;
 }
 
-const CoordinateVector &Scene::cGetWorldShift() const
-{
-    return worldShift;
-}
-
 Camera &Scene::getCamera()
 {
     return camera;
-}
-
-CoordinateVector &Scene::getWorldShift()
-{
-    return worldShift;
 }
