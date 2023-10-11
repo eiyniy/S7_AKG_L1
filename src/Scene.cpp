@@ -94,19 +94,10 @@ void Scene::convertAllModels()
 {
     for (auto pair : objects)
     {
-        if (pair.first == floorObjectName)
-        {
-            convertModel(
-                objectsConvertedVertices.at(floorObjectName),
-                objects.at(floorObjectName)->cGetVertices());
-        }
-        else
-        {
-            convertModel(
-                objectsConvertedVertices.at(selectedObjectName),
-                objects.at(selectedObjectName)->cGetVertices(),
-                objectsShift.at(selectedObjectName));
-        }
+        convertModel(
+            objectsConvertedVertices.at(pair.first),
+            objects.at(pair.first)->cGetVertices(),
+            objectsShift.at(pair.first));
     }
 }
 
