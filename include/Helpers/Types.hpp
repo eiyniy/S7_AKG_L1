@@ -49,6 +49,5 @@ public:
         const double step,
         bool &isCameraReversed);
 
-    double r,
-        a, b;
+    double r, a, b;
 };

@@ -53,7 +53,7 @@ void Scene::generateFloor()
 
 void Scene::generateFloor(const int size, const int step)
 {
-    auto color = sf::Color(125U, 125U, 125U, 125U);
+    auto color = sf::Color(255U, 255U, 255U, 64U);
     auto floorPt = new ObjInfo(color);
 
     objects.insert_or_assign(floorObjectName, floorPt);
@@ -121,7 +121,7 @@ void Scene::convertModel(
 
     auto convertMatrix =
         Matrix<4, 4>::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2000, 0.1) *
-        Matrix<4, 4>::getObserverConvert(camera.getPosition(), camera.cGetTarget(), up);
+        Matrix<4, 4>::getObserverConvert(camera.cGetPosition(), camera.cGetTarget(), up);
 
     if (moveConvert.has_value())
         convertMatrix = convertMatrix * Matrix<4, 4>::getMoveConvert(*moveConvert);
@@ -137,7 +137,7 @@ void Scene::convertModel(
 
         cv = Converter::matrixToCVector(convertMatrix * Converter::cVectorToMatrix(cv));
 
-        if (cv.cGetW() < 0)
+        if (cv.cGetW() <= 0)
             isWNegative = true;
 
         cv = cv / cv.cGetW();

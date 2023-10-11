@@ -4,7 +4,7 @@
 Camera::Camera(
     const CoordinateVector &p_position,
     const CoordinateVector &p_target,
-    const Dot &p_resolution,
+    Dot &p_resolution,
     const int p_fov)
     : position(p_position),
       target(p_target),
