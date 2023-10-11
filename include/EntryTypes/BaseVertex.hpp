@@ -2,7 +2,6 @@
 
 #include <Types.hpp>
 #include <Matrix.hpp>
-#include <CoordinateVector.hpp>
 #include <string>
 #include <optional>
 

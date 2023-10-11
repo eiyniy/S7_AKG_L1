@@ -3,7 +3,7 @@
 #include <optional>
 #include <string>
 #include <Types.hpp>
-#include <CoordinateVector.hpp>
+#include <Matrix.hpp>
 
 class Math
 {
@@ -11,6 +11,6 @@ public:
     Math() = delete;
 
     static std::optional<int> optStoi(const std::string &str);
-    static SphericalCoordinate decartToSpherical(const CoordinateVector &cv);
-    static CoordinateVector sphericalToDecart(const SphericalCoordinate &sc);
+    static SphericalCoordinate decartToSpherical(const Matrix<4, 1> &cv);
+    static Matrix<4, 1> sphericalToDecart(const SphericalCoordinate &sc);
 };

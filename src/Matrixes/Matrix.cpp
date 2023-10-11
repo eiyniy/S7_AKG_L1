@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cmath>
 #include <Matrix.hpp>
-#include <CoordinateVector.hpp>
 #include <Converter.hpp>
 
 #pragma region CONSTRUCTION
@@ -15,6 +14,20 @@ Matrix<Rows, Cols>::Matrix()
         for (int j = 0; j < cols; ++j)
             values[i][j] = 0;
     }
+}
+template <int Rows, int Cols>
+Matrix<Rows, Cols>::Matrix(
+    const double x,
+    const double y,
+    const double z,
+    const double w)
+    requires(Rows == 4 && Cols == 1)
+    : rows(Rows), cols(Cols)
+{
+    values[0][0] = x;
+    values[1][0] = y;
+    values[2][0] = z;
+    values[3][0] = w;
 };
 
 template <int Rows, int Cols>
@@ -72,11 +85,104 @@ const double &Matrix<Rows, Cols>::cGetValue(const int i, const int j) const
 }
 
 template <int Rows, int Cols>
+const double Matrix<Rows, Cols>::cGetX() const
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[0][0];
+}
+
+template <int Rows, int Cols>
+const double Matrix<Rows, Cols>::cGetY() const
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[1][0];
+}
+
+template <int Rows, int Cols>
+const double Matrix<Rows, Cols>::cGetZ() const
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[2][0];
+}
+
+template <int Rows, int Cols>
+const double Matrix<Rows, Cols>::cGetW() const
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[3][0];
+}
+
+template <int Rows, int Cols>
+double &Matrix<Rows, Cols>::getX()
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[0][0];
+}
+
+template <int Rows, int Cols>
+double &Matrix<Rows, Cols>::getY()
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[1][0];
+}
+
+template <int Rows, int Cols>
+double &Matrix<Rows, Cols>::getZ()
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[2][0];
+}
+
+template <int Rows, int Cols>
+double &Matrix<Rows, Cols>::getW()
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[3][0];
+}
+
+template <int Rows, int Cols>
+const double Matrix<Rows, Cols>::scalarMultiply(const Matrix<4, 1> &vector) const
+    requires(Rows == 4 && Cols == 1)
+{
+    double result = 0;
+
+    for (int i = 0; i < this->rows; ++i)
+        result += values[i][0] * vector.values[i][0];
+
+    return result;
+}
+
+template <int Rows, int Cols>
+const double Matrix<Rows, Cols>::getLength()
+    requires(Rows == 4 && Cols == 1)
+{
+    if (length.has_value())
+        return *length;
+
+    length = sqrt(
+        pow(values[0][0], 2) +
+        pow(values[1][0], 2) +
+        pow(values[2][0], 2));
+
+    return *length;
+}
+
+template <int Rows, int Cols>
+void Matrix<Rows, Cols>::normalize()
+    requires(Rows == 4 && Cols == 1)
+{
+    if (getLength() != 0.f)
+        *this = *this * (1 / getLength());
+    else
+        *this = Matrix<Rows, Cols>();
+}
+
+template <int Rows, int Cols>
 Matrix<4, 4> Matrix<Rows, Cols>::getConvertMatrix(
-    const CoordinateVector &xAxis,
-    const CoordinateVector &yAxis,
-    const CoordinateVector &zAxis,
-    const CoordinateVector &translation)
+    const Matrix<4, 1> &xAxis,
+    const Matrix<4, 1> &yAxis,
+    const Matrix<4, 1> &zAxis,
+    const Matrix<4, 1> &translation)
 {
     auto multiplier = Matrix<4, 4>();
 
@@ -104,7 +210,7 @@ Matrix<4, 4> Matrix<Rows, Cols>::getConvertMatrix(
 }
 
 template <int Rows, int Cols>
-Matrix<4, 4> Matrix<Rows, Cols>::getMoveConvert(const CoordinateVector &translation)
+Matrix<4, 4> Matrix<Rows, Cols>::getMoveConvert(const Matrix<4, 1> &translation)
 {
     return getConvertMatrix(
         {1, 0, 0, 0},
@@ -114,7 +220,7 @@ Matrix<4, 4> Matrix<Rows, Cols>::getMoveConvert(const CoordinateVector &translat
 }
 
 template <int Rows, int Cols>
-Matrix<4, 4> Matrix<Rows, Cols>::getScaleConvert(const CoordinateVector &scale)
+Matrix<4, 4> Matrix<Rows, Cols>::getScaleConvert(const Matrix<4, 1> &scale)
 {
     return getConvertMatrix(
         {scale.cGetX(), 0, 0, 0},
@@ -158,15 +264,15 @@ Matrix<4, 4> Matrix<Rows, Cols>::getRotateConvert(const AxisName axis, const dou
 }
 
 template <int Rows, int Cols>
-Matrix<4, 4> Matrix<Rows, Cols>::getObserverConvert(const CoordinateVector &eye, const CoordinateVector &target, const CoordinateVector &up)
+Matrix<4, 4> Matrix<Rows, Cols>::getObserverConvert(const Matrix<4, 1> &eye, const Matrix<4, 1> &target, const Matrix<4, 1> &up)
 {
-    CoordinateVector zAxis = Converter::matrixToCVector(eye - target);
-    CoordinateVector xAxis = up * zAxis;
-    CoordinateVector yAxis = zAxis * xAxis;
+    Matrix<4, 1> zAxis = eye - target;
+    Matrix<4, 1> xAxis = up * zAxis;
+    Matrix<4, 1> yAxis = zAxis * xAxis;
 
-    xAxis = xAxis.getNormalized();
-    yAxis = yAxis.getNormalized();
-    zAxis = zAxis.getNormalized();
+    xAxis.normalize();
+    yAxis.normalize();
+    zAxis.normalize();
 
     return getConvertMatrix(
         {
@@ -291,24 +397,22 @@ Matrix<Rows, Cols> operator-(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Co
     return temp;
 }
 
+Matrix<4, 1> operator*(const Matrix<4, 1> &m1, const Matrix<4, 1> &m2)
+{
+    Matrix<4, 1> temp;
+
+    temp.getValue(0, 0) = (m1.cGetY() * m2.cGetZ()) - (m1.cGetZ() * m2.cGetY());
+    temp.getValue(1, 0) = (m1.cGetZ() * m2.cGetX()) - (m1.cGetX() * m2.cGetZ());
+    temp.getValue(2, 0) = (m1.cGetX() * m2.cGetY()) - (m1.cGetY() * m2.cGetX());
+    temp.getValue(3, 0) = 1;
+
+    return temp;
+}
+
 template <int Rows, int Cols>
 Matrix<Rows, Cols> operator*(double v, const Matrix<Rows, Cols> &m)
 {
     return (m * v);
-}
-
-template <int Rows, int Cols>
-Matrix<Rows, Cols> operator/(const Matrix<Rows, Cols> &m, double v)
-{
-    auto temp = Matrix<Rows, Cols>();
-
-    for (int i = 0; i < m.rows; ++i)
-    {
-        for (int j = 0; j < m.cols; ++j)
-            temp.getValue(i, j) = m.cGetValue(i, j) / v;
-    }
-
-    return temp;
 }
 
 #pragma endregion DUAL_OPERATORS

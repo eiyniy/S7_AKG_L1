@@ -1,29 +1,29 @@
 #pragma once
 
-#include <CoordinateVector.hpp>
 #include <Types.hpp>
+#include <Matrix.hpp>
 
 class Camera
 {
 private:
-    CoordinateVector position;
-    CoordinateVector target;
+    Matrix<4, 1> position;
+    Matrix<4, 1> target;
     Dot resolution;
     int fov;
 
 public:
-    Camera(const CoordinateVector &p_position,
-           const CoordinateVector &p_target,
+    Camera(const Matrix<4, 1> &p_position,
+           const Matrix<4, 1> &p_target,
            Dot &p_resolution,
            const int p_fov);
 
-    const CoordinateVector &cGetPosition() const;
-    const CoordinateVector &cGetTarget() const;
+    const Matrix<4, 1> &cGetPosition() const;
+    const Matrix<4, 1> &cGetTarget() const;
     const Dot &cGetResolution() const;
     const int getFOV() const;
     const double getAspect() const;
 
-    CoordinateVector &getPosition();
-    CoordinateVector &getTarget();
+    Matrix<4, 1> &getPosition();
+    Matrix<4, 1> &getTarget();
     Dot &getResolution();
 };

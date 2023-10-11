@@ -2,7 +2,7 @@
 
 #include <ObjInfo.hpp>
 #include <Camera.hpp>
-#include <CoordinateVector.hpp>
+#include <Matrix.hpp>
 #include <Types.hpp>
 #include <SFML/Graphics.hpp>
 #include <optional>
@@ -14,14 +14,14 @@ private:
 
     std::string selectedObjectName;
     std::map<std::string, ObjInfo *> objects;
-    std::map<std::string, CoordinateVector> objectsShift;
+    std::map<std::string, Matrix<4, 1>> objectsShift;
     std::map<std::string, std::vector<Vertex>> objectsConvertedVertices;
     Camera &camera;
 
     const double moveSpeed;
     const double rotationSpeed;
 
-    CoordinateVector &up;
+    Matrix<4, 1> &up;
 
     void generateFloor();
     void generateFloor(const int size, const int step);
@@ -34,13 +34,13 @@ public:
 
     Scene(
         Camera &p_camera,
-        CoordinateVector &p_up,
+        Matrix<4, 1> &p_up,
         const double p_moveSpeed,
         const double p_rotationSpeed);
 
     ~Scene();
 
-    CoordinateVector getMoveConvert(
+    Matrix<4, 1> getMoveConvert(
         const AxisName axis,
         const Direction direction,
         const int dt);
@@ -49,7 +49,7 @@ public:
     void convertModel(
         std::vector<Vertex> &result,
         const std::vector<Vertex> &vertices,
-        const std::optional<CoordinateVector> &moveConvert = std::nullopt);
+        const std::optional<Matrix<4, 1>> &moveConvert = std::nullopt);
 
     void centralizeCamera();
     void rotateCamera(const AxisName axisName, const double angle);
@@ -57,12 +57,12 @@ public:
         const AxisName axisName,
         const Direction direction,
         const int dt);
-    void moveCamera(const CoordinateVector &transition);
+    void moveCamera(const Matrix<4, 1> &transition);
 
     ObjInfo *getObject(const std::string key);
     void addObject(const std::string key, ObjInfo *object);
 
-    CoordinateVector &getObjectShift(const std::string key);
+    Matrix<4, 1> &getObjectShift(const std::string key);
     std::vector<Vertex> &getObjectConvertedVertices(const std::string key);
 
     const std::vector<std::string> getAllObjectNames() const;

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <MainWindow.hpp>
 #include <Timer.hpp>
+#include <Converter.hpp>
 
 MainWindow::MainWindow(Scene &p_scene)
     : window(sf::RenderWindow(
@@ -119,7 +120,9 @@ void MainWindow::startLoop()
         else if (isObjectMoving)
         {
             auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
-            scene.getObjectShift(scene.getSelectedObjectName()) = scene.getObjectShift(scene.getSelectedObjectName()) + transition;
+            scene.getObjectShift(scene.getSelectedObjectName()) =
+                scene.getObjectShift(scene.getSelectedObjectName()) +
+                transition;
         }
         else if (isCentering)
         {

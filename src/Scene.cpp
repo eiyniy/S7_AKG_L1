@@ -6,7 +6,7 @@
 
 Scene::Scene(
     Camera &p_camera,
-    CoordinateVector &p_up,
+    Matrix<4, 1> &p_up,
     const double p_moveSpeed,
     const double p_rotationSpeed)
     : camera(p_camera),
@@ -31,10 +31,10 @@ void Scene::generateFloor()
         if (pair.first == floorObjectName)
             continue;
 
-        auto maxXZ = Converter::vertexToCVector(pair.second->getMaxXZ());
-        auto minXZ = Converter::vertexToCVector(pair.second->getMinXZ());
+        auto maxXZ = Converter::vertexToMatrix(pair.second->getMaxXZ());
+        auto minXZ = Converter::vertexToMatrix(pair.second->getMinXZ());
 
-        auto floorSize = Converter::matrixToCVector(maxXZ - minXZ);
+        auto floorSize = maxXZ - minXZ;
 
         auto biggerDimensionSize =
             floorSize.cGetX() > floorSize.cGetZ()
@@ -64,7 +64,7 @@ void Scene::generateFloor(const int size, const int step)
 
     objectsShift.insert_or_assign(
         floorObjectName,
-        CoordinateVector(0, 0, 0, 1));
+        Matrix<4, 1>(0, 0, 0));
 
     const auto evenSize = size % 2 == 0 ? size + 1 : size;
     const auto halfSize = evenSize / 2;
@@ -114,7 +114,7 @@ void Scene::convertAllModels()
 void Scene::convertModel(
     std::vector<Vertex> &result,
     const std::vector<Vertex> &vertices,
-    const std::optional<CoordinateVector> &moveConvert)
+    const std::optional<Matrix<4, 1>> &moveConvert)
 {
     result.clear();
     result.reserve(vertices.size());
@@ -126,16 +126,16 @@ void Scene::convertModel(
     if (moveConvert.has_value())
         convertMatrix = convertMatrix * Matrix<4, 4>::getMoveConvert(*moveConvert);
 
-    static CoordinateVector cv;
+    static Matrix<4, 1> cv;
 
     for (auto it = vertices.begin(); it < vertices.end(); ++it)
     {
         bool isOutOfScreen = false;
         bool isWNegative = false;
 
-        cv = Converter::vertexToCVector(*it);
+        cv = Converter::vertexToMatrix(*it);
 
-        cv = Converter::matrixToCVector(convertMatrix * Converter::cVectorToMatrix(cv));
+        cv = convertMatrix * cv;
 
         if (cv.cGetW() <= 0)
             isWNegative = true;
@@ -147,23 +147,24 @@ void Scene::convertModel(
             cv.cGetZ() < 0 || cv.cGetZ() > 1)
             isOutOfScreen = true;
 
-        cv = Converter::matrixToCVector(
-            Matrix<4, 4>::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) * cv);
+        cv = Matrix<4, 4>::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) * cv;
 
-        result.emplace_back(Converter::cVectorToVertex(cv, isOutOfScreen, isWNegative));
+        result.emplace_back(Converter::matrixToVertex(cv, isOutOfScreen, isWNegative));
     }
 }
 
 void Scene::centralizeCamera()
 {
-    camera.getTarget() = Converter::vertexToCVector(objects.at(selectedObjectName)->getCenter()) + objectsShift.at(selectedObjectName);
+    camera.getTarget() =
+        Converter::vertexToMatrix(objects.at(selectedObjectName)->getCenter()) +
+        objectsShift.at(selectedObjectName);
 }
 
 void Scene::rotateCamera(const AxisName axisName, const double angle)
 {
     auto rConvert = Matrix<4, 4>::getRotateConvert(axisName, angle);
 
-    camera.getTarget() = Converter::matrixToCVector(rConvert * camera.cGetTarget());
+    camera.getTarget() = rConvert * camera.cGetTarget();
 }
 
 void Scene::rotateCameraAround(
@@ -174,7 +175,7 @@ void Scene::rotateCameraAround(
     const double ratio = dt != 0 ? ((double)dt / defaultFrameTime) : 1.f;
     const double rotationSpeedTimed = rotationSpeed * ratio;
 
-    auto cameraRelative = Converter::matrixToCVector(camera.cGetPosition() - camera.cGetTarget());
+    auto cameraRelative = camera.cGetPosition() - camera.cGetTarget();
     auto spherical = Math::decartToSpherical(cameraRelative);
 
     bool isCameraReversed = false;
@@ -187,7 +188,7 @@ void Scene::rotateCameraAround(
     camera.getPosition() = cameraRelative + camera.cGetTarget();
 }
 
-void Scene::moveCamera(const CoordinateVector &transition)
+void Scene::moveCamera(const Matrix<4, 1> &transition)
 {
     camera.getTarget() = camera.cGetTarget() + transition;
     camera.getPosition() = camera.cGetPosition() + transition;
@@ -210,12 +211,12 @@ void Scene::addObject(const std::string key, ObjInfo *object)
     objectsConvertedVertices[key] = std::vector<Vertex>(
         object->cGetVertices().size());
 
-    objectsShift[key] = CoordinateVector(0, 0, 0, 1);
+    objectsShift[key] = Matrix<4, 1>(0, 0, 0, 1);
 
     generateFloor();
 }
 
-CoordinateVector &Scene::getObjectShift(const std::string key)
+Matrix<4, 1> &Scene::getObjectShift(const std::string key)
 {
     return objectsShift.at(key);
 }
@@ -240,12 +241,12 @@ const std::string Scene::getSelectedObjectName() const
     return selectedObjectName;
 }
 
-CoordinateVector Scene::getMoveConvert(
+Matrix<4, 1> Scene::getMoveConvert(
     const AxisName axis,
     const Direction direction,
     const int dt)
 {
-    CoordinateVector transition;
+    Matrix<4, 1> transition;
 
     const double ratio = dt != 0 ? ((double)dt / defaultFrameTime) : 1.f;
     const double moveSpeedTimed = moveSpeed * ratio;
@@ -254,23 +255,23 @@ CoordinateVector Scene::getMoveConvert(
     {
     case AxisName::X:
         if (direction == Direction::Forward)
-            transition = CoordinateVector(moveSpeedTimed, 0, 0, 0);
+            transition = Matrix<4, 1>(moveSpeedTimed, 0, 0, 0);
         else
-            transition = CoordinateVector(-moveSpeedTimed, 0, 0, 0);
+            transition = Matrix<4, 1>(-moveSpeedTimed, 0, 0, 0);
 
         break;
     case AxisName::Y:
         if (direction == Direction::Forward)
-            transition = CoordinateVector(0, moveSpeedTimed, 0, 0);
+            transition = Matrix<4, 1>(0, moveSpeedTimed, 0, 0);
         else
-            transition = CoordinateVector(0, -moveSpeedTimed, 0, 0);
+            transition = Matrix<4, 1>(0, -moveSpeedTimed, 0, 0);
 
         break;
     case AxisName::Z:
         if (direction == Direction::Forward)
-            transition = CoordinateVector(0, 0, moveSpeedTimed, 0);
+            transition = Matrix<4, 1>(0, 0, moveSpeedTimed, 0);
         else
-            transition = CoordinateVector(0, 0, -moveSpeedTimed, 0);
+            transition = Matrix<4, 1>(0, 0, -moveSpeedTimed, 0);
 
         break;
     }

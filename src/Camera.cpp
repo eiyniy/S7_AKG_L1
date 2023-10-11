@@ -2,8 +2,8 @@
 #include <cmath>
 
 Camera::Camera(
-    const CoordinateVector &p_position,
-    const CoordinateVector &p_target,
+    const Matrix<4, 1> &p_position,
+    const Matrix<4, 1> &p_target,
     Dot &p_resolution,
     const int p_fov)
     : position(p_position),
@@ -13,22 +13,22 @@ Camera::Camera(
 {
 }
 
-CoordinateVector &Camera::getPosition()
+Matrix<4, 1> &Camera::getPosition()
 {
     return position;
 }
 
-CoordinateVector &Camera::getTarget()
+Matrix<4, 1> &Camera::getTarget()
 {
     return target;
 }
 
-const CoordinateVector &Camera::cGetPosition() const
+const Matrix<4, 1> &Camera::cGetPosition() const
 {
     return position;
 }
 
-const CoordinateVector &Camera::cGetTarget() const
+const Matrix<4, 1> &Camera::cGetTarget() const
 {
     return target;
 }

@@ -10,13 +10,17 @@
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // MATRIX [I] [J]: I->ROW; J->COL
 
-class CoordinateVector;
-
 template <int Rows, int Cols>
 class Matrix
 {
 public:
     Matrix();
+    Matrix(
+        const double x,
+        const double y,
+        const double z,
+        const double w = 1.f)
+        requires(Rows == 4 && Cols == 1);
     ~Matrix();
 
     Matrix(const Matrix &m);
@@ -25,26 +29,53 @@ public:
     double &getValue(const int i, const int j);
     const double &cGetValue(const int i, const int j) const;
 
+    const double cGetX() const
+        requires(Rows == 4 && Cols == 1);
+    const double cGetY() const
+        requires(Rows == 4 && Cols == 1);
+    const double cGetZ() const
+        requires(Rows == 4 && Cols == 1);
+    const double cGetW() const
+        requires(Rows == 4 && Cols == 1);
+
+    double &getX()
+        requires(Rows == 4 && Cols == 1);
+    double &getY()
+        requires(Rows == 4 && Cols == 1);
+    double &getZ()
+        requires(Rows == 4 && Cols == 1);
+    double &getW()
+        requires(Rows == 4 && Cols == 1);
+
+    const double scalarMultiply(const Matrix<4, 1> &vector) const
+        requires(Rows == 4 && Cols == 1);
+
+    const double getLength()
+        requires(Rows == 4 && Cols == 1);
+
+    void normalize()
+        requires(Rows == 4 && Cols == 1);
+
     static Matrix<4, 4> getConvertMatrix(
-        const CoordinateVector &xAxis,
-        const CoordinateVector &yAxis,
-        const CoordinateVector &zAxis,
-        const CoordinateVector &translation);
+        const Matrix<4, 1> &xAxis,
+        const Matrix<4, 1> &yAxis,
+        const Matrix<4, 1> &zAxis,
+        const Matrix<4, 1> &translation);
 
     static Matrix<4, 4> getMoveConvert(
-        const CoordinateVector &translation);
+        const Matrix<4, 1> &translation);
 
     static Matrix<4, 4> getScaleConvert(
-        const CoordinateVector &scale);
+        const Matrix<4, 1> &scale);
 
     static Matrix<4, 4> getRotateConvert(
         const AxisName axis,
         const double angle);
 
     static Matrix<4, 4> getObserverConvert(
-        const CoordinateVector &eye,
-        const CoordinateVector &target,
-        const CoordinateVector &up);
+        const Matrix<4, 1> &eye,
+        const Matrix<4, 1> &target,
+        const Matrix<4, 1> &up);
 
     static Matrix<4, 4> getProjectionConvert(
         const double fov,
@@ -75,6 +106,8 @@ Matrix<Rows, Cols> operator-(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Co
 
 template <int Rows1, int Cols1, int Rows2, int Cols2>
 Matrix<Rows1, Cols2> operator*(const Matrix<Rows1, Cols1> &m1, const Matrix<Rows2, Cols2> &m2);
+
+Matrix<4, 1> operator*(const Matrix<4, 1> &m1, const Matrix<4, 1> &m2);
 
 template <int Rows, int Cols>
 Matrix<Rows, Cols> operator*(const Matrix<Rows, Cols> &m, double v);
@@ -131,6 +164,20 @@ Matrix<Rows, Cols> operator+(const Matrix<Rows, Cols> &m1, const Matrix<Rows, Co
     {
         for (int j = 0; j < m1.cols; ++j)
             temp.getValue(i, j) = m1.cGetValue(i, j) + m2.cGetValue(i, j);
+    }
+
+    return temp;
+}
+
+template <int Rows, int Cols>
+Matrix<Rows, Cols> operator/(const Matrix<Rows, Cols> &m, double v)
+{
+    auto temp = Matrix<Rows, Cols>();
+
+    for (int i = 0; i < m.rows; ++i)
+    {
+        for (int j = 0; j < m.cols; ++j)
+            temp.getValue(i, j) = m.cGetValue(i, j) / v;
     }
 
     return temp;
