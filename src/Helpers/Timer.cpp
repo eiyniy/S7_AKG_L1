@@ -2,7 +2,7 @@
 
 std::chrono::time_point<std::chrono::high_resolution_clock> Timer::timeStart;
 long long Timer::nsCount;
-int Timer::callsCount;
+long long Timer::callsCount;
 
 void Timer::start()
 {

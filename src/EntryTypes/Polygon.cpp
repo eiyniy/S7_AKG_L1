@@ -57,7 +57,7 @@ Polygon::Polygon(const std::string &line)
     accumulator.fill(std::nullopt);
 }
 
-Polygon::Polygon(const std::vector<VertexIndexes> indexes)
+Polygon::Polygon(const std::vector<VertexIndexes> &indexes)
 {
     vertexIndexesCount = indexes.size();
 

@@ -3,20 +3,22 @@
 
 Vertex::Vertex()
     : BaseVertex(),
-      isOutOfScreen(false),
-      isWNegative(false) {}
+      isOutOfScreen(false) {}
 
 Vertex::Vertex(const Vertex &v)
     : BaseVertex(v),
-      isOutOfScreen(v.isOutOfScreen),
-      isWNegative(v.isWNegative) {}
+      isOutOfScreen(v.isOutOfScreen) {}
 
 Vertex &Vertex::operator=(const Vertex &v)
 {
     if (this == &v)
         return *this;
 
-    *this = Vertex(v);
+    v1 = v.v1;
+    v2 = v.v2;
+    v3 = v.v3;
+    v4 = v.v4;
+    isOutOfScreen = v.isOutOfScreen;
 
     return *this;
 }
@@ -25,11 +27,9 @@ Vertex::Vertex(const double x,
                const double y,
                const double z,
                const double w,
-               const bool p_isOutOfScreen,
-               const bool p_isWNegative)
+               const bool p_isOutOfScreen)
     : BaseVertex(x, y, z, w),
-      isOutOfScreen(p_isOutOfScreen),
-      isWNegative(p_isWNegative) {}
+      isOutOfScreen(p_isOutOfScreen) {}
 
 Vertex Vertex::parse(const std::string &line)
 {
@@ -40,49 +40,4 @@ Vertex Vertex::parse(const std::string &line)
 const bool Vertex::cGetIsOutOfScreen() const
 {
     return isOutOfScreen;
-}
-
-const bool Vertex::cGetIsWNegative() const
-{
-    return isWNegative;
-}
-
-const double Vertex::cGetX() const
-{
-    return v1;
-}
-
-const double Vertex::cGetY() const
-{
-    return v2;
-}
-
-const double Vertex::cGetZ() const
-{
-    return v3;
-}
-
-const double Vertex::cGetW() const
-{
-    return v4;
-}
-
-double &Vertex::getX()
-{
-    return v1;
-}
-
-double &Vertex::getY()
-{
-    return v2;
-}
-
-double &Vertex::getZ()
-{
-    return v3;
-}
-
-double &Vertex::getW()
-{
-    return v4;
 }

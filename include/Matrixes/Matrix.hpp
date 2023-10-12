@@ -21,7 +21,6 @@ public:
         const double z,
         const double w = 1.f)
         requires(Rows == 4 && Cols == 1);
-    ~Matrix();
 
     Matrix(const Matrix &m);
     Matrix &operator=(const Matrix &m);
@@ -113,7 +112,75 @@ public:
 
     void log();
 
-protected:
-    std::array<std::array<double, Cols>, Rows> values;
+private:
+    std::array<double, Cols * Rows> values;
     std::optional<double> length;
 };
+
+template <int Rows, int Cols>
+inline double &Matrix<Rows, Cols>::getValue(const int i, const int j)
+{
+    return values[i * Cols + j];
+}
+
+template <int Rows, int Cols>
+inline const double &Matrix<Rows, Cols>::cGetValue(const int i, const int j) const
+{
+    return values[i * Cols + j];
+}
+
+template <int Rows, int Cols>
+inline const double Matrix<Rows, Cols>::cGetX() const
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[0];
+}
+
+template <int Rows, int Cols>
+inline const double Matrix<Rows, Cols>::cGetY() const
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[1];
+}
+
+template <int Rows, int Cols>
+inline const double Matrix<Rows, Cols>::cGetZ() const
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[2];
+}
+
+template <int Rows, int Cols>
+inline const double Matrix<Rows, Cols>::cGetW() const
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[3];
+}
+
+template <int Rows, int Cols>
+inline double &Matrix<Rows, Cols>::getX()
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[0];
+}
+
+template <int Rows, int Cols>
+inline double &Matrix<Rows, Cols>::getY()
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[1];
+}
+
+template <int Rows, int Cols>
+inline double &Matrix<Rows, Cols>::getZ()
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[2];
+}
+
+template <int Rows, int Cols>
+inline double &Matrix<Rows, Cols>::getW()
+    requires(Rows == 4 && Cols == 1)
+{
+    return values[3];
+}

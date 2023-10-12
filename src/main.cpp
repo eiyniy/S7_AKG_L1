@@ -13,6 +13,15 @@ int main(int argc, char **argv)
 {
     std::cout << "Hello world!" << std::endl;
 
+    auto cameraPosition = Matrix<4, 1>(10, 10, 10, 1);
+    auto cameraTarget = Matrix<4, 1>(0, 0, 0, 1);
+    auto cameraResolution = Dot(1280, 720);
+    auto camera = Camera(cameraPosition, cameraTarget, cameraResolution, 100);
+    auto up = Matrix<4, 1>(0, 1, 0);
+    auto scene = Scene(camera, up, 5, 0.5);
+    auto mainWindow = MainWindow(scene);
+    mainWindow.drawAllModels();
+
     auto tsStart = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     auto parser = ObjParser(argv[1]);
@@ -31,15 +40,8 @@ int main(int argc, char **argv)
 
     std::cout << "Parse time - " << tsParseEnd - tsStart << "ms" << std::endl;
 
-    auto cameraPosition = Matrix<4,1>(0, 0, 10, 1);
-    auto cameraTarget = Matrix<4,1>(0, 0, 0, 1);
-    auto cameraResolution = Dot(1280, 720);
-    auto camera = Camera(cameraPosition, cameraTarget, cameraResolution, 100);
-    auto up = Matrix<4,1>(0, 1, 0);
-    auto scene = Scene(camera, up, 5, 0.5);
     scene.addObject("MainObject", objInfoPt);
 
-    auto mainWindow = MainWindow(scene);
     mainWindow.startLoop();
 
     std::cout << "Timer time - " << Timer::getMcs() / 1000 << "ms. "

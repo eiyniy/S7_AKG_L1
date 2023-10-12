@@ -12,8 +12,16 @@ Scene::Scene(
     : camera(p_camera),
       up(p_up),
       moveSpeed(p_moveSpeed),
-      rotationSpeed(p_rotationSpeed)
+      rotationSpeed(p_rotationSpeed),
+      isMoveChanged(true),
+      isRotateChanged(true),
+      isScaleChanged(true),
+      isObserverChanged(true),
+      isProjectionChanged(true),
+      isWindowChanged(true)
 {
+    generateFloor(25, 20);
+    convertAllModels();
 }
 
 Scene::~Scene()
@@ -56,16 +64,6 @@ void Scene::generateFloor(const int size, const int step)
     auto color = sf::Color(255U, 255U, 255U, 64U);
     auto floorPt = new ObjInfo(color);
 
-    objects.insert_or_assign(floorObjectName, floorPt);
-
-    objectsConvertedVertices.insert_or_assign(
-        floorObjectName,
-        std::vector<Vertex>(floorPt->cGetVertices().size()));
-
-    objectsShift.insert_or_assign(
-        floorObjectName,
-        Matrix<4, 1>(0, 0, 0));
-
     const auto evenSize = size % 2 == 0 ? size + 1 : size;
     const auto halfSize = evenSize / 2;
 
@@ -88,10 +86,36 @@ void Scene::generateFloor(const int size, const int step)
             floorPt->addPolygon(Polygon(vertexesIndexes));
         }
     }
+
+    objects.insert_or_assign(floorObjectName, floorPt);
+
+    objectsConvertedVertices.insert_or_assign(
+        floorObjectName,
+        std::vector<Vertex>(floorPt->cGetVertices().size()));
+
+    objectsShift.insert_or_assign(
+        floorObjectName,
+        Matrix<4, 1>(0, 0, 0));
 }
 
 void Scene::convertAllModels()
 {
+    if (isObserverChanged)
+    {
+        observerConvertCached = Matrix<4, 4>::getObserverConvert(camera.cGetPosition(), camera.cGetTarget(), up);
+        isObserverChanged = false;
+    }
+    if (isProjectionChanged)
+    {
+        projectionConvertCached = Matrix<4, 4>::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2000, 0.1);
+        isProjectionChanged = false;
+    }
+    if (isWindowChanged)
+    {
+        windowConvertCached = Matrix<4, 4>::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0);
+        isWindowChanged = false;
+    }
+
     for (auto pair : objects)
     {
         convertModel(
@@ -105,42 +129,40 @@ void Scene::convertAllModels()
 void Scene::convertModel(
     std::vector<Vertex> &result,
     const std::vector<Vertex> &vertices,
-    const std::optional<Matrix<4, 1>> &moveConvert)
+    const Matrix<4, 1> &objectShift)
 {
-    result.clear();
-    result.reserve(vertices.size());
+    if (isMoveChanged)
+    {
+        moveConvertCached = Matrix<4, 4>::getMoveConvert(objectShift);
+        isMoveChanged = false;
+    }
 
-    auto convertMatrix =
-        Matrix<4, 4>::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2000, 0.1) *
-        Matrix<4, 4>::getObserverConvert(camera.cGetPosition(), camera.cGetTarget(), up);
+    const auto convertMatrix = projectionConvertCached * observerConvertCached * moveConvertCached;
 
-    if (moveConvert.has_value())
-        convertMatrix = convertMatrix * Matrix<4, 4>::getMoveConvert(*moveConvert);
+    static Matrix<4, 1> mVertex;
 
-    static Matrix<4, 1> cv;
-
-    for (auto it = vertices.begin(); it < vertices.end(); ++it)
+    int i = 0;
+    for (auto it = vertices.begin(); it < vertices.cend(); ++it, ++i)
     {
         bool isOutOfScreen = false;
-        bool isWNegative = false;
 
-        cv = Converter::vertexToMatrix(*it);
+        mVertex = Converter::vertexToMatrix(*it);
 
-        cv = convertMatrix * cv;
+        mVertex = convertMatrix * mVertex;
 
-        if (cv.cGetW() <= 0)
-            isWNegative = true;
-
-        cv = cv / cv.cGetW();
-
-        if (cv.cGetX() < -1 || cv.cGetX() > 1 ||
-            cv.cGetY() < -1 || cv.cGetY() > 1 ||
-            cv.cGetZ() < 0 || cv.cGetZ() > 1)
+        if (mVertex.cGetW() <= 0)
             isOutOfScreen = true;
 
-        cv = Matrix<4, 4>::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0) * cv;
+        mVertex /= mVertex.cGetW();
 
-        result.emplace_back(Converter::matrixToVertex(cv, isOutOfScreen, isWNegative));
+        if (mVertex.cGetX() < -1 || mVertex.cGetX() > 1 ||
+            mVertex.cGetY() < -1 || mVertex.cGetY() > 1 ||
+            mVertex.cGetZ() < 0 || mVertex.cGetZ() > 1)
+            isOutOfScreen = true;
+
+        mVertex = windowConvertCached * mVertex;
+
+        result[i] = Converter::matrixToVertex(mVertex, isOutOfScreen);
     }
 }
 
@@ -149,13 +171,8 @@ void Scene::centralizeCamera()
     camera.getTarget() =
         Converter::vertexToMatrix(objects.at(selectedObjectName)->getCenter()) +
         objectsShift.at(selectedObjectName);
-}
 
-void Scene::rotateCamera(const AxisName axisName, const double angle)
-{
-    auto rConvert = Matrix<4, 4>::getRotateConvert(axisName, angle);
-
-    camera.getTarget() = rConvert * camera.cGetTarget();
+    isObserverChanged = true;
 }
 
 void Scene::rotateCameraAround(
@@ -177,20 +194,41 @@ void Scene::rotateCameraAround(
 
     cameraRelative = Math::sphericalToDecart(spherical);
     camera.getPosition() = cameraRelative + camera.cGetTarget();
+
+    isObserverChanged = true;
 }
 
 void Scene::moveCamera(const Matrix<4, 1> &transition)
 {
     camera.getTarget() = camera.cGetTarget() + transition;
     camera.getPosition() = camera.cGetPosition() + transition;
+
+    isObserverChanged = true;
 }
 
-ObjInfo *Scene::getObject(const std::string key)
+void Scene::moveObject(const std::string& objectName, const Matrix<4, 1> &transition)
+{
+    getObjectShift(objectName) += transition;
+
+    isMoveChanged = true;
+}
+
+void Scene::resize(const int width, const int height)
+{
+    camera.getResolution() = Dot(width, height);
+
+    isProjectionChanged = true;
+    isWindowChanged = true;
+
+    convertAllModels();
+}
+
+ObjInfo *Scene::getObject(const std::string &key)
 {
     return objects.at(key);
 }
 
-void Scene::addObject(const std::string key, ObjInfo *object)
+void Scene::addObject(const std::string &key, ObjInfo *object)
 {
     if (key == floorObjectName)
         throw std::invalid_argument("This object name is reserved!");
@@ -207,12 +245,12 @@ void Scene::addObject(const std::string key, ObjInfo *object)
     generateFloor();
 }
 
-Matrix<4, 1> &Scene::getObjectShift(const std::string key)
+Matrix<4, 1> &Scene::getObjectShift(const std::string &key)
 {
     return objectsShift.at(key);
 }
 
-std::vector<Vertex> &Scene::getObjectConvertedVertices(const std::string key)
+std::vector<Vertex> &Scene::getObjectConvertedVertices(const std::string &key)
 {
     return objectsConvertedVertices.at(key);
 }
@@ -232,7 +270,7 @@ const std::string Scene::getSelectedObjectName() const
     return selectedObjectName;
 }
 
-Matrix<4, 1> Scene::getMoveConvert(
+Matrix<4, 1> Scene::getTransition(
     const AxisName axis,
     const Direction direction,
     const int dt)

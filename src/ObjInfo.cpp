@@ -2,7 +2,7 @@
 #include <ObjInfo.hpp>
 
 ObjInfo::ObjInfo(
-    const sf::Color p_color,
+    const sf::Color &p_color,
     const int vReserve,
     const int vtReserve,
     const int vnReserve,

@@ -10,8 +10,8 @@ VertexIndexes::VertexIndexes() = default;
 
 VertexIndexes::VertexIndexes(
     const int p_vertexId,
-    const std::optional<int> p_tVertexId,
-    const std::optional<int> p_nVertexId)
+    const std::optional<int> &p_tVertexId,
+    const std::optional<int> &p_nVertexId)
     : vertexId(p_vertexId),
       tVertexId(p_tVertexId),
       nVertexId(p_nVertexId) {}

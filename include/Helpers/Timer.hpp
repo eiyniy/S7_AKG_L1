@@ -6,7 +6,7 @@ class Timer
 {
     static std::chrono::time_point<std::chrono::high_resolution_clock> timeStart;
     static long long nsCount;
-    static int callsCount;
+    static long long callsCount;
 
 public:
     static void start();

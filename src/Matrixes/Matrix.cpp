@@ -11,7 +11,7 @@ Matrix<Rows, Cols>::Matrix()
     for (int i = 0; i < Rows; ++i)
     {
         for (int j = 0; j < Cols; ++j)
-            values[i][j] = 0;
+            getValue(i, j) = 0;
     }
 }
 
@@ -23,27 +23,20 @@ Matrix<Rows, Cols>::Matrix(
     const double w)
     requires(Rows == 4 && Cols == 1)
 {
-    values[0][0] = x;
-    values[1][0] = y;
-    values[2][0] = z;
-    values[3][0] = w;
+    getX() = x;
+    getY() = y;
+    getZ() = z;
+    getW() = w;
 };
-
-template <int Rows, int Cols>
-Matrix<Rows, Cols>::~Matrix()
-{
-}
 
 // TODO: FIX STRORAGE ALLOCATION
 template <int Rows, int Cols>
 Matrix<Rows, Cols>::Matrix(const Matrix &m)
 {
-    values = std::array<std::array<double, Cols>, Rows>();
-
     for (int i = 0; i < Rows; ++i)
     {
         for (int j = 0; j < Cols; ++j)
-            values[i][j] = m.values[i][j];
+            getValue(i, j) = m.cGetValue(i, j);
     }
 }
 
@@ -60,7 +53,7 @@ Matrix<Rows, Cols> &Matrix<Rows, Cols>::operator=(const Matrix &m)
     for (int i = 0; i < Rows; ++i)
     {
         for (int j = 0; j < Cols; ++j)
-            values[i][j] = m.values[i][j];
+            getValue(i, j) = m.cGetValue(i, j);
     }
 
     return *this;
@@ -72,7 +65,7 @@ Matrix<Rows, Cols> &Matrix<Rows, Cols>::operator+=(const Matrix &m)
     for (int i = 0; i < Rows; ++i)
     {
         for (int j = 0; j < Cols; ++j)
-            values[i][j] += m.values[i][j];
+            getValue(i, j) += m.cGetValue(i, j);
     }
 
     return *this;
@@ -84,7 +77,7 @@ Matrix<Rows, Cols> &Matrix<Rows, Cols>::operator-=(const Matrix &m)
     for (int i = 0; i < Rows; ++i)
     {
         for (int j = 0; j < Cols; ++j)
-            values[i][j] -= m.values[i][j];
+            getValue(i, j) -= m.cGetValue(i, j);
     }
 
     return *this;
@@ -104,7 +97,7 @@ Matrix<Rows, Cols> &Matrix<Rows, Cols>::operator+=(const double v)
     for (int i = 0; i < Rows; ++i)
     {
         for (int j = 0; j < Cols; ++j)
-            values[i][j] += v;
+            getValue(i, j) += v;
     }
 
     return *this;
@@ -116,7 +109,7 @@ Matrix<Rows, Cols> &Matrix<Rows, Cols>::operator-=(const double v)
     for (int i = 0; i < Rows; ++i)
     {
         for (int j = 0; j < Cols; ++j)
-            values[i][j] -= v;
+            getValue(i, j) -= v;
     }
 
     return *this;
@@ -128,7 +121,7 @@ Matrix<Rows, Cols> &Matrix<Rows, Cols>::operator*=(const double v)
     for (int i = 0; i < Rows; ++i)
     {
         for (int j = 0; j < Cols; ++j)
-            values[i][j] *= v;
+            getValue(i, j) *= v;
     }
 
     return *this;
@@ -140,7 +133,7 @@ Matrix<Rows, Cols> &Matrix<Rows, Cols>::operator/=(const double v)
     for (int i = 0; i < Rows; ++i)
     {
         for (int j = 0; j < Cols; ++j)
-            values[i][j] /= v;
+            getValue(i, j) /= v;
     }
 
     return *this;
@@ -200,7 +193,7 @@ Matrix<Rows, Cols2> Matrix<Rows, Cols>::operator*(const Matrix<Rows2, Cols2> &m)
         for (int k = 0; k < Cols; ++k)
         {
             for (int j = 0; j < Cols2; ++j)
-                temp.getValue(i, j) += (values[i][k] * m.cGetValue(k, j));
+                temp.getValue(i, j) += cGetValue(i, k) * m.cGetValue(k, j);
         }
     }
 
@@ -212,81 +205,13 @@ Matrix<Rows, Cols2> Matrix<Rows, Cols>::operator*(const Matrix<Rows2, Cols2> &m)
 #pragma region FUNCTIONS
 
 template <int Rows, int Cols>
-double &Matrix<Rows, Cols>::getValue(const int i, const int j)
-{
-    return values[i][j];
-}
-
-template <int Rows, int Cols>
-const double &Matrix<Rows, Cols>::cGetValue(const int i, const int j) const
-{
-    return values[i][j];
-}
-
-template <int Rows, int Cols>
-const double Matrix<Rows, Cols>::cGetX() const
-    requires(Rows == 4 && Cols == 1)
-{
-    return values[0][0];
-}
-
-template <int Rows, int Cols>
-const double Matrix<Rows, Cols>::cGetY() const
-    requires(Rows == 4 && Cols == 1)
-{
-    return values[1][0];
-}
-
-template <int Rows, int Cols>
-const double Matrix<Rows, Cols>::cGetZ() const
-    requires(Rows == 4 && Cols == 1)
-{
-    return values[2][0];
-}
-
-template <int Rows, int Cols>
-const double Matrix<Rows, Cols>::cGetW() const
-    requires(Rows == 4 && Cols == 1)
-{
-    return values[3][0];
-}
-
-template <int Rows, int Cols>
-double &Matrix<Rows, Cols>::getX()
-    requires(Rows == 4 && Cols == 1)
-{
-    return values[0][0];
-}
-
-template <int Rows, int Cols>
-double &Matrix<Rows, Cols>::getY()
-    requires(Rows == 4 && Cols == 1)
-{
-    return values[1][0];
-}
-
-template <int Rows, int Cols>
-double &Matrix<Rows, Cols>::getZ()
-    requires(Rows == 4 && Cols == 1)
-{
-    return values[2][0];
-}
-
-template <int Rows, int Cols>
-double &Matrix<Rows, Cols>::getW()
-    requires(Rows == 4 && Cols == 1)
-{
-    return values[3][0];
-}
-
-template <int Rows, int Cols>
 const double Matrix<Rows, Cols>::scalarMultiply(const Matrix<4, 1> &vector) const
     requires(Rows == 4 && Cols == 1)
 {
     double result = 0;
 
     for (int i = 0; i < Rows; ++i)
-        result += values[i][0] * vector.values[i][0];
+        result += values[i] * vector.values[i];
 
     return result;
 }
@@ -313,9 +238,9 @@ const double Matrix<Rows, Cols>::getLength()
         return *length;
 
     length = sqrt(
-        pow(values[0][0], 2) +
-        pow(values[1][0], 2) +
-        pow(values[2][0], 2));
+        pow(values[0], 2) +
+        pow(values[1], 2) +
+        pow(values[2], 2));
 
     return *length;
 }
@@ -437,7 +362,7 @@ Matrix<4, 4> Matrix<Rows, Cols>::getObserverConvert(const Matrix<4, 1> &eye, con
 template <int Rows, int Cols>
 Matrix<4, 4> Matrix<Rows, Cols>::getProjectionConvert(const double fov, const double aspect, const double zFar, const double zNear)
 {
-    auto halfTanFov = tan(fov / 2);
+    const auto halfTanFov = tan(fov / 2);
 
     return getConvertMatrix(
         {1.0 / (aspect * halfTanFov), 0, 0, 0},
@@ -462,7 +387,7 @@ void Matrix<Rows, Cols>::log()
     for (auto i = 0; i < Rows; ++i)
     {
         for (auto j = 0; j < Cols; ++j)
-            std::cout << values[i][j] << ' ';
+            std::cout << cGetValue(i, j) << ' ';
         std::cout << std::endl;
     }
 

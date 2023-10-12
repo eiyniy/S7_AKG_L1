@@ -21,7 +21,7 @@ class Polygon
 {
 public:
     Polygon(const std::string &line);
-    Polygon(const std::vector<VertexIndexes> indexes);
+    Polygon(const std::vector<VertexIndexes> &indexes);
 
     const int cGetVertexIndexesCount() const;
     const VertexIndexes &cGetVertexIndexes(const int i) const;

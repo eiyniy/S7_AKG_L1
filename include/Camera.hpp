@@ -27,3 +27,43 @@ public:
     Matrix<4, 1> &getTarget();
     Dot &getResolution();
 };
+
+inline Matrix<4, 1> &Camera::getPosition()
+{
+    return position;
+}
+
+inline Matrix<4, 1> &Camera::getTarget()
+{
+    return target;
+}
+
+inline const Matrix<4, 1> &Camera::cGetPosition() const
+{
+    return position;
+}
+
+inline const Matrix<4, 1> &Camera::cGetTarget() const
+{
+    return target;
+}
+
+inline const Dot &Camera::cGetResolution() const
+{
+    return resolution;
+}
+
+inline Dot &Camera::getResolution()
+{
+    return resolution;
+}
+
+inline const int Camera::getFOV() const
+{
+    return fov;
+}
+
+inline const double Camera::getAspect() const
+{
+    return ((double)resolution.x) / resolution.y;
+}

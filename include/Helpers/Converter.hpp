@@ -9,6 +9,5 @@ public:
     static Matrix<4, 1> vertexToMatrix(const Vertex &value);
     static Vertex matrixToVertex(
         const Matrix<4, 1> &value,
-        const bool isOutOfScreen,
-        const bool isWNegative);
+        const bool isOutOfScreen);
 };

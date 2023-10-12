@@ -46,8 +46,6 @@ void MainWindow::startLoop()
             break;
         case sf::Event::Resized:
         {
-            scene.getCamera().getResolution() = Dot(event.size.width, event.size.height);
-
             delete[] pixels;
             pixels = new sf::Uint8[event.size.width * event.size.height * 4];
 
@@ -57,7 +55,7 @@ void MainWindow::startLoop()
             auto view = sf::View(sf::FloatRect(0, 0, event.size.width, event.size.height));
             window.setView(view);
 
-            scene.convertAllModels();
+            scene.resize(event.size.width, event.size.height);
 
             break;
         }
@@ -110,7 +108,7 @@ void MainWindow::startLoop()
 
         if (isCameraMoving)
         {
-            auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
+            auto transition = scene.getTransition(moveAxis, moveDirection, dt);
             scene.moveCamera(transition);
         }
         else if (isCameraRotatingAround)
@@ -119,10 +117,8 @@ void MainWindow::startLoop()
         }
         else if (isObjectMoving)
         {
-            auto transition = scene.getMoveConvert(moveAxis, moveDirection, dt);
-            scene.getObjectShift(scene.getSelectedObjectName()) =
-                scene.getObjectShift(scene.getSelectedObjectName()) +
-                transition;
+            auto transition = scene.getTransition(moveAxis, moveDirection, dt);
+            scene.moveObject(scene.getSelectedObjectName(), transition);
         }
         else if (isCentering)
         {
@@ -133,86 +129,8 @@ void MainWindow::startLoop()
             scene.convertAllModels();
 
         drawAllModels();
-        window.display();
 
         dt = clock.restart().asMilliseconds();
-    }
-}
-
-void MainWindow::drawLineBR_1(
-    sf::Uint8 *pixels,
-    const Dot p1,
-    const Dot p2,
-    const sf::Color color)
-{
-    int x1 = p1.x;
-    int y1 = p1.y;
-
-    const Dot resolution = scene.cGetCamera().cGetResolution();
-    const int deltaX = abs(p2.x - x1);
-    const int deltaY = abs(p2.y - y1);
-    const int signX = x1 < p2.x ? 1 : -1;
-    const int signY = y1 < p2.y ? 1 : -1;
-
-    int error = deltaX - deltaY;
-
-    if (p2.x < resolution.x && p2.y < resolution.y && p2.x > 0 && p2.y > 0)
-        drawPixel(p2.x, p2.y, color, resolution);
-
-    while (x1 != p2.x || y1 != p2.y)
-    {
-        if (x1 < resolution.x && y1 < resolution.y && x1 > 0 && y1 > 0)
-            drawPixel(x1, y1, color, resolution);
-
-        int error2 = error * 2;
-        if (error2 > -deltaY)
-        {
-            error -= deltaY;
-            x1 += signX;
-        }
-        if (error2 < deltaX)
-        {
-            error += deltaX;
-            y1 += signY;
-        }
-    }
-}
-
-void MainWindow::drawLineDDA(
-    sf::Uint8 *pixels,
-    const Dot p1,
-    const Dot p2,
-    const sf::Color color)
-{
-    const Dot resolution = scene.cGetCamera().cGetResolution();
-
-    int deltaX = abs(p1.x - p2.x);
-    int deltaY = abs(p1.y - p2.y);
-
-    int length = std::max(deltaX, deltaY);
-
-    if (length == 0)
-    {
-        if (p1.x < resolution.x && p1.y < resolution.y && p1.x > 0 && p1.y > 0)
-            drawPixel(p1.x, p1.y, color, resolution);
-
-        return;
-    }
-
-    const int dX = (p2.x - p1.x) / length;
-    const int dY = (p2.y - p1.y) / length;
-
-    int x = p1.x;
-    int y = p1.y;
-
-    length++;
-    while (length--)
-    {
-        if (x < resolution.x && y < resolution.y && x > 0 && y > 0)
-            drawPixel(x, y, color, resolution);
-
-        x += dX;
-        y += dY;
     }
 }
 
@@ -237,11 +155,12 @@ void MainWindow::drawAllModels()
 
     bufferTexture.update(pixels);
     window.draw(bufferSprite);
+    window.display();
 }
 
 void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &viewportVertices)
 {
-    auto color = objInfo.getColor();
+    auto color = &objInfo.getColor();
     const Dot resolution = scene.cGetCamera().cGetResolution();
 
     /*
@@ -262,78 +181,120 @@ void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &vi
     {
         auto vIndexesCount = polygon.cGetVertexIndexesCount();
         bool isPolygonVisible = false;
-        // bool isPolygonVisible = true;
 
         for (int i = 0; i < vIndexesCount; ++i)
             isPolygonVisible |= !viewportVertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1].cGetIsOutOfScreen();
-        // isPolygonVisible &= !viewportVertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1].cGetIsOutOfScreen();
 
         if (!isPolygonVisible)
             continue;
 
-        auto polygonVertices = std::vector<sf::Vertex>();
-        polygonVertices.reserve(vIndexesCount);
+        auto polygonVertices = std::vector<Vertex>(vIndexesCount);
 
-        for (int i = 0, j = -1; i < vIndexesCount; ++i)
+        for (int i = 0; i < vIndexesCount; ++i)
         {
             auto vertex = viewportVertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1];
-            if (vertex.cGetIsWNegative())
+            polygonVertices[i] = vertex;
+
+            if (i < 1)
                 continue;
-
-            polygonVertices.emplace_back(
-                sf::Vertex(
-                    sf::Vector2f(
-                        vertex.cGetX(),
-                        vertex.cGetY()),
-                    color));
-            ++j;
-
-            if (polygonVertices.size() < 2)
-                continue;
-
-            // auto line = std::array<sf::Vertex, 2>{
-            //     polygonVertices[j - 1],
-            //     polygonVertices[j]};
-            // window.draw(line.data(), 2, sf::Lines);
 
             drawLineBR_1(
                 pixels,
-                Dot(polygonVertices[j - 1].position.x,
-                    polygonVertices[j - 1].position.y),
-                Dot(polygonVertices[j].position.x,
-                    polygonVertices[j].position.y),
+                polygonVertices[i - 1],
+                polygonVertices[i],
                 color);
         }
 
-        if (!(viewportVertices[polygon.cGetVertexIndexes(0).cGetVertexId() - 1].cGetIsWNegative() &&
-              viewportVertices[polygon.cGetVertexIndexes(vIndexesCount - 1).cGetVertexId() - 1].cGetIsWNegative() &&
-              polygonVertices.size() > 1))
-            continue;
-
-        // auto line = std::array<sf::Vertex, 2>{
-        //     *(polygonVertices.cend() - 1),
-        //     *polygonVertices.cbegin()};
-        // window.draw(line.data(), 2, sf::Lines);
-
         drawLineBR_1(
             pixels,
-            Dot((polygonVertices.cend() - 1)->position.x,
-                (polygonVertices.cend() - 1)->position.y),
-            Dot(polygonVertices.cbegin()->position.x,
-                polygonVertices.cbegin()->position.y),
+            *(polygonVertices.cend() - 1),
+            *polygonVertices.cbegin(),
             color);
     }
     // */
 }
 
-void MainWindow::drawPixel(
-    const int x,
-    const int y,
-    sf::Color color,
-    const Dot resolution)
+void MainWindow::drawLineBR_1(
+    sf::Uint8 *pixels,
+    const Vertex &v1,
+    const Vertex &v2,
+    const sf::Color *color)
 {
-    pixels[4 * (y * resolution.x + x)] = color.r;     // R
-    pixels[4 * (y * resolution.x + x) + 1] = color.g; // G
-    pixels[4 * (y * resolution.x + x) + 2] = color.b; // B
-    pixels[4 * (y * resolution.x + x) + 3] = color.a; // A
+    int x1 = v1.cGetX();
+    int y1 = v1.cGetY();
+
+    const Dot resolution = scene.cGetCamera().cGetResolution();
+    const int x2 = v2.cGetX();
+    const int y2 = v2.cGetY();
+    const int deltaX = abs(x2 - x1);
+    const int deltaY = abs(y2 - y1);
+    const int signX = x1 < x2 ? 1 : -1;
+    const int signY = y1 < y2 ? 1 : -1;
+
+    int error = deltaX - deltaY;
+
+    if (x2 < resolution.x && y2 < resolution.y && x2 > 0 && y2 > 0)
+        drawPixel(x2, y2, color, resolution.x);
+
+    // Timer::start();
+
+    while (x1 != x2 || y1 != y2)
+    {
+        if (x1 < resolution.x && y1 < resolution.y && x1 > 0 && y1 > 0)
+            drawPixel(x1, y1, color, resolution.x);
+
+        const int error2 = error * 2;
+        if (error2 > -deltaY)
+        {
+            error -= deltaY;
+            x1 += signX;
+        }
+        if (error2 < deltaX)
+        {
+            error += deltaX;
+            y1 += signY;
+        }
+    }
+
+    // Timer::stop();
+}
+
+void MainWindow::drawLineDDA(
+    sf::Uint8 *pixels,
+    const Vertex &v1,
+    const Vertex &v2,
+    const sf::Color *color)
+{
+    const Dot resolution = scene.cGetCamera().cGetResolution();
+    const int x2 = v2.cGetX();
+    const int y2 = v2.cGetY();
+
+    int x1 = v1.cGetX();
+    int y1 = v1.cGetY();
+
+    int deltaX = abs(x1 - x2);
+    int deltaY = abs(y1 - y2);
+
+    int length = std::max(deltaX, deltaY);
+
+    if (length == 0)
+    {
+        if (x1 < resolution.x && y1 < resolution.y && x1 > 0 && y1 > 0)
+            drawPixel(x1, y1, color, resolution.x);
+
+        return;
+    }
+
+    const int dX = (x2 - x1) / length;
+    const int dY = (y2 - y1) / length;
+
+    length++;
+    while (length--)
+    {
+        if (x1 < resolution.x && y1 < resolution.y && x1 > 0 && y1 > 0)
+            drawPixel(x1, y1, color, resolution.x);
+
+        x1 += dX;
+        y1 += dY;
+    }
 }

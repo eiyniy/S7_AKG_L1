@@ -23,6 +23,20 @@ private:
 
     Matrix<4, 1> &up;
 
+    bool isMoveChanged;
+    bool isRotateChanged;
+    bool isScaleChanged;
+    bool isObserverChanged;
+    bool isProjectionChanged;
+    bool isWindowChanged;
+
+    Matrix<4, 4> moveConvertCached;
+    Matrix<4, 4> rotateConvertCached;
+    Matrix<4, 4> scaleConvertCached;
+    Matrix<4, 4> observerConvertCached;
+    Matrix<4, 4> projectionConvertCached;
+    Matrix<4, 4> windowConvertCached;
+
     void generateFloor();
     void generateFloor(const int size, const int step);
 
@@ -40,7 +54,7 @@ public:
 
     ~Scene();
 
-    Matrix<4, 1> getMoveConvert(
+    Matrix<4, 1> getTransition(
         const AxisName axis,
         const Direction direction,
         const int dt);
@@ -49,21 +63,24 @@ public:
     void convertModel(
         std::vector<Vertex> &result,
         const std::vector<Vertex> &vertices,
-        const std::optional<Matrix<4, 1>> &moveConvert = std::nullopt);
+        const Matrix<4, 1> &objectShift);
 
     void centralizeCamera();
-    void rotateCamera(const AxisName axisName, const double angle);
     void rotateCameraAround(
         const AxisName axisName,
         const Direction direction,
         const int dt);
     void moveCamera(const Matrix<4, 1> &transition);
 
-    ObjInfo *getObject(const std::string key);
-    void addObject(const std::string key, ObjInfo *object);
+    void moveObject(const std::string &objectName, const Matrix<4, 1> &transition);
 
-    Matrix<4, 1> &getObjectShift(const std::string key);
-    std::vector<Vertex> &getObjectConvertedVertices(const std::string key);
+    void resize(const int width, const int height);
+
+    ObjInfo *getObject(const std::string &key);
+    void addObject(const std::string &key, ObjInfo *object);
+
+    Matrix<4, 1> &getObjectShift(const std::string &key);
+    std::vector<Vertex> &getObjectConvertedVertices(const std::string &key);
 
     const std::vector<std::string> getAllObjectNames() const;
     const std::string getSelectedObjectName() const;
