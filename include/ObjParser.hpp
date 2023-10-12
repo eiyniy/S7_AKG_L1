@@ -6,13 +6,14 @@
 #include <optional>
 #include <fstream>
 #include <vector>
+#include <memory>
 
 class ObjParser
 {
 public:
     ObjParser(std::string p_pathToFile);
 
-    std::string *readFile();
+    std::unique_ptr<std::string> readFile();
     ObjInfo *parseEntries(const std::string &fileContent);
     void parseEntry(const std::string &line, ObjInfo *result) const;
 

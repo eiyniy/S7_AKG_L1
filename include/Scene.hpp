@@ -10,7 +10,7 @@
 class Scene
 {
 private:
-    const int floorStepsCount = 20;
+    const int floorStepsCount = 30;
 
     std::string selectedObjectName;
     std::map<std::string, ObjInfo *> objects;
@@ -38,7 +38,7 @@ private:
     Matrix<4, 4> windowConvertCached;
 
     void generateFloor();
-    void generateFloor(const int size, const int step);
+    void generateFloor(const int size, const int step, const Dot &center);
 
 public:
     const std::string floorObjectName = "_FLOOR";

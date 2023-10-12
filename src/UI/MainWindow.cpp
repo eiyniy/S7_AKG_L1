@@ -8,13 +8,15 @@ MainWindow::MainWindow(Scene &p_scene)
           sf::VideoMode(
               p_scene.cGetCamera().cGetResolution().x,
               p_scene.cGetCamera().cGetResolution().y),
-          "SFML Graphics")),
+          "SFML Graphics",
+          sf::Style::Fullscreen)),
       scene(p_scene),
       isCameraMoving(false),
       isObjectMoving(false),
       isCameraRotating(false),
       isCameraRotatingAround(false),
-      isCentering(false)
+      isCentering(false),
+      isFullscreen(true)
 {
     window.setFramerateLimit(scene.defaultFps);
 
@@ -46,17 +48,7 @@ void MainWindow::startLoop()
             break;
         case sf::Event::Resized:
         {
-            delete[] pixels;
-            pixels = new sf::Uint8[event.size.width * event.size.height * 4];
-
-            bufferTexture.create(event.size.width, event.size.height);
-            bufferSprite.setTexture(bufferTexture, true);
-
-            auto view = sf::View(sf::FloatRect(0, 0, event.size.width, event.size.height));
-            window.setView(view);
-
-            scene.resize(event.size.width, event.size.height);
-
+            resize(event.size.width, event.size.height);
             break;
         }
         case sf::Event::KeyPressed:
@@ -86,6 +78,8 @@ void MainWindow::startLoop()
                 moveAxis = AxisName::Z;
             else if (event.key.code == sf::Keyboard::C && event.key.control)
                 isCentering = true;
+            else if (event.key.code == sf::Keyboard::F11)
+                resize();
 
             break;
 
@@ -212,6 +206,42 @@ void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &vi
             color);
     }
     // */
+}
+
+void MainWindow::resize()
+{
+    if (isFullscreen)
+    {
+        window.create(
+            sf::VideoMode(1280, 720),
+            "SFML Graphics",
+            sf::Style::Default);
+        resize(1280, 720);
+        isFullscreen = false;
+    }
+    else
+    {
+        window.create(
+            sf::VideoMode::getDesktopMode(),
+            "SFML Graphics",
+            sf::Style::Fullscreen);
+        resize(1920, 1080);
+        isFullscreen = true;
+    }
+}
+
+void MainWindow::resize(const int width, const int height)
+{
+    delete[] pixels;
+    pixels = new sf::Uint8[width * height * 4];
+
+    bufferTexture.create(width, height);
+    bufferSprite.setTexture(bufferTexture, true);
+
+    auto view = sf::View(sf::FloatRect(0, 0, width, height));
+    window.setView(view);
+
+    scene.resize(width, height);
 }
 
 void MainWindow::drawLineBR_1(

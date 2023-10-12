@@ -3,9 +3,7 @@
 #include <Timer.hpp>
 #include <optional>
 #include <filesystem>
-#include <functional>
 #include <iostream>
-#include <stdexcept>
 #include <sstream>
 
 ObjParser::ObjParser(std::string p_pathToFile)
@@ -119,11 +117,11 @@ void ObjParser::parseEntry(const std::string &line, ObjInfo *result) const
     }
 }
 
-std::string *ObjParser::readFile()
+std::unique_ptr<std::string> ObjParser::readFile()
 {
     readStream.seekg(0, std::ios::end);
     auto size = readStream.tellg();
-    auto buffer = new std::string(size, ' ');
+    auto buffer = std::make_unique<std::string>(std::string(size, ' '));
     readStream.seekg(0);
     readStream.read(&((*buffer)[0]), size);
 

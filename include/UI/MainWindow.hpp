@@ -13,6 +13,9 @@ public:
     void drawAllModels();
 
 private:
+    void resize();
+    void resize(const int width, const int height);
+
     void drawLineBR_1(
         sf::Uint8 *pixels,
         const Vertex &v1,
@@ -36,6 +39,8 @@ private:
         isCameraRotatingAround,
         isObjectMoving,
         isCentering;
+
+    bool isFullscreen;
 
     Scene &scene;
 
