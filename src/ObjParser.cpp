@@ -1,5 +1,5 @@
 #include <ObjParser.hpp>
-#include <Types.hpp>
+#include <Enums.hpp>
 #include <Timer.hpp>
 #include <optional>
 #include <filesystem>

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <format>
 #include <Matrix.hpp>
 #include <Converter.hpp>
 
@@ -222,6 +223,11 @@ const Matrix<4, 1> Matrix<Rows, Cols>::vectorMultiply(const Matrix<4, 1> &vector
 {
     Matrix<4, 1> temp;
 
+    // temp.values[0] = cGetY() * vector.cGetZ() - cGetZ() * vector.cGetY();
+    // temp.values[1] = cGetZ() * vector.cGetX() - cGetX() * vector.cGetZ();
+    // temp.values[2] = cGetX() * vector.cGetY() - cGetY() * vector.cGetX();
+    // temp.values[3] = 1;
+
     temp.getValue(0, 0) = (cGetY() * vector.cGetZ()) - (cGetZ() * vector.cGetY());
     temp.getValue(1, 0) = (cGetZ() * vector.cGetX()) - (cGetX() * vector.cGetZ());
     temp.getValue(2, 0) = (cGetX() * vector.cGetY()) - (cGetY() * vector.cGetX());
@@ -250,7 +256,7 @@ void Matrix<Rows, Cols>::normalize()
     requires(Rows == 4 && Cols == 1)
 {
     if (getLength() != 0.f)
-        *this = *this * (1 / getLength());
+        *this /= getLength();
     else
         *this = Matrix<Rows, Cols>();
 }
@@ -342,7 +348,7 @@ Matrix<4, 4> Matrix<Rows, Cols>::getRotateConvert(const AxisName axis, const dou
 }
 
 template <int Rows, int Cols>
-Matrix<4, 4> Matrix<Rows, Cols>::getObserverConvert(const Matrix<4, 1> &eye, const Matrix<4, 1> &target, const Matrix<4, 1> &up)
+Matrix<4, 4> Matrix<Rows, Cols>::getViewConvert(const Matrix<4, 1> &eye, const Matrix<4, 1> &target, const Matrix<4, 1> &up)
 {
     Matrix<4, 1> zAxis = eye - target;
     Matrix<4, 1> xAxis = up.vectorMultiply(zAxis);
@@ -372,7 +378,7 @@ Matrix<4, 4> Matrix<Rows, Cols>::getProjectionConvert(const double fov, const do
 }
 
 template <int Rows, int Cols>
-Matrix<4, 4> Matrix<Rows, Cols>::getWindowConvert(const double width, const double height, const double xMin, const double yMin)
+Matrix<4, 4> Matrix<Rows, Cols>::getViewportConvert(const double width, const double height, const double xMin, const double yMin)
 {
     return getConvertMatrix(
         {width / 2, 0, 0, 0},
@@ -382,7 +388,7 @@ Matrix<4, 4> Matrix<Rows, Cols>::getWindowConvert(const double width, const doub
 }
 
 template <int Rows, int Cols>
-void Matrix<Rows, Cols>::log()
+void Matrix<Rows, Cols>::log() const
 {
     for (auto i = 0; i < Rows; ++i)
     {
@@ -390,6 +396,15 @@ void Matrix<Rows, Cols>::log()
             std::cout << cGetValue(i, j) << ' ';
         std::cout << std::endl;
     }
+
+    std::cout << std::endl;
+}
+
+template <>
+void Matrix<4, 1>::log() const
+{
+    for (auto i = 0; i < 4; ++i)
+        std::cout << std::format("{:5.3f}", values[i]) << ' ';
 
     std::cout << std::endl;
 }

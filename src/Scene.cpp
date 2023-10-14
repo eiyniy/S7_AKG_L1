@@ -1,6 +1,7 @@
 #include <iostream>
 #include <future>
 #include <thread>
+#include <memory>
 #include <Scene.hpp>
 #include <Converter.hpp>
 #include <Timer.hpp>
@@ -15,14 +16,9 @@ Scene::Scene(
       up(p_up),
       moveSpeed(p_moveSpeed),
       rotationSpeed(p_rotationSpeed),
-      isMoveChanged(true),
-      isRotateChanged(true),
-      isScaleChanged(true),
-      isObserverChanged(true),
-      isProjectionChanged(true),
-      isWindowChanged(true)
+      converts({p_camera, p_up})
 {
-    generateFloor(25, 20, Dot(0, 0));
+    generateFloor(25, 20, Point(0, 0));
     convertAllModels();
 }
 
@@ -35,7 +31,7 @@ Scene::~Scene()
 void Scene::generateFloor()
 {
     double maxDimensionSize = 0;
-    auto center = Dot(0, 0);
+    auto center = Point(0, 0);
 
     for (auto pair : objects)
     {
@@ -52,7 +48,10 @@ void Scene::generateFloor()
         if (biggerDimensionSize > maxDimensionSize)
         {
             maxDimensionSize = biggerDimensionSize;
-            center = Converter::vertexToDot(pair.second->getCenter());
+
+            center = Point(
+                pair.second->getCenter().cGetX(),
+                pair.second->getCenter().cGetZ());
         }
     }
 
@@ -62,7 +61,7 @@ void Scene::generateFloor()
     generateFloor(floorStepsCount, ceil(step), center);
 }
 
-void Scene::generateFloor(const int size, const int step, const Dot &center)
+void Scene::generateFloor(const int size, const int step, const Point &center)
 {
     auto color = sf::Color(255U, 255U, 255U, 64U);
     auto floorPt = new ObjInfo(color);
@@ -73,7 +72,7 @@ void Scene::generateFloor(const int size, const int step, const Dot &center)
     for (int i = -halfSize; i <= halfSize; ++i)
     {
         for (int j = -halfSize; j <= halfSize; ++j)
-            floorPt->addVertex(Vertex(j * step + center.x, 0, i * step + center.y));
+            floorPt->addVertex(Vertex(j * step + center.cGetX(), 0, i * step + center.cGetY()));
     }
 
     for (int i = 0; i < evenSize - 1; ++i)
@@ -103,22 +102,6 @@ void Scene::generateFloor(const int size, const int step, const Dot &center)
 
 void Scene::convertAllModels()
 {
-    if (isObserverChanged)
-    {
-        observerConvertCached = Matrix<4, 4>::getObserverConvert(camera.cGetPosition(), camera.cGetTarget(), up);
-        isObserverChanged = false;
-    }
-    if (isProjectionChanged)
-    {
-        projectionConvertCached = Matrix<4, 4>::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2000, 0.1);
-        isProjectionChanged = false;
-    }
-    if (isWindowChanged)
-    {
-        windowConvertCached = Matrix<4, 4>::getWindowConvert(camera.cGetResolution().x, camera.cGetResolution().y, 0, 0);
-        isWindowChanged = false;
-    }
-
     for (auto pair : objects)
     {
         convertModel(
@@ -128,19 +111,15 @@ void Scene::convertAllModels()
     }
 }
 
-// TODO: Replace rotateConvert with RotateInfo type {AxisName & angle}
 void Scene::convertModel(
     std::vector<Vertex> &result,
     const std::vector<Vertex> &vertices,
     const Matrix<4, 1> &objectShift)
 {
-    if (isMoveChanged)
-    {
-        moveConvertCached = Matrix<4, 4>::getMoveConvert(objectShift);
-        isMoveChanged = false;
-    }
-
-    const auto convertMatrix = projectionConvertCached * observerConvertCached * moveConvertCached;
+    const auto convertMatrix =
+        *converts.getProjectionConvert() *
+        *converts.getViewConvert() *
+        *converts.getMoveConvert(std::make_unique<Matrix<4, 1>>(objectShift));
 
     int i = 0;
     for (auto it = vertices.begin(); it < vertices.cend(); ++it, ++i)
@@ -161,7 +140,7 @@ void Scene::convertModel(
             mVertex.cGetZ() < 0 || mVertex.cGetZ() > 1)
             isOutOfScreen = true;
 
-        mVertex = windowConvertCached * mVertex;
+        mVertex = *converts.getViewportConvert() * mVertex;
 
         result[i] = Converter::matrixToVertex(mVertex, isOutOfScreen);
     }
@@ -173,7 +152,7 @@ void Scene::centralizeCamera()
         Converter::vertexToMatrix(objects.at(selectedObjectName)->getCenter()) +
         objectsShift.at(selectedObjectName);
 
-    isObserverChanged = true;
+    converts.setChanged(MatrixConvert::View, true);
 }
 
 void Scene::rotateCameraAround(
@@ -196,7 +175,7 @@ void Scene::rotateCameraAround(
     cameraRelative = Math::sphericalToDecart(spherical);
     camera.getPosition() = cameraRelative + camera.cGetTarget();
 
-    isObserverChanged = true;
+    converts.setChanged(MatrixConvert::View, true);
 }
 
 void Scene::moveCamera(const Matrix<4, 1> &transition)
@@ -204,22 +183,22 @@ void Scene::moveCamera(const Matrix<4, 1> &transition)
     camera.getTarget() = camera.cGetTarget() + transition;
     camera.getPosition() = camera.cGetPosition() + transition;
 
-    isObserverChanged = true;
+    converts.setChanged(MatrixConvert::View, true);
 }
 
 void Scene::moveObject(const std::string &objectName, const Matrix<4, 1> &transition)
 {
     getObjectShift(objectName) += transition;
 
-    isMoveChanged = true;
+    converts.setChanged(MatrixConvert::Move, true);
 }
 
 void Scene::resize(const int width, const int height)
 {
-    camera.getResolution() = Dot(width, height);
+    camera.getResolution() = Point(width, height);
 
-    isProjectionChanged = true;
-    isWindowChanged = true;
+    converts.setChanged(MatrixConvert::Projection, true);
+    converts.setChanged(MatrixConvert::Viewport, true);
 
     convertAllModels();
 }

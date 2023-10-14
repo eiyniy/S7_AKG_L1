@@ -3,159 +3,22 @@
 #include <Timer.hpp>
 #include <Converter.hpp>
 
-MainWindow::MainWindow(Scene &p_scene)
+MainWindow::MainWindow(Point &p_resolution)
     : window(sf::RenderWindow(
-          sf::VideoMode(
-              p_scene.cGetCamera().cGetResolution().x,
-              p_scene.cGetCamera().cGetResolution().y),
+          sf::VideoMode(p_resolution.cGetX(), p_resolution.cGetY()),
           "SFML Graphics",
           sf::Style::Fullscreen)),
-      scene(p_scene),
-      isCameraMoving(false),
-      isObjectMoving(false),
-      isCameraRotating(false),
-      isCameraRotatingAround(false),
-      isCentering(false),
-      isFullscreen(true)
+      isFullscreen(true),
+      resolution(p_resolution)
 {
-    window.setFramerateLimit(scene.defaultFps);
-
-    auto resolution = scene.cGetCamera().cGetResolution();
-
-    pixels = new sf::Uint8[resolution.x * resolution.y * 4];
-    bufferTexture.create(resolution.x, resolution.y);
+    pixels = new sf::Uint8[resolution.cGetX() * resolution.cGetY() * 4];
+    bufferTexture.create(resolution.cGetX(), resolution.cGetY());
     bufferSprite.setTexture(bufferTexture, true);
-}
-
-void MainWindow::startLoop()
-{
-    sf::Clock clock;
-    float dt = 0.f;
-    auto moveAxis = AxisName::X;
-    auto moveDirection = Direction::Forward;
-
-    scene.convertAllModels();
-
-    sf::Event event;
-    while (window.isOpen())
-    {
-        window.pollEvent(event);
-
-        switch (event.type)
-        {
-        case sf::Event::Closed:
-            window.close();
-            break;
-        case sf::Event::Resized:
-        {
-            resize(event.size.width, event.size.height);
-            break;
-        }
-        case sf::Event::KeyPressed:
-            if (event.key.code == sf::Keyboard::Up ||
-                event.key.code == sf::Keyboard::Right ||
-                event.key.code == sf::Keyboard::Down ||
-                event.key.code == sf::Keyboard::Left)
-            {
-                if (event.key.control && !event.key.alt)
-                    isObjectMoving = true;
-                else if (!event.key.control && event.key.alt)
-                    isCameraRotating = true;
-                else if (event.key.control && event.key.alt)
-                    isCameraRotatingAround = true;
-                else if (!event.key.control && !event.key.alt)
-                    isCameraMoving = true;
-                if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::Right)
-                    moveDirection = Direction::Forward;
-                else if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::Left)
-                    moveDirection = Direction::Backward;
-            }
-            else if (event.key.code == sf::Keyboard::X)
-                moveAxis = AxisName::X;
-            else if (event.key.code == sf::Keyboard::Y)
-                moveAxis = AxisName::Y;
-            else if (event.key.code == sf::Keyboard::Z)
-                moveAxis = AxisName::Z;
-            else if (event.key.code == sf::Keyboard::C && event.key.control)
-                isCentering = true;
-            else if (event.key.code == sf::Keyboard::F11)
-                resize();
-
-            break;
-
-        case sf::Event::KeyReleased:
-            if (event.key.code == sf::Keyboard::Up ||
-                event.key.code == sf::Keyboard::Right ||
-                event.key.code == sf::Keyboard::Down ||
-                event.key.code == sf::Keyboard::Left)
-            {
-                isCameraMoving = false;
-                isCameraRotating = false;
-                isCameraRotatingAround = false;
-                isObjectMoving = false;
-            }
-            else if (event.key.code == sf::Keyboard::C)
-                isCentering = false;
-
-            break;
-        }
-
-        if (isCameraMoving)
-        {
-            auto transition = scene.getTransition(moveAxis, moveDirection, dt);
-            scene.moveCamera(transition);
-        }
-        else if (isCameraRotatingAround)
-        {
-            scene.rotateCameraAround(moveAxis, moveDirection, dt);
-        }
-        else if (isObjectMoving)
-        {
-            auto transition = scene.getTransition(moveAxis, moveDirection, dt);
-            scene.moveObject(scene.getSelectedObjectName(), transition);
-        }
-        else if (isCentering)
-        {
-            scene.centralizeCamera();
-        }
-
-        if (isCameraMoving || isCameraRotatingAround || isObjectMoving || isCentering)
-            scene.convertAllModels();
-
-        drawAllModels();
-
-        dt = clock.restart().asMilliseconds();
-    }
-}
-
-void MainWindow::drawAllModels()
-{
-    window.clear();
-
-    auto resolution = scene.cGetCamera().cGetResolution();
-    std::fill(pixels, pixels + resolution.x * resolution.y * 4, 0x53u);
-
-    drawModel(
-        *scene.getObject(scene.floorObjectName),
-        scene.getObjectConvertedVertices(scene.floorObjectName));
-
-    for (auto key : scene.getAllObjectNames())
-    {
-        if (key == scene.floorObjectName)
-            continue;
-
-        drawModel(*scene.getObject(key), scene.getObjectConvertedVertices(key));
-    }
-
-    bufferTexture.update(pixels);
-    window.draw(bufferSprite);
-    window.display();
 }
 
 void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &viewportVertices)
 {
     auto color = &objInfo.getColor();
-    const Dot resolution = scene.cGetCamera().cGetResolution();
 
     /*
     for (auto vertex : viewportVertices)
@@ -192,15 +55,13 @@ void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &vi
             if (i < 1)
                 continue;
 
-            drawLineBR_1(
-                pixels,
+            drawLineBR(
                 polygonVertices[i - 1],
                 polygonVertices[i],
                 color);
         }
 
-        drawLineBR_1(
-            pixels,
+        drawLineBR(
             *(polygonVertices.cend() - 1),
             *polygonVertices.cbegin(),
             color);
@@ -208,30 +69,32 @@ void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &vi
     // */
 }
 
-void MainWindow::resize()
+void MainWindow::switchVideoMode(const bool isEscape)
 {
+    if (!isFullscreen && isEscape)
+        return;
+
+    sf::VideoMode videoMode;
+
     if (isFullscreen)
-    {
-        window.create(
-            sf::VideoMode(1280, 720),
-            "SFML Graphics",
-            sf::Style::Default);
-        resize(1280, 720);
-        isFullscreen = false;
-    }
+        videoMode = sf::VideoMode(1280, 720);
     else
-    {
-        window.create(
-            sf::VideoMode::getDesktopMode(),
-            "SFML Graphics",
-            sf::Style::Fullscreen);
-        resize(1920, 1080);
-        isFullscreen = true;
-    }
+        videoMode = sf::VideoMode::getDesktopMode();
+
+    isFullscreen = !isFullscreen;
+
+    window.create(
+        videoMode,
+        "SFML Graphics",
+        isFullscreen ? sf::Style::Fullscreen : sf::Style::Default);
+
+    resize(videoMode.width, videoMode.height);
 }
 
 void MainWindow::resize(const int width, const int height)
 {
+    resolution = Point(width, height);
+
     delete[] pixels;
     pixels = new sf::Uint8[width * height * 4];
 
@@ -240,12 +103,22 @@ void MainWindow::resize(const int width, const int height)
 
     auto view = sf::View(sf::FloatRect(0, 0, width, height));
     window.setView(view);
-
-    scene.resize(width, height);
 }
 
-void MainWindow::drawLineBR_1(
-    sf::Uint8 *pixels,
+void MainWindow::clear()
+{
+    window.clear();
+    std::fill(pixels, pixels + resolution.cGetX() * resolution.cGetY() * 4, 0x53u);
+}
+
+void MainWindow::drawPixels()
+{
+    bufferTexture.update(pixels);
+    window.draw(bufferSprite);
+    window.display();
+}
+
+void MainWindow::drawLineBR(
     const Vertex &v1,
     const Vertex &v2,
     const sf::Color *color)
@@ -253,7 +126,6 @@ void MainWindow::drawLineBR_1(
     int x1 = v1.cGetX();
     int y1 = v1.cGetY();
 
-    const Dot resolution = scene.cGetCamera().cGetResolution();
     const int x2 = v2.cGetX();
     const int y2 = v2.cGetY();
     const int deltaX = abs(x2 - x1);
@@ -263,15 +135,15 @@ void MainWindow::drawLineBR_1(
 
     int error = deltaX - deltaY;
 
-    if (x2 < resolution.x && y2 < resolution.y && x2 > 0 && y2 > 0)
-        drawPixel(x2, y2, color, resolution.x);
+    if (x2 < resolution.cGetX() && y2 < resolution.cGetY() && x2 > 0 && y2 > 0)
+        drawPixel(x2, y2, color, resolution.cGetX());
 
     // Timer::start();
 
     while (x1 != x2 || y1 != y2)
     {
-        if (x1 < resolution.x && y1 < resolution.y && x1 > 0 && y1 > 0)
-            drawPixel(x1, y1, color, resolution.x);
+        if (x1 < resolution.cGetX() && y1 < resolution.cGetY() && x1 > 0 && y1 > 0)
+            drawPixel(x1, y1, color, resolution.cGetX());
 
         const int error2 = error * 2;
         if (error2 > -deltaY)
@@ -290,12 +162,10 @@ void MainWindow::drawLineBR_1(
 }
 
 void MainWindow::drawLineDDA(
-    sf::Uint8 *pixels,
     const Vertex &v1,
     const Vertex &v2,
     const sf::Color *color)
 {
-    const Dot resolution = scene.cGetCamera().cGetResolution();
     const int x2 = v2.cGetX();
     const int y2 = v2.cGetY();
 
@@ -309,8 +179,8 @@ void MainWindow::drawLineDDA(
 
     if (length == 0)
     {
-        if (x1 < resolution.x && y1 < resolution.y && x1 > 0 && y1 > 0)
-            drawPixel(x1, y1, color, resolution.x);
+        if (x1 < resolution.cGetX() && y1 < resolution.cGetY() && x1 > 0 && y1 > 0)
+            drawPixel(x1, y1, color, resolution.cGetX());
 
         return;
     }
@@ -321,8 +191,8 @@ void MainWindow::drawLineDDA(
     length++;
     while (length--)
     {
-        if (x1 < resolution.x && y1 < resolution.y && x1 > 0 && y1 > 0)
-            drawPixel(x1, y1, color, resolution.x);
+        if (x1 < resolution.cGetX() && y1 < resolution.cGetY() && x1 > 0 && y1 > 0)
+            drawPixel(x1, y1, color, resolution.cGetX());
 
         x1 += dX;
         y1 += dY;

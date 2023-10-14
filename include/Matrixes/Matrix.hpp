@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Types.hpp>
+#include <Enums.hpp>
 #include <vector>
 #include <stdexcept>
 #include <optional>
@@ -93,7 +93,7 @@ public:
         const AxisName axis,
         const double angle);
 
-    static Matrix<4, 4> getObserverConvert(
+    static Matrix<4, 4> getViewConvert(
         const Matrix<4, 1> &eye,
         const Matrix<4, 1> &target,
         const Matrix<4, 1> &up);
@@ -104,13 +104,13 @@ public:
         const double zFar,
         const double zNear);
 
-    static Matrix<4, 4> getWindowConvert(
+    static Matrix<4, 4> getViewportConvert(
         const double width,
         const double height,
         const double xMin,
         const double yMin);
 
-    void log();
+    void log() const;
 
 private:
     std::array<double, Cols * Rows> values;

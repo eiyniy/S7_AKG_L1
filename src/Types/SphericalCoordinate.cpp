@@ -1,8 +1,4 @@
-#include <Types.hpp>
-#include <iostream>
-
-Dot::Dot(const int p_x, const int p_y)
-    : x(p_x), y(p_y) {}
+#include <SphericalCoordinate.hpp>
 
 SphericalCoordinate::SphericalCoordinate(
     const double p_r,
@@ -51,7 +47,5 @@ void SphericalCoordinate::move(
             a += signedStep;
         else
             a -= signedStep;
-
-        std::cout << "A reversed" << std::endl;
     }
 }

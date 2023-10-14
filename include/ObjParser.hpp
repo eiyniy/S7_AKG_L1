@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ObjInfo.hpp>
-#include <Types.hpp>
+#include <Enums.hpp>
 #include <string>
 #include <optional>
 #include <fstream>

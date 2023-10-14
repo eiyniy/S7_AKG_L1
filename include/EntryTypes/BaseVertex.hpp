@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Types.hpp>
+#include <Enums.hpp>
 #include <Matrix.hpp>
 #include <string>
 #include <optional>

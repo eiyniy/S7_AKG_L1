@@ -2,7 +2,7 @@
 
 #include <optional>
 #include <string>
-#include <Types.hpp>
+#include <SphericalCoordinate.hpp>
 #include <Matrix.hpp>
 
 class Math

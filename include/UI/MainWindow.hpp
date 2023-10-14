@@ -7,48 +7,54 @@
 class MainWindow
 {
 public:
-    MainWindow(Scene &p_scene);
+    MainWindow(Point &p_resolution);
 
-    void startLoop();
-    void drawAllModels();
-
-private:
-    void resize();
+    void switchVideoMode(const bool isEscape = false);
     void resize(const int width, const int height);
 
-    void drawLineBR_1(
-        sf::Uint8 *pixels,
+    void clear();
+
+    void drawPixels();
+    void drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &viewportVertices);
+
+    sf::RenderWindow &getWindow();
+    const Point &cGetResolution() const;
+
+private:
+    void drawLineBR(
         const Vertex &v1,
         const Vertex &v2,
         const sf::Color *color);
     void drawLineDDA(
-        sf::Uint8 *pixels,
         const Vertex &v1,
         const Vertex &v2,
         const sf::Color *color);
 
-    void drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &viewportVertices);
     void drawPixel(
         const int x,
         const int y,
         const sf::Color *color,
         const int xSize);
 
-    bool isCameraMoving,
-        isCameraRotating,
-        isCameraRotatingAround,
-        isObjectMoving,
-        isCentering;
-
     bool isFullscreen;
 
-    Scene &scene;
+    Point &resolution;
 
     sf::RenderWindow window;
     sf::Uint8 *pixels;
     sf::Texture bufferTexture;
     sf::Sprite bufferSprite;
 };
+
+inline sf::RenderWindow &MainWindow::getWindow()
+{
+    return window;
+}
+
+inline const Point &MainWindow::cGetResolution() const
+{
+    return resolution;
+}
 
 inline void MainWindow::drawPixel(
     const int x,
@@ -57,11 +63,4 @@ inline void MainWindow::drawPixel(
     const int xSize)
 {
     std::memcpy(pixels + (4 * (y * xSize + x)), color, 4);
-
-    // const int point = 4 * (y * resolution.x + x);
-
-    // pixels[point] = color.r;     // R
-    // pixels[point + 1] = color.g; // G
-    // pixels[point + 2] = color.b; // B
-    // pixels[point + 3] = color.a; // A
 }

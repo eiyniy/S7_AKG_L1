@@ -3,7 +3,8 @@
 #include <ObjInfo.hpp>
 #include <Camera.hpp>
 #include <Matrix.hpp>
-#include <Types.hpp>
+#include <ConvertsCache.hpp>
+#include <Enums.hpp>
 #include <SFML/Graphics.hpp>
 #include <optional>
 
@@ -23,27 +24,14 @@ private:
 
     Matrix<4, 1> &up;
 
-    bool isMoveChanged;
-    bool isRotateChanged;
-    bool isScaleChanged;
-    bool isObserverChanged;
-    bool isProjectionChanged;
-    bool isWindowChanged;
-
-    Matrix<4, 4> moveConvertCached;
-    Matrix<4, 4> rotateConvertCached;
-    Matrix<4, 4> scaleConvertCached;
-    Matrix<4, 4> observerConvertCached;
-    Matrix<4, 4> projectionConvertCached;
-    Matrix<4, 4> windowConvertCached;
+    ConvertsCache converts;
 
     void generateFloor();
-    void generateFloor(const int size, const int step, const Dot &center);
+    void generateFloor(const int size, const int step, const Point &center);
 
 public:
     const std::string floorObjectName = "_FLOOR";
 
-    const int defaultFps = 165;
     const double defaultFrameTime = (1.f * 1000.f / 60);
 
     Scene(

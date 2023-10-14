@@ -1,7 +1,7 @@
 #pragma once
 
 #include <VertexIndexes.hpp>
-#include <Types.hpp>
+#include <Enums.hpp>
 #include <string>
 #include <vector>
 #include <optional>

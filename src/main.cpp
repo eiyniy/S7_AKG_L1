@@ -9,6 +9,7 @@
 #include <Scene.hpp>
 #include <Camera.hpp>
 #include <Converter.hpp>
+#include <Engine.hpp>
 
 int main(int argc, char **argv)
 {
@@ -26,12 +27,12 @@ int main(int argc, char **argv)
     auto cameraPosition = Matrix<4, 1>(1, 50, 150);
     auto cameraTarget = Matrix<4, 1>(0, 0, 0);
     auto videoMode = sf::VideoMode::getDesktopMode();
-    auto cameraResolution = Dot(videoMode.width, videoMode.height);
+    auto cameraResolution = Point(videoMode.width, videoMode.height);
     auto camera = Camera(cameraPosition, cameraTarget, cameraResolution, 100);
     auto up = Matrix<4, 1>(0, 1, 0);
     auto scene = Scene(camera, up, 5, 0.5);
-    auto mainWindow = MainWindow(scene);
-    mainWindow.drawAllModels();
+    auto mainWindow = MainWindow(cameraResolution);
+    auto engine = Engine(scene, mainWindow);
 
     auto objInfoPt = objInfoPtFuture.get();
 
@@ -43,7 +44,7 @@ int main(int argc, char **argv)
 
     scene.addObject("MainObject", objInfoPt);
 
-    mainWindow.startLoop();
+    engine.start();
 
     std::cout << "Timer time - " << Timer::getMcs() / 1000 << "ms. "
               << "Calls count - " << Timer::getCalls() << std::endl

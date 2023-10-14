@@ -16,8 +16,3 @@ Vertex Converter::matrixToVertex(
         value.cGetW(),
         isOutOfScreen);
 }
-
-Dot Converter::vertexToDot(const Vertex &value)
-{
-    return Dot(value.cGetX(), value.cGetY());
-}
