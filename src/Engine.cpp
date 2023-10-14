@@ -1,4 +1,5 @@
 #include <Engine.hpp>
+#include <iostream>
 
 Engine::Engine(Scene &p_scene, MainWindow &p_mainWindow)
     : scene(p_scene),

@@ -3,7 +3,6 @@
 #include <ObjInfo.hpp>
 #include <Camera.hpp>
 #include <Matrix.hpp>
-#include <ConvertsCache.hpp>
 #include <Enums.hpp>
 #include <SFML/Graphics.hpp>
 #include <optional>
@@ -23,8 +22,6 @@ private:
     const double rotationSpeed;
 
     Matrix<4, 1> &up;
-
-    ConvertsCache converts;
 
     void generateFloor();
     void generateFloor(const int size, const int step, const Point &center);

@@ -27,11 +27,15 @@ enum class Direction
     Backward
 };
 
-enum class MatrixConvert
+enum class ModelMatrixConvert
 {
     Move,
     Rotate,
-    Scale,
+    Scale
+};
+
+enum class SceneMatrixConvert
+{
     View,
     Projection,
     Viewport

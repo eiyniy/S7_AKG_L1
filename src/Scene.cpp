@@ -15,8 +15,7 @@ Scene::Scene(
     : camera(p_camera),
       up(p_up),
       moveSpeed(p_moveSpeed),
-      rotationSpeed(p_rotationSpeed),
-      converts({p_camera, p_up})
+      rotationSpeed(p_rotationSpeed)
 {
     generateFloor(25, 20, Point(0, 0));
     convertAllModels();
@@ -117,9 +116,9 @@ void Scene::convertModel(
     const Matrix<4, 1> &objectShift)
 {
     const auto convertMatrix =
-        *converts.getProjectionConvert() *
-        *converts.getViewConvert() *
-        *converts.getMoveConvert(std::make_unique<Matrix<4, 1>>(objectShift));
+        Matrix<4, 4>::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2000, 0.1) *
+        Matrix<4, 4>::getViewConvert(camera.cGetPosition(), camera.cGetTarget(), up) *
+        Matrix<4, 4>::getMoveConvert(objectShift);
 
     int i = 0;
     for (auto it = vertices.begin(); it < vertices.cend(); ++it, ++i)
@@ -140,7 +139,7 @@ void Scene::convertModel(
             mVertex.cGetZ() < 0 || mVertex.cGetZ() > 1)
             isOutOfScreen = true;
 
-        mVertex = *converts.getViewportConvert() * mVertex;
+        mVertex = Matrix<4, 4>::getViewportConvert(camera.cGetResolution().cGetX(), camera.cGetResolution().cGetY(), 0, 0) * mVertex;
 
         result[i] = Converter::matrixToVertex(mVertex, isOutOfScreen);
     }
@@ -151,8 +150,6 @@ void Scene::centralizeCamera()
     camera.getTarget() =
         Converter::vertexToMatrix(objects.at(selectedObjectName)->getCenter()) +
         objectsShift.at(selectedObjectName);
-
-    converts.setChanged(MatrixConvert::View, true);
 }
 
 void Scene::rotateCameraAround(
@@ -174,31 +171,22 @@ void Scene::rotateCameraAround(
 
     cameraRelative = Math::sphericalToDecart(spherical);
     camera.getPosition() = cameraRelative + camera.cGetTarget();
-
-    converts.setChanged(MatrixConvert::View, true);
 }
 
 void Scene::moveCamera(const Matrix<4, 1> &transition)
 {
     camera.getTarget() = camera.cGetTarget() + transition;
     camera.getPosition() = camera.cGetPosition() + transition;
-
-    converts.setChanged(MatrixConvert::View, true);
 }
 
 void Scene::moveObject(const std::string &objectName, const Matrix<4, 1> &transition)
 {
     getObjectShift(objectName) += transition;
-
-    converts.setChanged(MatrixConvert::Move, true);
 }
 
 void Scene::resize(const int width, const int height)
 {
     camera.getResolution() = Point(width, height);
-
-    converts.setChanged(MatrixConvert::Projection, true);
-    converts.setChanged(MatrixConvert::Viewport, true);
 
     convertAllModels();
 }
