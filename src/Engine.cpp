@@ -1,14 +1,16 @@
 #include <Engine.hpp>
 #include <iostream>
+#include <MoveCameraCommand.hpp>
+#include <MoveObjectCommand.hpp>
+#include <RotateCameraAroundCommand.hpp>
+#include <CentralizeCameraCommand.hpp>
+#include <SwitchVideoModeCommand.hpp>
+#include <CloseCommand.hpp>
+#include <ResizeCommand.hpp>
 
-Engine::Engine(Scene &p_scene, MainWindow &p_mainWindow)
-    : scene(p_scene),
-      mainWindow(p_mainWindow),
-      isCameraMoving(false),
-      isObjectMoving(false),
-      isCameraRotating(false),
-      isCameraRotatingAround(false),
-      isCentering(false)
+Engine::Engine(Scene &_scene, MainWindow &_mainWindow)
+    : scene(_scene),
+      mainWindow(_mainWindow)
 {
     mainWindow.getWindow().setFramerateLimit(defaultFps);
     draw();
@@ -28,99 +30,120 @@ void Engine::start()
 
 void Engine::handleEvents()
 {
+    static sf::Event event;
     mainWindow.getWindow().pollEvent(event);
 
     switch (event.type)
     {
     case sf::Event::Closed:
-        mainWindow.getWindow().close();
+        commandsQueue.push(std::move(std::make_unique<CloseCommand>(
+            CloseCommand(mainWindow))));
         break;
     case sf::Event::Resized:
-    {
-        mainWindow.resize(event.size.width, event.size.height);
-        scene.resize(event.size.width, event.size.height);
+        commandsQueue.push(std::move(std::make_unique<ResizeCommand>(
+            ResizeCommand(
+                scene,
+                mainWindow,
+                event.size.width,
+                event.size.height))));
+        break;
+    case sf::Event::KeyPressed:
+        updateInput(event);
+        sendInputCommand(event);
         break;
     }
-    case sf::Event::KeyPressed:
-        if (event.key.code == sf::Keyboard::Up ||
-            event.key.code == sf::Keyboard::Right ||
-            event.key.code == sf::Keyboard::Down ||
-            event.key.code == sf::Keyboard::Left)
+}
+
+void Engine::updateInput(const sf::Event &event)
+{
+    switch (event.key.code)
+    {
+    case sf::Keyboard::Up:
+    case sf::Keyboard::Right:
+        moveDirection = Direction::Forward;
+        break;
+    case sf::Keyboard::Down:
+    case sf::Keyboard::Left:
+        moveDirection = Direction::Backward;
+        break;
+    case sf::Keyboard::X:
+        moveAxis = AxisName::X;
+        break;
+    case sf::Keyboard::Y:
+        moveAxis = AxisName::Y;
+        break;
+    case sf::Keyboard::Z:
+        moveAxis = AxisName::Z;
+        break;
+    }
+}
+
+void Engine::sendInputCommand(const sf::Event &event)
+{
+    switch (event.key.code)
+    {
+    case sf::Keyboard::Up:
+    case sf::Keyboard::Right:
+    case sf::Keyboard::Down:
+    case sf::Keyboard::Left:
+        if (event.key.control && !event.key.alt)
         {
-            if (event.key.control && !event.key.alt)
-                isObjectMoving = true;
-            else if (!event.key.control && event.key.alt)
-                isCameraRotating = true;
-            else if (event.key.control && event.key.alt)
-                isCameraRotatingAround = true;
-            else if (!event.key.control && !event.key.alt)
-                isCameraMoving = true;
-            if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::Right)
-                moveDirection = Direction::Forward;
-            else if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::Left)
-                moveDirection = Direction::Backward;
+            commandsQueue.push(std::move(std::make_unique<MoveObjectCommand>(
+                MoveObjectCommand(
+                    scene,
+                    scene.cGetSelectedObjectName(),
+                    moveAxis,
+                    moveDirection,
+                    dt))));
         }
-        else if (event.key.code == sf::Keyboard::X)
-            moveAxis = AxisName::X;
-        else if (event.key.code == sf::Keyboard::Y)
-            moveAxis = AxisName::Y;
-        else if (event.key.code == sf::Keyboard::Z)
-            moveAxis = AxisName::Z;
-        else if (event.key.code == sf::Keyboard::C && event.key.control)
-            isCentering = true;
-        else if (event.key.code == sf::Keyboard::F11)
+        else if (event.key.control && event.key.alt)
         {
-            mainWindow.switchVideoMode();
-            scene.resize(mainWindow.cGetResolution().cGetX(), mainWindow.cGetResolution().cGetY());
+            commandsQueue.push(std::move(std::make_unique<RotateCameraAroundCommand>(
+                RotateCameraAroundCommand(
+                    scene,
+                    moveAxis,
+                    moveDirection,
+                    dt))));
         }
-        else if (event.key.code == sf::Keyboard::Escape)
+        else if (!event.key.control && !event.key.alt)
         {
-            mainWindow.switchVideoMode(true);
-            scene.resize(mainWindow.cGetResolution().cGetX(), mainWindow.cGetResolution().cGetY());
+            commandsQueue.push(std::move(std::make_unique<MoveCameraCommand>(
+                MoveCameraCommand(
+                    scene,
+                    moveAxis,
+                    moveDirection,
+                    dt))));
         }
+        break;
+    case sf::Keyboard::C:
+        if (!event.key.control)
+            break;
+
+        commandsQueue.push(std::move(std::make_unique<CentralizeCameraCommand>(
+            CentralizeCameraCommand(scene))));
 
         break;
-
-    case sf::Event::KeyReleased:
-        if (event.key.code == sf::Keyboard::Up ||
-            event.key.code == sf::Keyboard::Right ||
-            event.key.code == sf::Keyboard::Down ||
-            event.key.code == sf::Keyboard::Left)
-        {
-            isCameraMoving = false;
-            isCameraRotating = false;
-            isCameraRotatingAround = false;
-            isObjectMoving = false;
-        }
-        else if (event.key.code == sf::Keyboard::C)
-            isCentering = false;
-
+    case sf::Keyboard::F11:
+    case sf::Keyboard::Escape:
+        commandsQueue.push(std::move(std::make_unique<SwitchVideoModeCommand>(
+            SwitchVideoModeCommand(
+                scene,
+                mainWindow,
+                event.key.code == sf::Keyboard::Escape))));
         break;
     }
 }
 
 void Engine::update()
 {
-    if (isCameraMoving)
+    bool needUpdate = false;
+    while (auto command = commandsQueue.tryPop())
     {
-        auto transition = scene.getTransition(moveAxis, moveDirection, dt);
-        scene.moveCamera(transition);
-    }
-    else if (isCameraRotatingAround)
-    {
-        scene.rotateCameraAround(moveAxis, moveDirection, dt);
-    }
-    else if (isObjectMoving)
-    {
-        auto transition = scene.getTransition(moveAxis, moveDirection, dt);
-        scene.moveObject(scene.getSelectedObjectName(), transition);
-    }
-    else if (isCentering)
-    {
-        scene.centralizeCamera();
+        (*command)->execute();
+        needUpdate = true;
     }
 
-    if (isCameraMoving || isCameraRotatingAround || isObjectMoving || isCentering)
+    if (needUpdate)
         scene.convertAllModels();
 }
 
@@ -129,15 +152,15 @@ void Engine::draw()
     mainWindow.clear();
 
     mainWindow.drawModel(
-        *scene.getObject(scene.floorObjectName),
-        scene.getObjectConvertedVertices(scene.floorObjectName));
+        *scene.cGetObject(scene.floorObjectName),
+        scene.cGetObjectConvertedVertices(scene.floorObjectName));
 
-    for (auto key : scene.getAllObjectNames())
+    for (auto key : scene.cGetAllObjectNames())
     {
         if (key == scene.floorObjectName)
             continue;
 
-        mainWindow.drawModel(*scene.getObject(key), scene.getObjectConvertedVertices(key));
+        mainWindow.drawModel(*scene.cGetObject(key), scene.cGetObjectConvertedVertices(key));
     }
 
     mainWindow.drawPixels();

@@ -17,7 +17,7 @@ public:
            const double y,
            const double z,
            const double w = 1,
-           const bool p_isOutOfScreen = false);
+           const bool _isOutOfScreen = false);
 
     static Vertex parse(const std::string &line);
 

@@ -6,9 +6,9 @@ class SphericalCoordinate
 {
 public:
     SphericalCoordinate(
-        const double p_r,
-        const double p_a,
-        const double p_b);
+        const double _r,
+        const double _a,
+        const double _b);
 
     void move(
         const AxisName axisName,

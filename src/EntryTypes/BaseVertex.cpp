@@ -5,8 +5,12 @@
 #include <stdexcept>
 #include <iostream>
 
-BaseVertex::BaseVertex(const double p_v1, const double p_v2, const double p_v3, const double p_v4)
-    : v1(p_v1), v2(p_v2), v3(p_v3), v4(p_v4) {}
+BaseVertex::BaseVertex(
+    const double _v1, 
+    const double _v2, 
+    const double _v3, 
+    const double _v4)
+    : v1(_v1), v2(_v2), v3(_v3), v4(_v4) {}
 
 BaseVertex::BaseVertex(const BaseVertex &bv)
     : v1(bv.v1), v2(bv.v2), v3(bv.v3), v4(bv.v4) {}

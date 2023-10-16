@@ -2,13 +2,11 @@
 #include <cmath>
 
 Camera::Camera(
-    const Matrix<4, 1> &p_position,
-    const Matrix<4, 1> &p_target,
-    Point &p_resolution,
-    const int p_fov)
-    : position(p_position),
-      target(p_target),
-      resolution(p_resolution),
-      fov(p_fov * M_PI / 180)
-{
-}
+    const Matrix<4, 1> &_position,
+    const Matrix<4, 1> &_target,
+    Point &_resolution,
+    const int _fov)
+    : position(_position),
+      target(_target),
+      resolution(_resolution),
+      fov(_fov * M_PI / 180) {}

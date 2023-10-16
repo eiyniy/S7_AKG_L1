@@ -32,17 +32,17 @@ public:
     const double defaultFrameTime = (1.f * 1000.f / 60);
 
     Scene(
-        Camera &p_camera,
-        Matrix<4, 1> &p_up,
-        const double p_moveSpeed,
-        const double p_rotationSpeed);
+        Camera &_camera,
+        Matrix<4, 1> &_up,
+        const double _moveSpeed,
+        const double _rotationSpeed);
 
     ~Scene();
 
-    Matrix<4, 1> getTransition(
+    const Matrix<4, 1> cGetTransition(
         const AxisName axis,
         const Direction direction,
-        const int dt);
+        const int dt) const;
 
     void convertAllModels();
     void convertModel(
@@ -61,15 +61,37 @@ public:
 
     void resize(const int width, const int height);
 
-    ObjInfo *getObject(const std::string &key);
+    const ObjInfo *cGetObject(const std::string &key) const;
     void addObject(const std::string &key, ObjInfo *object);
 
+    const Matrix<4, 1> &cGetObjectShift(const std::string &key) const;
     Matrix<4, 1> &getObjectShift(const std::string &key);
-    std::vector<Vertex> &getObjectConvertedVertices(const std::string &key);
 
-    const std::vector<std::string> getAllObjectNames() const;
-    const std::string getSelectedObjectName() const;
+    const std::vector<Vertex> &cGetObjectConvertedVertices(const std::string &key) const;
+
+    const std::vector<std::string> cGetAllObjectNames() const;
+    const std::string cGetSelectedObjectName() const;
 
     const Camera &cGetCamera() const;
     Camera &getCamera();
 };
+
+inline const ObjInfo *Scene::cGetObject(const std::string &key) const
+{
+    return objects.at(key);
+}
+
+inline const Matrix<4, 1> &Scene::cGetObjectShift(const std::string &key) const
+{
+    return objectsShift.at(key);
+}
+
+inline Matrix<4, 1> &Scene::getObjectShift(const std::string &key)
+{
+    return objectsShift.at(key);
+}
+
+inline const std::vector<Vertex> &Scene::cGetObjectConvertedVertices(const std::string &key) const
+{
+    return objectsConvertedVertices.at(key);
+}

@@ -3,7 +3,10 @@
 class Point
 {
 public:
-    Point(const int p_x, const int p_y);
+    Point(const int _x, const int _y);
+    Point(const Point &point);
+
+    Point &operator=(const Point &point);
 
     const int cGetX() const;
     const int cGetY() const;

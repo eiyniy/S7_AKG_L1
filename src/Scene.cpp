@@ -8,14 +8,14 @@
 #include <Math.hpp>
 
 Scene::Scene(
-    Camera &p_camera,
-    Matrix<4, 1> &p_up,
-    const double p_moveSpeed,
-    const double p_rotationSpeed)
-    : camera(p_camera),
-      up(p_up),
-      moveSpeed(p_moveSpeed),
-      rotationSpeed(p_rotationSpeed)
+    Camera &_camera,
+    Matrix<4, 1> &_up,
+    const double _moveSpeed,
+    const double _rotationSpeed)
+    : camera(_camera),
+      up(_up),
+      moveSpeed(_moveSpeed),
+      rotationSpeed(_rotationSpeed)
 {
     generateFloor(25, 20, Point(0, 0));
     convertAllModels();
@@ -157,7 +157,7 @@ void Scene::rotateCameraAround(
     const Direction direction,
     const int dt)
 {
-    const double ratio = dt != 0 ? ((double)dt / defaultFrameTime) : 1.f;
+    const double ratio = dt != 0 ? (dt / defaultFrameTime) : 1.f;
     const double rotationSpeedTimed = rotationSpeed * ratio;
 
     auto cameraRelative = camera.cGetPosition() - camera.cGetTarget();
@@ -191,11 +191,6 @@ void Scene::resize(const int width, const int height)
     convertAllModels();
 }
 
-ObjInfo *Scene::getObject(const std::string &key)
-{
-    return objects.at(key);
-}
-
 void Scene::addObject(const std::string &key, ObjInfo *object)
 {
     if (key == floorObjectName)
@@ -213,17 +208,7 @@ void Scene::addObject(const std::string &key, ObjInfo *object)
     generateFloor();
 }
 
-Matrix<4, 1> &Scene::getObjectShift(const std::string &key)
-{
-    return objectsShift.at(key);
-}
-
-std::vector<Vertex> &Scene::getObjectConvertedVertices(const std::string &key)
-{
-    return objectsConvertedVertices.at(key);
-}
-
-const std::vector<std::string> Scene::getAllObjectNames() const
+const std::vector<std::string> Scene::cGetAllObjectNames() const
 {
     auto res = std::vector<std::string>();
 
@@ -233,19 +218,19 @@ const std::vector<std::string> Scene::getAllObjectNames() const
     return res;
 }
 
-const std::string Scene::getSelectedObjectName() const
+const std::string Scene::cGetSelectedObjectName() const
 {
     return selectedObjectName;
 }
 
-Matrix<4, 1> Scene::getTransition(
+const Matrix<4, 1> Scene::cGetTransition(
     const AxisName axis,
     const Direction direction,
-    const int dt)
+    const int dt) const
 {
     Matrix<4, 1> transition;
 
-    const double ratio = dt != 0 ? ((double)dt / defaultFrameTime) : 1.f;
+    const double ratio = dt != 0 ? (dt / defaultFrameTime) : 1.f;
     const double moveSpeedTimed = moveSpeed * ratio;
 
     switch (axis)

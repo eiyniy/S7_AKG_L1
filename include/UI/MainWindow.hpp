@@ -7,7 +7,7 @@
 class MainWindow
 {
 public:
-    MainWindow(Point &p_resolution);
+    MainWindow(Point &_resolution);
 
     void switchVideoMode(const bool isEscape = false);
     void resize(const int width, const int height);
@@ -21,7 +21,7 @@ public:
     const Point &cGetResolution() const;
 
 private:
-    void drawLineBR(
+    void drawLineBr(
         const Vertex &v1,
         const Vertex &v2,
         const sf::Color *color);
@@ -39,6 +39,7 @@ private:
     bool isFullscreen;
 
     Point &resolution;
+    Point lastResolution;
 
     sf::RenderWindow window;
     sf::Uint8 *pixels;

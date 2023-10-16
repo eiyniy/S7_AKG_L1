@@ -6,9 +6,10 @@
             "name": "Launch (gdb)",
             "request": "launch",
             "args": [
-                // "${workspaceFolder}/resources/models/uploads_files_4271637_Rubik'sCube.obj"
+                "${workspaceFolder}/resources/models/uploads_files_4271637_Rubik'sCube.obj"
                 // "${workspaceFolder}/resources/models/untitled.obj"
-                "${workspaceFolder}/resources/models/cat.obj"
+                // "${workspaceFolder}/resources/models/cat.obj"
+                // "${workspaceFolder}/resources/models/Z3_OBJ.obj"
                 // "${workspaceFolder}/resources/models/uploads_files_2217034_WOMAN.obj"
                 // "${workspaceFolder}/resources/models/Stone_01_Base.OBJ"
             ],

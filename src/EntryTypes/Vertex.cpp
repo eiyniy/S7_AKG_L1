@@ -27,9 +27,9 @@ Vertex::Vertex(const double x,
                const double y,
                const double z,
                const double w,
-               const bool p_isOutOfScreen)
+               const bool _isOutOfScreen)
     : BaseVertex(x, y, z, w),
-      isOutOfScreen(p_isOutOfScreen) {}
+      isOutOfScreen(_isOutOfScreen) {}
 
 Vertex Vertex::parse(const std::string &line)
 {

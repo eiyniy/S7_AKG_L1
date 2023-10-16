@@ -12,10 +12,10 @@ private:
     int fov;
 
 public:
-    Camera(const Matrix<4, 1> &p_position,
-           const Matrix<4, 1> &p_target,
-           Point &p_resolution,
-           const int p_fov);
+    Camera(const Matrix<4, 1> &_position,
+           const Matrix<4, 1> &_target,
+           Point &_resolution,
+           const int _fov);
 
     const Matrix<4, 1> &cGetPosition() const;
     const Matrix<4, 1> &cGetTarget() const;

@@ -1,10 +1,10 @@
 #include <SphericalCoordinate.hpp>
 
 SphericalCoordinate::SphericalCoordinate(
-    const double p_r,
-    const double p_a,
-    const double p_b)
-    : r(p_r), a(p_a), b(p_b) {}
+    const double _r,
+    const double _a,
+    const double _b)
+    : r(_r), a(_a), b(_b) {}
 
 void SphericalCoordinate::move(
     const AxisName axisName,

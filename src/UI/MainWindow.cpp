@@ -3,13 +3,14 @@
 #include <Timer.hpp>
 #include <Converter.hpp>
 
-MainWindow::MainWindow(Point &p_resolution)
+MainWindow::MainWindow(Point &_resolution)
     : window(sf::RenderWindow(
-          sf::VideoMode(p_resolution.cGetX(), p_resolution.cGetY()),
+          sf::VideoMode(_resolution.cGetX(), _resolution.cGetY()),
           "SFML Graphics",
           sf::Style::Fullscreen)),
       isFullscreen(true),
-      resolution(p_resolution)
+      resolution(_resolution),
+      lastResolution(Point(1280, 720))
 {
     pixels = new sf::Uint8[resolution.cGetX() * resolution.cGetY() * 4];
     bufferTexture.create(resolution.cGetX(), resolution.cGetY());
@@ -55,13 +56,13 @@ void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &vi
             if (i < 1)
                 continue;
 
-            drawLineBR(
+            drawLineBr(
                 polygonVertices[i - 1],
                 polygonVertices[i],
                 color);
         }
 
-        drawLineBR(
+        drawLineBr(
             *(polygonVertices.cend() - 1),
             *polygonVertices.cbegin(),
             color);
@@ -77,9 +78,12 @@ void MainWindow::switchVideoMode(const bool isEscape)
     sf::VideoMode videoMode;
 
     if (isFullscreen)
-        videoMode = sf::VideoMode(1280, 720);
+        videoMode = sf::VideoMode(lastResolution.cGetX(), lastResolution.cGetY());
     else
+    {
+        lastResolution = Point(window.getSize().x, window.getSize().y);
         videoMode = sf::VideoMode::getDesktopMode();
+    }
 
     isFullscreen = !isFullscreen;
 
@@ -118,7 +122,7 @@ void MainWindow::drawPixels()
     window.display();
 }
 
-void MainWindow::drawLineBR(
+void MainWindow::drawLineBr(
     const Vertex &v1,
     const Vertex &v2,
     const sf::Color *color)
@@ -138,8 +142,6 @@ void MainWindow::drawLineBR(
     if (x2 < resolution.cGetX() && y2 < resolution.cGetY() && x2 > 0 && y2 > 0)
         drawPixel(x2, y2, color, resolution.cGetX());
 
-    // Timer::start();
-
     while (x1 != x2 || y1 != y2)
     {
         if (x1 < resolution.cGetX() && y1 < resolution.cGetY() && x1 > 0 && y1 > 0)
@@ -157,8 +159,6 @@ void MainWindow::drawLineBR(
             y1 += signY;
         }
     }
-
-    // Timer::stop();
 }
 
 void MainWindow::drawLineDDA(

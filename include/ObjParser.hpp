@@ -11,7 +11,7 @@
 class ObjParser
 {
 public:
-    ObjParser(std::string p_pathToFile);
+    ObjParser(const std::string &_pathToFile);
 
     std::unique_ptr<std::string> readFile();
     ObjInfo *parseEntries(const std::string &fileContent);
@@ -25,6 +25,6 @@ public:
         const bool allowEmpty = false);
 
 private:
-    std::ifstream readStream;
     std::string pathToFile;
+    std::ifstream readStream;
 };

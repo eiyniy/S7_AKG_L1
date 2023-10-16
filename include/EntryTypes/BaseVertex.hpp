@@ -9,7 +9,11 @@ class BaseVertex
 {
 public:
     BaseVertex() = default;
-    BaseVertex(const double p_v1, const double p_v2, const double p_v3, const double p_v4 = 0);
+    BaseVertex(
+        const double _v1,
+        const double _v2,
+        const double _v3,
+        const double _v4 = 0);
     BaseVertex(const BaseVertex &bv);
 
     BaseVertex &operator=(const BaseVertex &bv);

@@ -11,7 +11,7 @@ class ObjInfo
 {
 public:
     ObjInfo(
-        const sf::Color &p_color,
+        const sf::Color &_color,
         const int vReserve = 0,
         const int vtReserve = 0,
         const int vnReserve = 0,

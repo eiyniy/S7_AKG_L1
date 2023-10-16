@@ -2,12 +2,12 @@
 #include <ObjInfo.hpp>
 
 ObjInfo::ObjInfo(
-    const sf::Color &p_color,
+    const sf::Color &_color,
     const int vReserve,
     const int vtReserve,
     const int vnReserve,
     const int pReserve)
-    : color(p_color)
+    : color(_color)
 {
     if (vReserve != 0)
         vertices.reserve(vReserve);

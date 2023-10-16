@@ -6,12 +6,12 @@
 #include <iostream>
 #include <sstream>
 
-ObjParser::ObjParser(std::string p_pathToFile)
+ObjParser::ObjParser(const std::string &_pathToFile)
 {
-    if (!std::filesystem::exists(p_pathToFile))
+    if (!std::filesystem::exists(_pathToFile))
         throw std::logic_error("Could not open file");
 
-    std::swap(pathToFile, p_pathToFile);
+    pathToFile = _pathToFile;
 
     readStream.open(pathToFile);
     if (!readStream.is_open())
