@@ -112,7 +112,7 @@ void ObjParser::parseEntry(const std::string &line, ObjInfo *result) const
         result->addNVertex(NormalVertex::parse(line));
         break;
     case EntryType::Polygon:
-        result->addPolygon(Polygon(line));
+        result->addPolygon(Polygon::parse(line));
         break;
     }
 }

@@ -39,11 +39,6 @@ void ObjInfo::addPolygon(const Polygon &polygon)
     polygons.emplace_back(polygon);
 }
 
-std::vector<Vertex> &ObjInfo::getVertices()
-{
-    return vertices;
-}
-
 const std::vector<Vertex> &ObjInfo::cGetVertices() const
 {
     return vertices;

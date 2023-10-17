@@ -11,7 +11,8 @@ public:
         const int _vertexId,
         const std::optional<int> &_tVertexId = std::nullopt,
         const std::optional<int> &_nVertexId = std::nullopt);
-    VertexIndexes(std::string &str);
+
+    static VertexIndexes parse(const std::string &str);
 
     const int cGetVertexId() const;
 

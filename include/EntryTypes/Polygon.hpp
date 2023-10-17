@@ -9,7 +9,7 @@
 
 struct SValues
 {
-    SValues(const std::array<std::optional<VertexIndexes>, 4> &values);
+    SValues(const std::vector<VertexIndexes> &values);
 
     VertexIndexes v1;
     VertexIndexes v2;
@@ -20,8 +20,9 @@ struct SValues
 class Polygon
 {
 public:
-    Polygon(const std::string &line);
     Polygon(const std::vector<VertexIndexes> &indexes);
+
+    static Polygon parse(const std::string &line);
 
     const int cGetVertexIndexesCount() const;
     const VertexIndexes &cGetVertexIndexes(const int i) const;

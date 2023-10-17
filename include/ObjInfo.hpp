@@ -22,8 +22,6 @@ public:
     void addNVertex(const NormalVertex &nVertex);
     void addPolygon(const Polygon &polygon);
 
-    std::vector<Vertex> &getVertices();
-
     const std::vector<Vertex> &cGetVertices() const;
     const std::vector<TextureVertex> &cGetTVertices() const;
     const std::vector<NormalVertex> &cGetNVertices() const;
