@@ -1,23 +1,24 @@
 #pragma once
 
-#include <TimedCommand.hpp>
+#include <Command.hpp>
 #include <Enums.hpp>
-#include <Scene.hpp>
+#include <Camera.hpp>
 
-class RotateCameraAroundCommand : public TimedCommand
+class RotateCameraAroundCommand : public Command
 {
 public:
     RotateCameraAroundCommand(
-        Scene &_scene,
+        Camera &_camera,
         const AxisName _axisName,
         const Direction _direction,
-        const int _dt);
+        const double _step);
 
     void execute() override;
 
 protected:
-    Scene &scene;
+    Camera &camera;
 
     const AxisName axisName;
     const Direction direction;
+    const double step;
 };

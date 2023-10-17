@@ -1,23 +1,16 @@
 #include <RotateCameraAroundCommand.hpp>
 
 RotateCameraAroundCommand::RotateCameraAroundCommand(
-    Scene &_scene,
+    Camera &_camera,
     const AxisName _axisName,
     const Direction _direction,
-    const int _dt)
-    : TimedCommand(_dt),
-      scene(_scene),
+    const double _step)
+    : camera(_camera),
       axisName(_axisName),
-      direction(_direction) {}
+      direction(_direction),
+      step(_step) {}
 
 void RotateCameraAroundCommand::execute()
 {
-    const double ratio = dt != 0 ? (dt / scene.defaultFrameTime) : 1.f;
-    const double step = scene.rotationSpeed * ratio;
-
-    bool isReversed = false;
-    scene.getCamera().rotateAround(axisName, direction, step, isReversed);
-
-    if (isReversed)
-        scene.flip();
+    camera.rotateAround(axisName, direction, step);
 }

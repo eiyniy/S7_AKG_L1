@@ -17,20 +17,20 @@ MainWindow::MainWindow(Point &_resolution)
     bufferSprite.setTexture(bufferTexture, true);
 }
 
-void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &viewportVertices)
+void MainWindow::drawModel(const Object &objInfo, const std::vector<Vertex> &viewportVertices)
 {
-    auto color = &objInfo.getColor();
+    auto color = &objInfo.cGetColor();
 
     /*
     for (auto vertex : viewportVertices)
     {
-        if (vertex.cGetIsOutOfScreen() || vertex.cGetIsWNegative())
+        if (vertex.cGetIsOutOfScreen())
             continue;
 
         int x = std::trunc(vertex.cGetX());
         int y = std::trunc(vertex.cGetY());
 
-        drawPixel(x, y, color, resolution);
+        drawPixel(x, y, color, resolution.cGetX());
     }
     */
 
@@ -46,12 +46,12 @@ void MainWindow::drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &vi
         if (!isPolygonVisible)
             continue;
 
-        auto polygonVertices = std::vector<Vertex>(vIndexesCount);
+        auto polygonVertices = std::vector<Point>(vIndexesCount);
 
         for (int i = 0; i < vIndexesCount; ++i)
         {
             auto vertex = viewportVertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1];
-            polygonVertices[i] = vertex;
+            polygonVertices[i] = Point(round(vertex.cGetX()), round(vertex.cGetY()));
 
             if (i < 1)
                 continue;
@@ -123,15 +123,15 @@ void MainWindow::drawPixels()
 }
 
 void MainWindow::drawLineBr(
-    const Vertex &v1,
-    const Vertex &v2,
+    const Point &p1,
+    const Point &p2,
     const sf::Color *color)
 {
-    int x1 = v1.cGetX();
-    int y1 = v1.cGetY();
+    int x1 = p1.cGetX();
+    int y1 = p1.cGetY();
 
-    const int x2 = v2.cGetX();
-    const int y2 = v2.cGetY();
+    const int x2 = p2.cGetX();
+    const int y2 = p2.cGetY();
     const int deltaX = abs(x2 - x1);
     const int deltaY = abs(y2 - y1);
     const int signX = x1 < x2 ? 1 : -1;
@@ -158,43 +158,5 @@ void MainWindow::drawLineBr(
             error += deltaX;
             y1 += signY;
         }
-    }
-}
-
-void MainWindow::drawLineDDA(
-    const Vertex &v1,
-    const Vertex &v2,
-    const sf::Color *color)
-{
-    const int x2 = v2.cGetX();
-    const int y2 = v2.cGetY();
-
-    int x1 = v1.cGetX();
-    int y1 = v1.cGetY();
-
-    int deltaX = abs(x1 - x2);
-    int deltaY = abs(y1 - y2);
-
-    int length = std::max(deltaX, deltaY);
-
-    if (length == 0)
-    {
-        if (x1 < resolution.cGetX() && y1 < resolution.cGetY() && x1 > 0 && y1 > 0)
-            drawPixel(x1, y1, color, resolution.cGetX());
-
-        return;
-    }
-
-    const int dX = (x2 - x1) / length;
-    const int dY = (y2 - y1) / length;
-
-    length++;
-    while (length--)
-    {
-        if (x1 < resolution.cGetX() && y1 < resolution.cGetY() && x1 > 0 && y1 > 0)
-            drawPixel(x1, y1, color, resolution.cGetX());
-
-        x1 += dX;
-        y1 += dY;
     }
 }

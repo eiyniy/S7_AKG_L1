@@ -15,19 +15,15 @@ public:
     void clear();
 
     void drawPixels();
-    void drawModel(const ObjInfo &objInfo, const std::vector<Vertex> &viewportVertices);
+    void drawModel(const Object &objInfo, const std::vector<Vertex> &viewportVertices);
 
     sf::RenderWindow &getWindow();
     const Point &cGetResolution() const;
 
 private:
     void drawLineBr(
-        const Vertex &v1,
-        const Vertex &v2,
-        const sf::Color *color);
-    void drawLineDDA(
-        const Vertex &v1,
-        const Vertex &v2,
+        const Point &p1,
+        const Point &p2,
         const sf::Color *color);
 
     void drawPixel(

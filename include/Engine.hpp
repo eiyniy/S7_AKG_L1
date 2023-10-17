@@ -13,6 +13,11 @@ public:
 
     void start();
 
+    static Matrix<4, 1> getTransition(
+        const AxisName axis,
+        const Direction direction,
+        const double step);
+
 private:
     const int defaultFps = 165;
 

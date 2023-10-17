@@ -1,15 +1,19 @@
 #pragma once
 
-#include <Scene.hpp>
+#include <Object.hpp>
+#include <Camera.hpp>
 #include <Command.hpp>
 
 class CentralizeCameraCommand : public Command
 {
 public:
-    CentralizeCameraCommand(Scene &_scene);
+    CentralizeCameraCommand(
+        Camera &_camera,
+        Object &_object);
 
     void execute() override;
 
 private:
-    Scene &scene;
+    Camera &camera;
+    Object &object;
 };

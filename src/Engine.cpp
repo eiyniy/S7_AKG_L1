@@ -18,14 +18,47 @@ Engine::Engine(Scene &_scene, MainWindow &_mainWindow)
 
 void Engine::start()
 {
-    scene.convertAllModels();
-
     while (mainWindow.getWindow().isOpen())
     {
         handleEvents();
         update();
         draw();
     }
+}
+
+Matrix<4, 1> Engine::getTransition(
+    const AxisName axis,
+    const Direction direction,
+    const double step)
+{
+    Matrix<4, 1> transition;
+
+    switch (axis)
+    {
+    case AxisName::X:
+        if (direction == Direction::Forward)
+            transition = Matrix<4, 1>(step, 0, 0, 0);
+        else
+            transition = Matrix<4, 1>(-step, 0, 0, 0);
+
+        break;
+    case AxisName::Y:
+        if (direction == Direction::Forward)
+            transition = Matrix<4, 1>(0, step, 0, 0);
+        else
+            transition = Matrix<4, 1>(0, -step, 0, 0);
+
+        break;
+    case AxisName::Z:
+        if (direction == Direction::Forward)
+            transition = Matrix<4, 1>(0, 0, step, 0);
+        else
+            transition = Matrix<4, 1>(0, 0, -step, 0);
+
+        break;
+    }
+
+    return transition;
 }
 
 void Engine::handleEvents()
@@ -86,41 +119,52 @@ void Engine::sendInputCommand(const sf::Event &event)
     case sf::Keyboard::Right:
     case sf::Keyboard::Down:
     case sf::Keyboard::Left:
+    {
+        const double ratio = dt != 0 ? (dt / scene.defaultFrameTime) : 1.f;
+
         if (event.key.control && !event.key.alt)
         {
+            const double step = scene.moveSpeed * ratio;
+
             commandsQueue.push(std::move(std::make_unique<MoveObjectCommand>(
                 MoveObjectCommand(
-                    scene,
-                    scene.cGetSelectedObjectName(),
+                    *scene.getObject(scene.cGetSelectedObjectName()),
                     moveAxis,
                     moveDirection,
-                    dt))));
+                    step))));
         }
         else if (event.key.control && event.key.alt)
         {
+            const double step = scene.rotationSpeed * ratio;
+
             commandsQueue.push(std::move(std::make_unique<RotateCameraAroundCommand>(
                 RotateCameraAroundCommand(
-                    scene,
+                    scene.getCamera(),
                     moveAxis,
                     moveDirection,
-                    dt))));
+                    step))));
         }
         else if (!event.key.control && !event.key.alt)
         {
+            const double step = scene.rotationSpeed * ratio;
+
             commandsQueue.push(std::move(std::make_unique<MoveCameraCommand>(
                 MoveCameraCommand(
-                    scene,
+                    scene.getCamera(),
                     moveAxis,
                     moveDirection,
-                    dt))));
+                    step))));
         }
         break;
+    }
     case sf::Keyboard::C:
         if (!event.key.control)
             break;
 
         commandsQueue.push(std::move(std::make_unique<CentralizeCameraCommand>(
-            CentralizeCameraCommand(scene))));
+            CentralizeCameraCommand(
+                scene.getCamera(),
+                *scene.getObject(scene.cGetSelectedObjectName())))));
 
         break;
     case sf::Keyboard::F11:
@@ -136,15 +180,8 @@ void Engine::sendInputCommand(const sf::Event &event)
 
 void Engine::update()
 {
-    bool needUpdate = false;
     while (auto command = commandsQueue.tryPop())
-    {
         (*command)->execute();
-        needUpdate = true;
-    }
-
-    if (needUpdate)
-        scene.convertAllModels();
 }
 
 void Engine::draw()
@@ -153,14 +190,16 @@ void Engine::draw()
 
     mainWindow.drawModel(
         *scene.cGetObject(scene.floorObjectName),
-        scene.cGetObjectConvertedVertices(scene.floorObjectName));
+        scene.cGetObject(scene.floorObjectName)->cGetDrawable(scene.cGetCamera()));
 
     for (auto key : scene.cGetAllObjectNames())
     {
         if (key == scene.floorObjectName)
             continue;
 
-        mainWindow.drawModel(*scene.cGetObject(key), scene.cGetObjectConvertedVertices(key));
+        mainWindow.drawModel(
+            *scene.cGetObject(key),
+            scene.cGetObject(key)->cGetDrawable(scene.cGetCamera()));
     }
 
     mainWindow.drawPixels();

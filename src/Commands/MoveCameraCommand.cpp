@@ -1,13 +1,16 @@
 #include <MoveCameraCommand.hpp>
+#include <Engine.hpp>
 
 MoveCameraCommand::MoveCameraCommand(
-    Scene &_scene,
+    Camera &_camera,
     const AxisName _axisName,
     const Direction _direction,
-    const int _dt)
-    : MoveCommand(_scene, _axisName, _direction, _dt) {}
+    const double _step)
+    : MoveCommand(_axisName, _direction, _step),
+      camera(_camera) {}
 
 void MoveCameraCommand::execute()
 {
-    scene.getCamera().move(transition);
+    auto transition = Engine::getTransition(axisName, direction, step);
+    camera.move(transition);
 }

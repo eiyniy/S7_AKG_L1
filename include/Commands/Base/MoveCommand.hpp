@@ -1,20 +1,19 @@
 #pragma once
 
-#include <TimedCommand.hpp>
+#include <Command.hpp>
 #include <Enums.hpp>
 #include <Scene.hpp>
 
-class MoveCommand : public TimedCommand
+class MoveCommand : public Command
 {
 protected:
     MoveCommand(
-        Scene &_scene,
         const AxisName _axisName,
         const Direction _direction,
-        const int _dt);
+        const double _step);
 
 protected:
-    Scene &scene;
-
-    Matrix<4, 1> transition;
+    const AxisName axisName;
+    const Direction direction;
+    const double step;
 };

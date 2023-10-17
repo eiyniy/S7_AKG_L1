@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ObjInfo.hpp>
+#include <Object.hpp>
 #include <Camera.hpp>
 #include <Matrix.hpp>
 #include <Enums.hpp>
@@ -13,11 +13,8 @@ private:
     const int floorStepsCount = 30;
 
     std::string selectedObjectName;
-    std::map<std::string, ObjInfo *> objects;
-    std::map<std::string, Matrix<4, 1>> objectsShift;
-    std::map<std::string, std::vector<Vertex>> objectsConvertedVertices;
+    std::map<std::string, Object *> objects;
     Camera &camera;
-    Matrix<4, 1> &up;
 
     void generateFloor();
     void generateFloor(const int size, const int step, const Point &center);
@@ -31,55 +28,39 @@ public:
 
     Scene(
         Camera &_camera,
-        Matrix<4, 1> &_up,
         const double _moveSpeed,
         const double _rotationSpeed);
 
     ~Scene();
 
-    const Matrix<4, 1> cGetTransition(
-        const AxisName axis,
-        const Direction direction,
-        const int dt) const;
-
-    void convertAllModels();
-    void convertModel(
-        std::vector<Vertex> &result,
-        const std::vector<Vertex> &vertices,
-        const Matrix<4, 1> &objectShift);
-
-    void flip();
     void centralizeCamera();
-    void moveObject(const std::string &objectName, const Matrix<4, 1> &transition);
-    void addObject(const std::string &key, ObjInfo *object);
+    void addObject(const std::string &key, Object *object);
 
-    const ObjInfo *cGetObject(const std::string &key) const;
-    const Matrix<4, 1> &cGetObjectShift(const std::string &key) const;
-    const std::vector<Vertex> &cGetObjectConvertedVertices(const std::string &key) const;
+    const Object *cGetObject(const std::string &key) const;
     const std::vector<std::string> cGetAllObjectNames() const;
     const std::string cGetSelectedObjectName() const;
     const Camera &cGetCamera() const;
 
-    Matrix<4, 1> &getObjectShift(const std::string &key);
+    Object *getObject(const std::string &key);
     Camera &getCamera();
 };
 
-inline const ObjInfo *Scene::cGetObject(const std::string &key) const
+inline const Object *Scene::cGetObject(const std::string &key) const
 {
     return objects.at(key);
 }
 
-inline const Matrix<4, 1> &Scene::cGetObjectShift(const std::string &key) const
+inline const Camera &Scene::cGetCamera() const
 {
-    return objectsShift.at(key);
+    return camera;
 }
 
-inline Matrix<4, 1> &Scene::getObjectShift(const std::string &key)
+inline Object *Scene::getObject(const std::string &key)
 {
-    return objectsShift.at(key);
+    return objects.at(key);
 }
 
-inline const std::vector<Vertex> &Scene::cGetObjectConvertedVertices(const std::string &key) const
+inline Camera &Scene::getCamera()
 {
-    return objectsConvertedVertices.at(key);
+    return camera;
 }

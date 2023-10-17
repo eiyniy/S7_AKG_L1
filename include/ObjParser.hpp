@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ObjInfo.hpp>
+#include <Object.hpp>
 #include <Enums.hpp>
 #include <string>
 #include <optional>
@@ -14,8 +14,7 @@ public:
     ObjParser(const std::string &_pathToFile);
 
     std::unique_ptr<std::string> readFile();
-    ObjInfo *parseEntries(const std::string &fileContent);
-    void parseEntry(const std::string &line, ObjInfo *result) const;
+    Object *parseEntries(const std::string &fileContent);
 
     static std::optional<EntryType> getEntryType(const std::string &line);
     static std::optional<std::string> getNextPart(

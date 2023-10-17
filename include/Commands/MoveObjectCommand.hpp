@@ -1,19 +1,19 @@
 #pragma once
 
 #include <MoveCommand.hpp>
+#include <Object.hpp>
 
 class MoveObjectCommand : public MoveCommand
 {
 public:
     MoveObjectCommand(
-        Scene &_scene,
-        const std::string &_objectName,
+        Object &_object,
         const AxisName _axisName,
         const Direction _direction,
-        const int _dt);
+        const double _step);
 
     void execute() override;
 
 private:
-    const std::string &objectName;
+    Object &object;
 };

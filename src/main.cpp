@@ -28,9 +28,9 @@ int main(int argc, char **argv)
     auto cameraTarget = Matrix<4, 1>(0, 0, 0);
     auto videoMode = sf::VideoMode::getDesktopMode();
     auto cameraResolution = Point(videoMode.width, videoMode.height);
-    auto camera = Camera(cameraPosition, cameraTarget, cameraResolution, 100);
     auto up = Matrix<4, 1>(0, 1, 0);
-    auto scene = Scene(camera, up, 5, 0.5);
+    auto camera = Camera(up, cameraPosition, cameraTarget, cameraResolution, 100);
+    auto scene = Scene(camera, 5, 0.5);
     auto mainWindow = MainWindow(cameraResolution);
     auto engine = Engine(scene, mainWindow);
 

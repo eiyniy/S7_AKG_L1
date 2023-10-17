@@ -1,32 +1,38 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
+#include <vector>
 #include <Vertex.hpp>
 #include <TextureVertex.hpp>
 #include <NormalVertex.hpp>
 #include <Polygon.hpp>
-#include <SFML/Graphics.hpp>
-#include <vector>
+#include <Camera.hpp>
 
-class ObjInfo
+class Object
 {
 public:
-    ObjInfo(
+    Object(
         const std::vector<Vertex> &_vertices,
         const std::vector<TextureVertex> &_tVertices,
         const std::vector<NormalVertex> &_nVertices,
         const std::vector<Polygon> &_polygons,
         const sf::Color &_color);
 
+    void move(const Matrix<4, 1> &transition);
+    const std::vector<Vertex> cGetDrawable(const Camera &camera) const;
+
     const std::vector<Vertex> &cGetVertices() const;
     const std::vector<TextureVertex> &cGetTVertices() const;
     const std::vector<NormalVertex> &cGetNVertices() const;
     const std::vector<Polygon> &cGetPolygons() const;
 
+    const sf::Color &cGetColor() const;
+
     const Vertex &getCenter();
     const Vertex &getMaxXZ();
     const Vertex &getMinXZ();
 
-    const sf::Color &getColor() const;
+    const Matrix<4, 1> &cGetShift() const;
 
 private:
     void calcGeometricParams();
@@ -36,8 +42,20 @@ private:
     const std::vector<NormalVertex> nVertices;
     const std::vector<Polygon> polygons;
 
+    const sf::Color color;
+
     std::optional<Vertex> center;
     std::optional<Vertex> maxXZ, minXZ;
 
-    const sf::Color color;
+    Matrix<4, 1> shift;
 };
+
+inline const Matrix<4, 1> &Object::cGetShift() const
+{
+    return shift;
+}
+
+inline const sf::Color &Object::cGetColor() const
+{
+    return color;
+}

@@ -74,7 +74,7 @@ std::optional<std::string> ObjParser::getNextPart(
 
 #pragma endregion Static
 
-ObjInfo *ObjParser::parseEntries(const std::string &fileContent)
+Object *ObjParser::parseEntries(const std::string &fileContent)
 {
     std::istringstream ss(fileContent);
 
@@ -114,7 +114,7 @@ ObjInfo *ObjParser::parseEntries(const std::string &fileContent)
     readStream.clear();
     readStream.seekg(0, std::ios::beg);
 
-    return new ObjInfo(
+    return new Object(
         vertexes,
         tVertexes,
         nVertexes,

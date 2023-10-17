@@ -1,15 +1,16 @@
 #include <MoveObjectCommand.hpp>
+#include <Engine.hpp>
 
 MoveObjectCommand::MoveObjectCommand(
-    Scene &_scene,
-    const std::string &_objectName,
+    Object &_object,
     const AxisName _axisName,
     const Direction _direction,
-    const int _dt)
-    : MoveCommand(_scene, _axisName, _direction, _dt),
-      objectName(_objectName) {}
+    const double _step)
+    : MoveCommand(_axisName, _direction, _step),
+      object(_object) {}
 
 void MoveObjectCommand::execute()
 {
-    scene.moveObject(objectName, transition);
+    auto transition = Engine::getTransition(axisName, direction, step);
+    object.move(transition);
 }
