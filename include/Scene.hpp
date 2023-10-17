@@ -17,10 +17,6 @@ private:
     std::map<std::string, Matrix<4, 1>> objectsShift;
     std::map<std::string, std::vector<Vertex>> objectsConvertedVertices;
     Camera &camera;
-
-    const double moveSpeed;
-    const double rotationSpeed;
-
     Matrix<4, 1> &up;
 
     void generateFloor();
@@ -29,7 +25,9 @@ private:
 public:
     const std::string floorObjectName = "_FLOOR";
 
-    const double defaultFrameTime = (1.f * 1000.f / 60);
+    const double defaultFrameTime;
+    const double moveSpeed;
+    const double rotationSpeed;
 
     Scene(
         Camera &_camera,
@@ -50,29 +48,19 @@ public:
         const std::vector<Vertex> &vertices,
         const Matrix<4, 1> &objectShift);
 
+    void flip();
     void centralizeCamera();
-    void rotateCameraAround(
-        const AxisName axisName,
-        const Direction direction,
-        const int dt);
-    void moveCamera(const Matrix<4, 1> &transition);
-
     void moveObject(const std::string &objectName, const Matrix<4, 1> &transition);
-
-    void resize(const int width, const int height);
-
-    const ObjInfo *cGetObject(const std::string &key) const;
     void addObject(const std::string &key, ObjInfo *object);
 
+    const ObjInfo *cGetObject(const std::string &key) const;
     const Matrix<4, 1> &cGetObjectShift(const std::string &key) const;
-    Matrix<4, 1> &getObjectShift(const std::string &key);
-
     const std::vector<Vertex> &cGetObjectConvertedVertices(const std::string &key) const;
-
     const std::vector<std::string> cGetAllObjectNames() const;
     const std::string cGetSelectedObjectName() const;
-
     const Camera &cGetCamera() const;
+
+    Matrix<4, 1> &getObjectShift(const std::string &key);
     Camera &getCamera();
 };
 

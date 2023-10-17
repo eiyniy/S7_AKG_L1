@@ -13,5 +13,5 @@ ResizeCommand::ResizeCommand(
 void ResizeCommand::execute()
 {
     mainWindow.resize(width, height);
-    scene.resize(width, height);
+    scene.getCamera().setResolution({width, height});
 }

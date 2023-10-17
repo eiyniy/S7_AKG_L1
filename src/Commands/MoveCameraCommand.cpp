@@ -9,5 +9,5 @@ MoveCameraCommand::MoveCameraCommand(
 
 void MoveCameraCommand::execute()
 {
-    scene.moveCamera(transition);
+    scene.getCamera().move(transition);
 }

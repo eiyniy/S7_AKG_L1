@@ -11,5 +11,5 @@ SwitchVideoModeCommand::SwitchVideoModeCommand(
 void SwitchVideoModeCommand::execute()
 {
     mainWindow.switchVideoMode(isEscape);
-    scene.resize(mainWindow.cGetResolution().cGetX(), mainWindow.cGetResolution().cGetY());
+    scene.getCamera().setResolution(mainWindow.cGetResolution());
 }

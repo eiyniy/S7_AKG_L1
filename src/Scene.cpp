@@ -14,6 +14,7 @@ Scene::Scene(
     const double _rotationSpeed)
     : camera(_camera),
       up(_up),
+      defaultFrameTime(1.f * 1000.f / 60),
       moveSpeed(_moveSpeed),
       rotationSpeed(_rotationSpeed)
 {
@@ -116,7 +117,7 @@ void Scene::convertModel(
     const Matrix<4, 1> &objectShift)
 {
     const auto convertMatrix =
-        Matrix<4, 4>::getProjectionConvert(camera.getFOV(), camera.getAspect(), 2000, 0.1) *
+        Matrix<4, 4>::getProjectionConvert(camera.cGetFOV(), camera.cGetAspect(), 2000, 0.1) *
         Matrix<4, 4>::getViewConvert(camera.cGetPosition(), camera.cGetTarget(), up) *
         Matrix<4, 4>::getMoveConvert(objectShift);
 
@@ -145,50 +146,22 @@ void Scene::convertModel(
     }
 }
 
+void Scene::flip()
+{
+    up.getY() = -up.cGetY();
+}
+
 void Scene::centralizeCamera()
 {
-    camera.getTarget() =
-        Converter::vertexToMatrix(objects.at(selectedObjectName)->getCenter()) +
-        objectsShift.at(selectedObjectName);
-}
-
-void Scene::rotateCameraAround(
-    const AxisName axisName,
-    const Direction direction,
-    const int dt)
-{
-    const double ratio = dt != 0 ? (dt / defaultFrameTime) : 1.f;
-    const double rotationSpeedTimed = rotationSpeed * ratio;
-
-    auto cameraRelative = camera.cGetPosition() - camera.cGetTarget();
-    auto spherical = Math::decartToSpherical(cameraRelative);
-
-    bool isCameraReversed = false;
-    spherical.move(axisName, direction, rotationSpeedTimed, isCameraReversed);
-
-    if (isCameraReversed)
-        up.getY() = -up.cGetY();
-
-    cameraRelative = Math::sphericalToDecart(spherical);
-    camera.getPosition() = cameraRelative + camera.cGetTarget();
-}
-
-void Scene::moveCamera(const Matrix<4, 1> &transition)
-{
-    camera.getTarget() = camera.cGetTarget() + transition;
-    camera.getPosition() = camera.cGetPosition() + transition;
+    camera.setTarget(
+        Converter::vertexToMatrix(
+            objects.at(selectedObjectName)->getCenter()) +
+        objectsShift.at(selectedObjectName));
 }
 
 void Scene::moveObject(const std::string &objectName, const Matrix<4, 1> &transition)
 {
     getObjectShift(objectName) += transition;
-}
-
-void Scene::resize(const int width, const int height)
-{
-    camera.getResolution() = Point(width, height);
-
-    convertAllModels();
 }
 
 void Scene::addObject(const std::string &key, ObjInfo *object)
