@@ -78,7 +78,10 @@ ObjInfo *ObjParser::parseEntries(const std::string &fileContent)
 {
     std::istringstream ss(fileContent);
 
-    auto info = new ObjInfo(sf::Color::White);
+    std::vector<Vertex> vertexes;
+    std::vector<TextureVertex> tVertexes;
+    std::vector<NormalVertex> nVertexes;
+    std::vector<Polygon> polygons;
 
     auto iter = fileContent.cbegin();
     auto iterEnd = fileContent.cend();
@@ -86,35 +89,37 @@ ObjInfo *ObjParser::parseEntries(const std::string &fileContent)
     std::string line;
 
     while (getline(ss, line, '\n'))
-        parseEntry(line, info);
+    {
+        auto type = getEntryType(line);
+        if (!type.has_value())
+            continue;
+
+        switch (*type)
+        {
+        case EntryType::Vertex:
+            vertexes.emplace_back(Vertex::parse(line));
+            break;
+        case EntryType::TextureVertex:
+            tVertexes.emplace_back(TextureVertex::parse(line));
+            break;
+        case EntryType::NormalVertex:
+            nVertexes.emplace_back(NormalVertex::parse(line));
+            break;
+        case EntryType::Polygon:
+            polygons.emplace_back(Polygon::parse(line));
+            break;
+        }
+    }
 
     readStream.clear();
     readStream.seekg(0, std::ios::beg);
 
-    return info;
-}
-
-void ObjParser::parseEntry(const std::string &line, ObjInfo *result) const
-{
-    auto type = getEntryType(line);
-    if (!type.has_value())
-        return;
-
-    switch (*type)
-    {
-    case EntryType::Vertex:
-        result->addVertex(Vertex::parse(line));
-        break;
-    case EntryType::TextureVertex:
-        result->addTVertex(TextureVertex::parse(line));
-        break;
-    case EntryType::NormalVertex:
-        result->addNVertex(NormalVertex::parse(line));
-        break;
-    case EntryType::Polygon:
-        result->addPolygon(Polygon::parse(line));
-        break;
-    }
+    return new ObjInfo(
+        vertexes,
+        tVertexes,
+        nVertexes,
+        polygons,
+        sf::Color::White);
 }
 
 std::unique_ptr<std::string> ObjParser::readFile()

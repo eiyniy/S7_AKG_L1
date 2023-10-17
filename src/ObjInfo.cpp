@@ -2,42 +2,16 @@
 #include <ObjInfo.hpp>
 
 ObjInfo::ObjInfo(
-    const sf::Color &_color,
-    const int vReserve,
-    const int vtReserve,
-    const int vnReserve,
-    const int pReserve)
-    : color(_color)
-{
-    if (vReserve != 0)
-        vertices.reserve(vReserve);
-    if (vtReserve != 0)
-        tVertices.reserve(vtReserve);
-    if (vnReserve != 0)
-        nVertices.reserve(vnReserve);
-    if (pReserve != 0)
-        polygons.reserve(pReserve);
-}
-
-void ObjInfo::addVertex(const Vertex &vertex)
-{
-    vertices.emplace_back(vertex);
-}
-
-void ObjInfo::addTVertex(const TextureVertex &tVertex)
-{
-    tVertices.emplace_back(tVertex);
-}
-
-void ObjInfo::addNVertex(const NormalVertex &nVertex)
-{
-    nVertices.emplace_back(nVertex);
-}
-
-void ObjInfo::addPolygon(const Polygon &polygon)
-{
-    polygons.emplace_back(polygon);
-}
+    const std::vector<Vertex> &_vertices,
+    const std::vector<TextureVertex> &_tVertices,
+    const std::vector<NormalVertex> &_nVertices,
+    const std::vector<Polygon> &_polygons,
+    const sf::Color &_color)
+    : color(_color),
+      vertices(_vertices),
+      tVertices(_tVertices),
+      nVertices(_nVertices),
+      polygons(_polygons) {}
 
 const std::vector<Vertex> &ObjInfo::cGetVertices() const
 {
@@ -96,7 +70,7 @@ void ObjInfo::calcGeometricParams()
     minXZ = Vertex(xMin, 0, zMin);
 }
 
-Vertex &ObjInfo::getCenter()
+const Vertex &ObjInfo::getCenter()
 {
     if (!center.has_value())
         calcGeometricParams();
@@ -104,7 +78,7 @@ Vertex &ObjInfo::getCenter()
     return *center;
 }
 
-Vertex &ObjInfo::getMaxXZ()
+const Vertex &ObjInfo::getMaxXZ()
 {
     if (!maxXZ.has_value())
         calcGeometricParams();
@@ -112,7 +86,7 @@ Vertex &ObjInfo::getMaxXZ()
     return *maxXZ;
 }
 
-Vertex &ObjInfo::getMinXZ()
+const Vertex &ObjInfo::getMinXZ()
 {
     if (!minXZ.has_value())
         calcGeometricParams();

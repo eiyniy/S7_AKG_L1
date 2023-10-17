@@ -64,7 +64,9 @@ void Scene::generateFloor()
 void Scene::generateFloor(const int size, const int step, const Point &center)
 {
     auto color = sf::Color(255U, 255U, 255U, 64U);
-    auto floorPt = new ObjInfo(color);
+
+    std::vector<Vertex> vertexes;
+    std::vector<Polygon> polygons;
 
     const auto evenSize = size % 2 == 0 ? size + 1 : size;
     const auto halfSize = evenSize / 2;
@@ -72,7 +74,7 @@ void Scene::generateFloor(const int size, const int step, const Point &center)
     for (int i = -halfSize; i <= halfSize; ++i)
     {
         for (int j = -halfSize; j <= halfSize; ++j)
-            floorPt->addVertex(Vertex(j * step + center.cGetX(), 0, i * step + center.cGetY()));
+            vertexes.emplace_back(Vertex(j * step + center.cGetX(), 0, i * step + center.cGetY()));
     }
 
     for (int i = 0; i < evenSize - 1; ++i)
@@ -85,9 +87,12 @@ void Scene::generateFloor(const int size, const int step, const Point &center)
                 VertexIndexes((j + 1) * evenSize + i + 2),
                 VertexIndexes((j + 1) * evenSize + i + 1)};
 
-            floorPt->addPolygon(Polygon(vertexesIndexes));
+            polygons.emplace_back(Polygon(vertexesIndexes));
         }
     }
+
+    auto floorPt = new ObjInfo(
+        vertexes, {}, {}, polygons, color);
 
     objects.insert_or_assign(floorObjectName, floorPt);
 

@@ -7,7 +7,7 @@
 SValues::SValues(const std::vector<VertexIndexes> &values)
     : v4(std::nullopt)
 {
-    if (values.size() != 3 || values.size() != 4)
+    if (values.size() != 3 && values.size() != 4)
         throw std::logic_error("Invalid argument");
 
     v1 = values[0];

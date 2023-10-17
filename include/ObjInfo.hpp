@@ -11,35 +11,30 @@ class ObjInfo
 {
 public:
     ObjInfo(
-        const sf::Color &_color,
-        const int vReserve = 0,
-        const int vtReserve = 0,
-        const int vnReserve = 0,
-        const int pReserve = 0);
-
-    void addVertex(const Vertex &vertex);
-    void addTVertex(const TextureVertex &tVertex);
-    void addNVertex(const NormalVertex &nVertex);
-    void addPolygon(const Polygon &polygon);
+        const std::vector<Vertex> &_vertices,
+        const std::vector<TextureVertex> &_tVertices,
+        const std::vector<NormalVertex> &_nVertices,
+        const std::vector<Polygon> &_polygons,
+        const sf::Color &_color);
 
     const std::vector<Vertex> &cGetVertices() const;
     const std::vector<TextureVertex> &cGetTVertices() const;
     const std::vector<NormalVertex> &cGetNVertices() const;
     const std::vector<Polygon> &cGetPolygons() const;
 
-    Vertex &getCenter();
-    Vertex &getMaxXZ();
-    Vertex &getMinXZ();
+    const Vertex &getCenter();
+    const Vertex &getMaxXZ();
+    const Vertex &getMinXZ();
 
     const sf::Color &getColor() const;
 
 private:
     void calcGeometricParams();
 
-    std::vector<Vertex> vertices;
-    std::vector<TextureVertex> tVertices;
-    std::vector<NormalVertex> nVertices;
-    std::vector<Polygon> polygons;
+    const std::vector<Vertex> vertices;
+    const std::vector<TextureVertex> tVertices;
+    const std::vector<NormalVertex> nVertices;
+    const std::vector<Polygon> polygons;
 
     std::optional<Vertex> center;
     std::optional<Vertex> maxXZ, minXZ;
