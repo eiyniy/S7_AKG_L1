@@ -19,20 +19,20 @@ public:
         const sf::Color &_color);
 
     void move(const Matrix<4, 1> &transition);
-    const std::vector<Vertex> cGetDrawable(const Camera &camera) const;
 
     const std::vector<Vertex> &cGetVertices() const;
     const std::vector<TextureVertex> &cGetTVertices() const;
     const std::vector<NormalVertex> &cGetNVertices() const;
     const std::vector<Polygon> &cGetPolygons() const;
 
+    const Matrix<4, 1> &cGetShift() const;
     const sf::Color &cGetColor() const;
+
+    const std::vector<Vertex> getDrawable(const Camera &camera);
 
     const Vertex &getCenter();
     const Vertex &getMaxXZ();
     const Vertex &getMinXZ();
-
-    const Matrix<4, 1> &cGetShift() const;
 
 private:
     void calcGeometricParams();
@@ -48,6 +48,8 @@ private:
     std::optional<Vertex> maxXZ, minXZ;
 
     Matrix<4, 1> shift;
+
+    std::vector<Vertex> drawable;
 };
 
 inline const Matrix<4, 1> &Object::cGetShift() const

@@ -40,7 +40,7 @@ Polygon Polygon::parse(const std::string &line)
     if (entryType != EntryType::Polygon)
         throw std::logic_error("Could not parse value");
 
-    static auto accumulator = std::vector<VertexIndexes>();
+    auto accumulator = std::vector<VertexIndexes>();
     accumulator.reserve(3);
 
     auto iter = line.cbegin();
@@ -55,9 +55,7 @@ Polygon Polygon::parse(const std::string &line)
         ++i;
     }
 
-    auto res = Polygon(accumulator);
-    accumulator.clear();
-    return res;
+    return Polygon(accumulator);
 }
 
 const int Polygon::cGetVertexIndexesCount() const

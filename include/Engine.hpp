@@ -2,9 +2,9 @@
 
 #include <Scene.hpp>
 #include <MainWindow.hpp>
-#include <TSQueue.hpp>
 #include <Command.hpp>
 #include <memory>
+#include <queue>
 
 class Engine
 {
@@ -30,7 +30,7 @@ private:
     sf::Clock clock;
     int dt;
 
-    TSQueue<std::unique_ptr<Command>> commandsQueue;
+    std::queue<std::unique_ptr<Command>> commandsQueue;
 
     void handleEvents();
     void updateInput(const sf::Event &event);

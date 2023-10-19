@@ -1,10 +1,12 @@
-#include <ObjParser.hpp>
-#include <Enums.hpp>
-#include <Timer.hpp>
 #include <optional>
 #include <filesystem>
 #include <iostream>
 #include <sstream>
+#include <mutex>
+#include <ObjParser.hpp>
+#include <Enums.hpp>
+#include <Timer.hpp>
+#include <ThreadPool.hpp>
 
 ObjParser::ObjParser(const std::string &_pathToFile)
 {
@@ -76,43 +78,42 @@ std::optional<std::string> ObjParser::getNextPart(
 
 Object *ObjParser::parseEntries(const std::string &fileContent)
 {
-    std::istringstream ss(fileContent);
+    const auto timeStart = std::chrono::high_resolution_clock::now();
 
-    std::vector<Vertex> vertexes;
-    std::vector<TextureVertex> tVertexes;
-    std::vector<NormalVertex> nVertexes;
-    std::vector<Polygon> polygons;
+    const auto lines = splitByLines(fileContent);
 
-    auto iter = fileContent.cbegin();
-    auto iterEnd = fileContent.cend();
+    /*
+    // const int threadsCount = (unsigned int)ceil(lines.size() / 10000.f);
+    const int threadsCount = std::min(
+        (unsigned int)ceil(lines.size() / 10000.f),
+        ThreadPool::getInstance().getThreadsCount());
 
-    std::string line;
+    const double size = lines.size() / (double)threadsCount;
 
-    while (getline(ss, line, '\n'))
+    for (int i = 0; i < threadsCount; ++i)
     {
-        auto type = getEntryType(line);
-        if (!type.has_value())
-            continue;
+        const int begin = floor(size * i);
+        const int end = floor(size * (i + 1)) - 1;
 
-        switch (*type)
-        {
-        case EntryType::Vertex:
-            vertexes.emplace_back(Vertex::parse(line));
-            break;
-        case EntryType::TextureVertex:
-            tVertexes.emplace_back(TextureVertex::parse(line));
-            break;
-        case EntryType::NormalVertex:
-            nVertexes.emplace_back(NormalVertex::parse(line));
-            break;
-        case EntryType::Polygon:
-            polygons.emplace_back(Polygon::parse(line));
-            break;
-        }
+        ThreadPool::getInstance().enqueue(
+            [this, i, begin, end, &lines]()
+            {
+                for (int j = begin; j <= end; ++j)
+                    parseEntry(lines[j]);
+            });
     }
 
-    readStream.clear();
-    readStream.seekg(0, std::ios::beg);
+    ThreadPool::getInstance().waitAll();
+    */
+
+    // /*
+    for (int j = 0; j < lines.size(); ++j)
+        parseEntry(lines[j]);
+    // */
+
+    const auto timeEnd = std::chrono::high_resolution_clock::now();
+    auto parseTime = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count();
+    std::cout << "Parse time: " << parseTime << " ms" << std::endl;
 
     return new Object(
         vertexes,
@@ -122,13 +123,48 @@ Object *ObjParser::parseEntries(const std::string &fileContent)
         sf::Color::White);
 }
 
-std::unique_ptr<std::string> ObjParser::readFile()
+void ObjParser::parseEntry(const std::string &line)
+{
+    const auto type = getEntryType(line);
+    if (!type.has_value())
+        return;
+
+    switch (*type)
+    {
+    case EntryType::Vertex:
+        vertexes.emplace_back(Vertex::parse(line));
+        break;
+    case EntryType::TextureVertex:
+        tVertexes.emplace_back(TextureVertex::parse(line));
+        break;
+    case EntryType::NormalVertex:
+        nVertexes.emplace_back(NormalVertex::parse(line));
+        break;
+    case EntryType::Polygon:
+        polygons.emplace_back(Polygon::parse(line));
+        break;
+    }
+}
+
+std::vector<std::string> ObjParser::splitByLines(const std::string &string)
+{
+    auto result = std::vector<std::string>{};
+    auto ss = std::stringstream{string};
+
+    for (std::string line; std::getline(ss, line, '\n');)
+        result.emplace_back(line);
+
+    return result;
+}
+
+std::string ObjParser::readFile()
 {
     readStream.seekg(0, std::ios::end);
     auto size = readStream.tellg();
-    auto buffer = std::make_unique<std::string>(std::string(size, ' '));
+    auto buffer = std::string(size, ' ');
     readStream.seekg(0);
-    readStream.read(&((*buffer)[0]), size);
+    readStream.read(&(buffer[0]), size);
+    readStream.close();
 
     return buffer;
 }

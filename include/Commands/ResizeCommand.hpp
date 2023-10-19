@@ -8,7 +8,7 @@ class ResizeCommand : public Command
 {
 public:
     ResizeCommand(
-        Scene &_scene,
+        Camera &_camera,
         MainWindow &_mainWindow,
         const int _width,
         const int _height);
@@ -16,7 +16,7 @@ public:
     void execute() override;
 
 private:
-    Scene &scene;
+    Camera &camera;
     MainWindow &mainWindow;
 
     const int width;

@@ -37,7 +37,7 @@ std::array<double, 4> BaseVertex::parse(const std::string &line)
         throw std::logic_error("Could not parse value");
 
     std::optional<std::string> strPart;
-    static auto accumulator = std::array<std::optional<double>, 4>();
+    auto accumulator = std::array<std::optional<double>, 4>();
 
     auto iter = line.cbegin();
     auto iterEnd = line.cend();

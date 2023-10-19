@@ -1,11 +1,11 @@
 #include <ResizeCommand.hpp>
 
 ResizeCommand::ResizeCommand(
-    Scene &_scene,
+    Camera &_camera,
     MainWindow &_mainWindow,
     const int _width,
     const int _height)
-    : scene(_scene),
+    : camera(_camera),
       mainWindow(_mainWindow),
       width(_width),
       height(_height) {}
@@ -13,5 +13,5 @@ ResizeCommand::ResizeCommand(
 void ResizeCommand::execute()
 {
     mainWindow.resize(width, height);
-    scene.getCamera().setResolution({width, height});
+    camera.setResolution({width, height});
 }

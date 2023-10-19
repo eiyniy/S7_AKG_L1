@@ -16,17 +16,17 @@ private:
     std::condition_variable cv;
 
 public:
-    void push(T item);
+    void emplace(T item);
     T pop();
     const std::optional<T> tryPop();
 };
 
 template <typename T>
-inline void TSQueue<T>::push(T item)
+inline void TSQueue<T>::emplace(T item)
 {
     std::unique_lock<std::mutex> lock(mutex);
 
-    queue.push(std::move(item));
+    queue.emplace(item);
 
     cv.notify_one();
 }

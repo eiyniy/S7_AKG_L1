@@ -10,8 +10,11 @@
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/include/EntryTypes",
-                "${workspaceFolder}/include/Matrixes",
                 "${workspaceFolder}/include/Helpers"
+                "${workspaceFolder}/include/Commands"
+                "${workspaceFolder}/include/Commands/Base"
+                "${workspaceFolder}/include/Types"
+                "${workspaceFolder}/include/UI"
             ],
             "defines": [
                 "_DEBUG",

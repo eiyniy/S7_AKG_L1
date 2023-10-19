@@ -18,7 +18,7 @@ VertexIndexes::VertexIndexes(
 
 VertexIndexes VertexIndexes::parse(const std::string &str)
 {
-    static auto accumulator = std::array<std::optional<double>, 3>();
+    auto accumulator = std::array<std::optional<double>, 3>();
 
     auto iter = str.cbegin();
     auto iterEnd = str.cend();
@@ -33,10 +33,7 @@ VertexIndexes VertexIndexes::parse(const std::string &str)
     if (!accumulator[0].has_value())
         throw std::logic_error("Invalid argument");
 
-    auto res = VertexIndexes(*accumulator[0], accumulator[1], accumulator[2]);
-    accumulator.fill(std::nullopt);
-
-    return res;
+    return VertexIndexes(*accumulator[0], accumulator[1], accumulator[2]);
 }
 
 const int VertexIndexes::cGetVertexId() const

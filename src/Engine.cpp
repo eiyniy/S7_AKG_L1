@@ -7,12 +7,14 @@
 #include <SwitchVideoModeCommand.hpp>
 #include <CloseCommand.hpp>
 #include <ResizeCommand.hpp>
+#include <ThreadPool.hpp>
+#include <Timer.hpp>
 
 Engine::Engine(Scene &_scene, MainWindow &_mainWindow)
     : scene(_scene),
       mainWindow(_mainWindow)
 {
-    mainWindow.getWindow().setFramerateLimit(defaultFps);
+    // mainWindow.getWindow().setFramerateLimit(defaultFps);
     draw();
 }
 
@@ -69,16 +71,14 @@ void Engine::handleEvents()
     switch (event.type)
     {
     case sf::Event::Closed:
-        commandsQueue.push(std::move(std::make_unique<CloseCommand>(
-            CloseCommand(mainWindow))));
+        commandsQueue.emplace(std::make_unique<CloseCommand>(mainWindow));
         break;
     case sf::Event::Resized:
-        commandsQueue.push(std::move(std::make_unique<ResizeCommand>(
-            ResizeCommand(
-                scene,
-                mainWindow,
-                event.size.width,
-                event.size.height))));
+        commandsQueue.emplace(std::make_unique<ResizeCommand>(
+            scene.getCamera(),
+            mainWindow,
+            event.size.width,
+            event.size.height));
         break;
     case sf::Event::KeyPressed:
         updateInput(event);
@@ -126,34 +126,31 @@ void Engine::sendInputCommand(const sf::Event &event)
         {
             const double step = scene.moveSpeed * ratio;
 
-            commandsQueue.push(std::move(std::make_unique<MoveObjectCommand>(
-                MoveObjectCommand(
-                    *scene.getObject(scene.cGetSelectedObjectName()),
-                    moveAxis,
-                    moveDirection,
-                    step))));
+            commandsQueue.emplace(std::make_unique<MoveObjectCommand>(
+                *scene.getObject(scene.cGetSelectedObjectName()),
+                moveAxis,
+                moveDirection,
+                step));
         }
         else if (event.key.control && event.key.alt)
         {
             const double step = scene.rotationSpeed * ratio;
 
-            commandsQueue.push(std::move(std::make_unique<RotateCameraAroundCommand>(
-                RotateCameraAroundCommand(
-                    scene.getCamera(),
-                    moveAxis,
-                    moveDirection,
-                    step))));
+            commandsQueue.emplace(std::make_unique<RotateCameraAroundCommand>(
+                scene.getCamera(),
+                moveAxis,
+                moveDirection,
+                step));
         }
         else if (!event.key.control && !event.key.alt)
         {
-            const double step = scene.rotationSpeed * ratio;
+            const double step = scene.moveSpeed * ratio;
 
-            commandsQueue.push(std::move(std::make_unique<MoveCameraCommand>(
-                MoveCameraCommand(
-                    scene.getCamera(),
-                    moveAxis,
-                    moveDirection,
-                    step))));
+            commandsQueue.emplace(std::make_unique<MoveCameraCommand>(
+                scene.getCamera(),
+                moveAxis,
+                moveDirection,
+                step));
         }
         break;
     }
@@ -161,27 +158,29 @@ void Engine::sendInputCommand(const sf::Event &event)
         if (!event.key.control)
             break;
 
-        commandsQueue.push(std::move(std::make_unique<CentralizeCameraCommand>(
-            CentralizeCameraCommand(
-                scene.getCamera(),
-                *scene.getObject(scene.cGetSelectedObjectName())))));
+        commandsQueue.emplace(std::make_unique<CentralizeCameraCommand>(
+            scene.getCamera(),
+            *scene.getObject(scene.cGetSelectedObjectName())));
 
         break;
     case sf::Keyboard::F11:
     case sf::Keyboard::Escape:
-        commandsQueue.push(std::move(std::make_unique<SwitchVideoModeCommand>(
-            SwitchVideoModeCommand(
-                scene,
-                mainWindow,
-                event.key.code == sf::Keyboard::Escape))));
+        commandsQueue.emplace(std::make_unique<SwitchVideoModeCommand>(
+            scene,
+            mainWindow,
+            event.key.code == sf::Keyboard::Escape));
         break;
     }
 }
 
 void Engine::update()
 {
-    while (auto command = commandsQueue.tryPop())
-        (*command)->execute();
+    while (!commandsQueue.empty())
+    {
+        auto command = std::move(commandsQueue.front());
+        commandsQueue.pop();
+        command->execute();
+    }
 }
 
 void Engine::draw()
@@ -190,7 +189,7 @@ void Engine::draw()
 
     mainWindow.drawModel(
         *scene.cGetObject(scene.floorObjectName),
-        scene.cGetObject(scene.floorObjectName)->cGetDrawable(scene.cGetCamera()));
+        scene.getObject(scene.floorObjectName)->getDrawable(scene.cGetCamera()));
 
     for (auto key : scene.cGetAllObjectNames())
     {
@@ -199,7 +198,7 @@ void Engine::draw()
 
         mainWindow.drawModel(
             *scene.cGetObject(key),
-            scene.cGetObject(key)->cGetDrawable(scene.cGetCamera()));
+            scene.getObject(key)->getDrawable(scene.cGetCamera()));
     }
 
     mainWindow.drawPixels();

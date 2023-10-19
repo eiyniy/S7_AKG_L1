@@ -3,6 +3,7 @@
 #include <cstring>
 #include <SFML/Graphics.hpp>
 #include <Scene.hpp>
+#include <mutex>
 
 class MainWindow
 {
@@ -15,12 +16,17 @@ public:
     void clear();
 
     void drawPixels();
-    void drawModel(const Object &objInfo, const std::vector<Vertex> &viewportVertices);
+    void drawModel(const Object &objInfo, const std::vector<Vertex> viewportVertices);
 
     sf::RenderWindow &getWindow();
     const Point &cGetResolution() const;
 
 private:
+    void drawPolygon(
+        const Polygon &polygon,
+        const std::vector<Vertex> &drawableVertices,
+        const sf::Color *color);
+
     void drawLineBr(
         const Point &p1,
         const Point &p2,
@@ -37,8 +43,10 @@ private:
     Point &resolution;
     Point lastResolution;
 
-    sf::RenderWindow window;
     sf::Uint8 *pixels;
+    std::mutex pixelsMutex;
+
+    sf::RenderWindow window;
     sf::Texture bufferTexture;
     sf::Sprite bufferSprite;
 };
@@ -59,5 +67,6 @@ inline void MainWindow::drawPixel(
     const sf::Color *color,
     const int xSize)
 {
+    // std::unique_lock<std::mutex> pixelsLock(pixelsMutex);
     std::memcpy(pixels + (4 * (y * xSize + x)), color, 4);
 }

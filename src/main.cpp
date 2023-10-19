@@ -20,16 +20,13 @@ int main(int argc, char **argv)
         std::launch::async,
         [&parser]
         {
-            auto fileContentPt = parser.readFile();
-            return parser.parseEntries(*fileContentPt);
+            auto str = parser.readFile();
+            return parser.parseEntries(str);
         });
 
-    auto cameraPosition = Matrix<4, 1>(1, 50, 150);
-    auto cameraTarget = Matrix<4, 1>(0, 0, 0);
     auto videoMode = sf::VideoMode::getDesktopMode();
     auto cameraResolution = Point(videoMode.width, videoMode.height);
-    auto up = Matrix<4, 1>(0, 1, 0);
-    auto camera = Camera(up, cameraPosition, cameraTarget, cameraResolution, 100);
+    auto camera = Camera({0, 1, 0}, {1, 50, 150}, {0, 0, 0}, cameraResolution, 100);
     auto scene = Scene(camera, 5, 0.5);
     auto mainWindow = MainWindow(cameraResolution);
     auto engine = Engine(scene, mainWindow);
