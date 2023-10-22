@@ -93,6 +93,11 @@ const std::vector<Polygon> &Object::cGetPolygons() const
     return polygons;
 }
 
+std::vector<Polygon> &Object::getPolygons()
+{
+    return polygons;
+}
+
 void Object::calcGeometricParams()
 {
     double cx = 0, cy = 0, cz = 0;
@@ -159,23 +164,23 @@ const Vertex convertVertex(
     const Matrix<4, 4> &toProjectionConvert,
     const Matrix<4, 4> &viewportConvert)
 {
-    bool isOutOfScreen = false;
+    bool isVisible = true;
 
     auto mVertex = Converter::vertexToMatrix(vertex);
 
     mVertex = toProjectionConvert * mVertex;
 
     if (mVertex.cGetW() <= 0)
-        isOutOfScreen = true;
+        isVisible = false;
 
     mVertex /= mVertex.cGetW();
 
     if (mVertex.cGetX() < -1 || mVertex.cGetX() > 1 ||
         mVertex.cGetY() < -1 || mVertex.cGetY() > 1 ||
         mVertex.cGetZ() < 0 || mVertex.cGetZ() > 1)
-        isOutOfScreen = true;
+        isVisible = false;
 
     mVertex = viewportConvert * mVertex;
 
-    return Converter::matrixToVertex(mVertex, isOutOfScreen);
+    return Converter::matrixToVertex(mVertex, isVisible);
 }

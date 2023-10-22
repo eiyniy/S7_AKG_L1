@@ -4,7 +4,7 @@
 #include <Timer.hpp>
 #include <array>
 
-SValues::SValues(const std::vector<VertexIndexes> &values)
+SValues::SValues(const std::vector<VertexIds> &values)
     : v4(std::nullopt)
 {
     if (values.size() != 3 && values.size() != 4)
@@ -18,7 +18,7 @@ SValues::SValues(const std::vector<VertexIndexes> &values)
         v4 = values[3];
 }
 
-Polygon::Polygon(const std::vector<VertexIndexes> &indexes)
+Polygon::Polygon(const std::vector<VertexIds> &indexes)
 {
     vertexIndexesCount = indexes.size();
 
@@ -40,7 +40,7 @@ Polygon Polygon::parse(const std::string &line)
     if (entryType != EntryType::Polygon)
         throw std::logic_error("Could not parse value");
 
-    auto accumulator = std::vector<VertexIndexes>();
+    auto accumulator = std::vector<VertexIds>();
     accumulator.reserve(3);
 
     auto iter = line.cbegin();
@@ -51,19 +51,19 @@ Polygon Polygon::parse(const std::string &line)
     int i = 0;
     while (auto strPart = ObjParser::getNextPart(&iter, iterEnd, ' '))
     {
-        accumulator.emplace_back(VertexIndexes::parse(*strPart));
+        accumulator.emplace_back(VertexIds::parse(*strPart));
         ++i;
     }
 
     return Polygon(accumulator);
 }
 
-const int Polygon::cGetVertexIndexesCount() const
+const int Polygon::cGetVertexIdsCount() const
 {
     return vertexIndexesCount;
 }
 
-const VertexIndexes &Polygon::cGetVertexIndexes(const int i) const
+const VertexIds &Polygon::cGetVertexIds(const int i) const
 {
     switch (storageMode)
     {
@@ -82,13 +82,13 @@ const VertexIndexes &Polygon::cGetVertexIndexes(const int i) const
             break;
         case 3:
             if (!sValues->v4.has_value())
-                throw std::invalid_argument("Could not get VertexIndexes");
+                throw std::invalid_argument("Could not get VertexIds");
 
             return *sValues->v4;
             break;
 
         default:
-            throw std::invalid_argument("Could not get VertexIndexes");
+            throw std::invalid_argument("Could not get VertexIds");
             break;
         }
 
@@ -106,7 +106,7 @@ void Polygon::moveValuesToDynamic()
 
     storageMode = StorageMode::Dynamic;
 
-    dValues = std::vector<VertexIndexes>(4);
+    dValues = std::vector<VertexIds>(4);
 
     dValues->at(0) = sValues->v1;
     dValues->at(1) = sValues->v2;

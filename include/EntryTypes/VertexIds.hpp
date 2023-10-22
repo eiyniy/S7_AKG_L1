@@ -3,16 +3,16 @@
 #include <optional>
 #include <string>
 
-class VertexIndexes
+class VertexIds
 {
 public:
-    VertexIndexes();
-    VertexIndexes(
+    VertexIds();
+    VertexIds(
         const int _vertexId,
         const std::optional<int> &_tVertexId = std::nullopt,
         const std::optional<int> &_nVertexId = std::nullopt);
 
-    static VertexIndexes parse(const std::string &str);
+    static VertexIds parse(const std::string &str);
 
     const int cGetVertexId() const;
 

@@ -3,6 +3,7 @@
 #include <Timer.hpp>
 #include <Converter.hpp>
 #include <ThreadPool.hpp>
+#include <SHClipper.hpp>
 
 MainWindow::MainWindow(Point &_resolution)
     : window(sf::RenderWindow(
@@ -18,14 +19,14 @@ MainWindow::MainWindow(Point &_resolution)
     bufferSprite.setTexture(bufferTexture, true);
 }
 
-void MainWindow::drawModel(const Object &objInfo, const std::vector<Vertex> viewportVertices)
+void MainWindow::drawModel(Object &objInfo, std::vector<Vertex> viewportVertices)
 {
     auto color = &objInfo.cGetColor();
 
     /*
     for (auto vertex : viewportVertices)
     {
-        if (vertex.cGetIsOutOfScreen())
+        if (!vertex.IsVisible())
             continue;
 
         int x = std::trunc(vertex.cGetX());
@@ -35,7 +36,7 @@ void MainWindow::drawModel(const Object &objInfo, const std::vector<Vertex> view
     }
     */
 
-    const auto polygons = objInfo.cGetPolygons();
+    auto polygons = objInfo.getPolygons();
 
     // /*
     // const int threadsCount = (unsigned int)ceil(polygons.size() / 10000.f);
@@ -53,7 +54,10 @@ void MainWindow::drawModel(const Object &objInfo, const std::vector<Vertex> view
             [this, begin, end, &polygons, &viewportVertices, color]()
             {
                 for (int j = begin; j <= end; ++j)
+                {
+                    SHClipper::clip(polygons[j], viewportVertices, {{0, 0}, {window.getSize().x, 0}, {window.getSize().x, window.getSize().y}, {0, window.getSize().x}});
                     drawPolygon(polygons[j], viewportVertices, color);
+                }
             });
     }
 
@@ -120,14 +124,14 @@ void MainWindow::drawPixels()
 
 void MainWindow::drawPolygon(
     const Polygon &polygon,
-    const std::vector<Vertex> &drawableVertices,
+    std::vector<Vertex> &drawableVertices,
     const sf::Color *color)
 {
-    auto vIndexesCount = polygon.cGetVertexIndexesCount();
+    auto vIndexesCount = polygon.cGetVertexIdsCount();
     bool isPolygonVisible = true;
 
     for (int i = 0; i < vIndexesCount; ++i)
-        isPolygonVisible &= !drawableVertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1].cGetIsOutOfScreen();
+        isPolygonVisible &= drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1].IsVisible();
 
     if (!isPolygonVisible)
         return;
@@ -136,7 +140,7 @@ void MainWindow::drawPolygon(
 
     for (int i = 0; i < vIndexesCount; ++i)
     {
-        auto vertex = drawableVertices[polygon.cGetVertexIndexes(i).cGetVertexId() - 1];
+        auto vertex = drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1];
         polygonVertices[i] = Point(vertex.cGetX(), vertex.cGetY());
 
         if (i < 1)

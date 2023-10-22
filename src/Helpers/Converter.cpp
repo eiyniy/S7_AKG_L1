@@ -16,3 +16,8 @@ Vertex Converter::matrixToVertex(
         value.cGetW(),
         isOutOfScreen);
 }
+
+Point Converter::vertexToPoint(const Vertex &value)
+{
+    return Point(value.cGetX(), value.cGetY());
+}

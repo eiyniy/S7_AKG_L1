@@ -3,11 +3,11 @@
 
 Vertex::Vertex()
     : BaseVertex(),
-      isOutOfScreen(false) {}
+      isVisible(true) {}
 
 Vertex::Vertex(const Vertex &v)
     : BaseVertex(v),
-      isOutOfScreen(v.isOutOfScreen) {}
+      isVisible(v.isVisible) {}
 
 Vertex &Vertex::operator=(const Vertex &v)
 {
@@ -18,7 +18,7 @@ Vertex &Vertex::operator=(const Vertex &v)
     v2 = v.v2;
     v3 = v.v3;
     v4 = v.v4;
-    isOutOfScreen = v.isOutOfScreen;
+    isVisible = v.isVisible;
 
     return *this;
 }
@@ -27,9 +27,9 @@ Vertex::Vertex(const double x,
                const double y,
                const double z,
                const double w,
-               const bool _isOutOfScreen)
+               const bool _isVisible)
     : BaseVertex(x, y, z, w),
-      isOutOfScreen(_isOutOfScreen) {}
+      isVisible(_isVisible) {}
 
 Vertex Vertex::parse(const std::string &line)
 {
@@ -37,7 +37,7 @@ Vertex Vertex::parse(const std::string &line)
     return Vertex(acc[0], acc[1], acc[2], acc[3]);
 }
 
-const bool Vertex::cGetIsOutOfScreen() const
+const bool Vertex::IsVisible() const
 {
-    return isOutOfScreen;
+    return isVisible;
 }

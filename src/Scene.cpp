@@ -78,11 +78,11 @@ void Scene::generateFloor(const int size, const int step, const Point &center)
     {
         for (int j = 0; j < evenSize - 1; ++j)
         {
-            auto vertexesIndexes = std::vector<VertexIndexes>{
-                VertexIndexes(j * evenSize + i + 1),
-                VertexIndexes(j * evenSize + i + 2),
-                VertexIndexes((j + 1) * evenSize + i + 2),
-                VertexIndexes((j + 1) * evenSize + i + 1)};
+            auto vertexesIndexes = std::vector<VertexIds>{
+                VertexIds(j * evenSize + i + 1),
+                VertexIds(j * evenSize + i + 2),
+                VertexIds((j + 1) * evenSize + i + 2),
+                VertexIds((j + 1) * evenSize + i + 1)};
 
             polygons.emplace_back(Polygon(vertexesIndexes));
         }

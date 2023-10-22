@@ -1,4 +1,4 @@
-#include <VertexIndexes.hpp>
+#include <VertexIds.hpp>
 #include <ObjParser.hpp>
 #include <Math.hpp>
 #include <Timer.hpp>
@@ -6,9 +6,9 @@
 #include <chrono>
 #include <array>
 
-VertexIndexes::VertexIndexes() = default;
+VertexIds::VertexIds() = default;
 
-VertexIndexes::VertexIndexes(
+VertexIds::VertexIds(
     const int _vertexId,
     const std::optional<int> &_tVertexId,
     const std::optional<int> &_nVertexId)
@@ -16,7 +16,7 @@ VertexIndexes::VertexIndexes(
       tVertexId(_tVertexId),
       nVertexId(_nVertexId) {}
 
-VertexIndexes VertexIndexes::parse(const std::string &str)
+VertexIds VertexIds::parse(const std::string &str)
 {
     auto accumulator = std::array<std::optional<double>, 3>();
 
@@ -33,10 +33,10 @@ VertexIndexes VertexIndexes::parse(const std::string &str)
     if (!accumulator[0].has_value())
         throw std::logic_error("Invalid argument");
 
-    return VertexIndexes(*accumulator[0], accumulator[1], accumulator[2]);
+    return VertexIds(*accumulator[0], accumulator[1], accumulator[2]);
 }
 
-const int VertexIndexes::cGetVertexId() const
+const int VertexIds::cGetVertexId() const
 {
     return vertexId;
 }

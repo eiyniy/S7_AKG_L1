@@ -10,6 +10,7 @@
 #include <Camera.hpp>
 #include <Converter.hpp>
 #include <Engine.hpp>
+#include <SHClipper.hpp>
 
 int main(int argc, char **argv)
 {
@@ -26,20 +27,29 @@ int main(int argc, char **argv)
 
     auto videoMode = sf::VideoMode::getDesktopMode();
     auto cameraResolution = Point(videoMode.width, videoMode.height);
-    auto camera = Camera({0, 1, 0}, {1, 50, 150}, {0, 0, 0}, cameraResolution, 100);
-    auto scene = Scene(camera, 5, 0.5);
+    auto camera = Camera({0, 1, 0}, {1, 1, 1}, {0, 0, 0}, cameraResolution, 100);
+    auto scene = Scene(camera, 0.5, 0.5);
     auto mainWindow = MainWindow(cameraResolution);
     auto engine = Engine(scene, mainWindow);
 
     auto objInfoPt = objInfoPtFuture.get();
 
-    std::cout << "Vertices count - " << objInfoPt->cGetVertices().size() << std::endl;
-    std::cout << "Texture vertices count - " << objInfoPt->cGetTVertices().size() << std::endl;
-    std::cout << "Normal vertices count - " << objInfoPt->cGetNVertices().size() << std::endl;
-    std::cout << "Polygons count - " << objInfoPt->cGetPolygons().size() << std::endl;
-    std::cout << std::endl;
-
     scene.addObject("MainObject", objInfoPt);
+
+    /*
+        std::vector<Vertex> textVertices = {
+            {100, 100, 0, 1, false},
+            {200, 200, 0, 1, false},
+            {100, 300, 0, 1, false}};
+        Polygon testPolygon{{{1}, {2}, {3}}};
+        std::vector<Point> testClipper = {
+            {0, 150},
+            {400, 150},
+            {400, 250},
+            {0, 250}};
+    */
+
+    // SHClipper::clip(testPolygon, textVertices, testClipper);
 
     engine.start();
 

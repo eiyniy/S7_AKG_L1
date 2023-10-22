@@ -17,11 +17,11 @@ public:
            const double y,
            const double z,
            const double w = 1,
-           const bool _isOutOfScreen = false);
+           const bool _isVisible = true);
 
     static Vertex parse(const std::string &line);
 
-    const bool cGetIsOutOfScreen() const;
+    const bool IsVisible() const;
 
     const double cGetX() const;
     const double cGetY() const;
@@ -34,7 +34,7 @@ public:
     double &getW();
 
 private:
-    bool isOutOfScreen;
+    bool isVisible;
 };
 
 inline const double Vertex::cGetX() const

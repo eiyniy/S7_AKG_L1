@@ -187,9 +187,9 @@ void Engine::draw()
 {
     mainWindow.clear();
 
-    mainWindow.drawModel(
-        *scene.cGetObject(scene.floorObjectName),
-        scene.getObject(scene.floorObjectName)->getDrawable(scene.cGetCamera()));
+    // mainWindow.drawModel(
+    //     *scene.getObject(scene.floorObjectName),
+    //     scene.getObject(scene.floorObjectName)->getDrawable(scene.cGetCamera()));
 
     for (auto key : scene.cGetAllObjectNames())
     {
@@ -197,7 +197,7 @@ void Engine::draw()
             continue;
 
         mainWindow.drawModel(
-            *scene.cGetObject(key),
+            *scene.getObject(key),
             scene.getObject(key)->getDrawable(scene.cGetCamera()));
     }
 

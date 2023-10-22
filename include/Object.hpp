@@ -25,6 +25,8 @@ public:
     const std::vector<NormalVertex> &cGetNVertices() const;
     const std::vector<Polygon> &cGetPolygons() const;
 
+    std::vector<Polygon> &getPolygons();
+
     const Matrix<4, 1> &cGetShift() const;
     const sf::Color &cGetColor() const;
 
@@ -40,7 +42,7 @@ private:
     const std::vector<Vertex> vertices;
     const std::vector<TextureVertex> tVertices;
     const std::vector<NormalVertex> nVertices;
-    const std::vector<Polygon> polygons;
+    std::vector<Polygon> polygons;
 
     const sf::Color color;
 
