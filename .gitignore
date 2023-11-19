@@ -1,3 +1,5 @@
 **/build
 **/resources
-.PVS-Studio
+**/.PVS-Studio
+**/.idea
+**/cmake-build-debug

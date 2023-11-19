@@ -1,27 +1,39 @@
 #pragma once
 
-class Point
-{
+class Point {
 public:
     Point();
-    Point(const int _x, const int _y);
+
+    Point(int _x, int _y);
+
     Point(const Point &point);
 
     Point &operator=(const Point &point);
 
-    const int cGetX() const;
-    const int cGetY() const;
+    [[nodiscard]] int cGetX() const;
+
+    [[nodiscard]] int cGetY() const;
+
+    [[nodiscard]] int &getX();
+
+    [[nodiscard]] int &getY();
 
 private:
     int x, y;
 };
 
-inline const int Point::cGetX() const
-{
+inline int Point::cGetX() const {
     return x;
 }
 
-inline const int Point::cGetY() const
-{
+inline int Point::cGetY() const {
+    return y;
+}
+
+inline int &Point::getX() {
+    return x;
+}
+
+inline int &Point::getY() {
     return y;
 }

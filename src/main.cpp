@@ -1,29 +1,24 @@
 #include <iostream>
 #include <future>
-#include <memory>
 #include <ObjParser.hpp>
-#include <Vertex.hpp>
 #include <Timer.hpp>
-#include <Matrix.hpp>
 #include <MainWindow.hpp>
 #include <Scene.hpp>
 #include <Camera.hpp>
-#include <Converter.hpp>
 #include <Engine.hpp>
-#include <SHClipper.hpp>
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     std::cout << "Hello world!" << std::endl;
 
-    auto parser = ObjParser(argv[1]);
+//    auto parser = ObjParser(argv[1]);
+    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/untitled.obj");
+//    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/rubik.obj");
     auto objInfoPtFuture = std::async(
-        std::launch::async,
-        [&parser]
-        {
-            auto str = parser.readFile();
-            return parser.parseEntries(str);
-        });
+            std::launch::async,
+            [&parser] {
+                auto str = parser.readFile();
+                return parser.parseEntries(str);
+            });
 
     auto videoMode = sf::VideoMode::getDesktopMode();
     auto cameraResolution = Point(videoMode.width, videoMode.height);
@@ -37,7 +32,7 @@ int main(int argc, char **argv)
     scene.addObject("MainObject", objInfoPt);
 
     /*
-        std::vector<Vertex> textVertices = {
+        std::vector<Vertex> testVertices = {
             {100, 100, 0, 1, false},
             {200, 200, 0, 1, false},
             {100, 300, 0, 1, false}};
@@ -49,7 +44,7 @@ int main(int argc, char **argv)
             {0, 250}};
     */
 
-    // SHClipper::clip(testPolygon, textVertices, testClipper);
+    // SHClipper::clip(testPolygon, testVertices, testClipper);
 
     engine.start();
 

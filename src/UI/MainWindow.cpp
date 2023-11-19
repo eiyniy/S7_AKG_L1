@@ -6,21 +6,20 @@
 #include <SHClipper.hpp>
 
 MainWindow::MainWindow(Point &_resolution)
-    : window(sf::RenderWindow(
-          sf::VideoMode(_resolution.cGetX(), _resolution.cGetY()),
-          "SFML Graphics",
-          sf::Style::Fullscreen)),
-      isFullscreen(true),
-      resolution(_resolution),
-      lastResolution(Point(1280, 720))
-{
+        : window(sf::RenderWindow(
+        sf::VideoMode(_resolution.cGetX(), _resolution.cGetY()),
+        "SFML Graphics",
+        sf::Style::Fullscreen)),
+          isFullscreen(true),
+          resolution(_resolution),
+          lastResolution(Point(1280, 720)),
+          clipper(std::make_unique<CSClipper>(resolution.cGetX() - 1, resolution.cGetY() - 1, 0, 0)) {
     pixels = new sf::Uint8[resolution.cGetX() * resolution.cGetY() * 4];
     bufferTexture.create(resolution.cGetX(), resolution.cGetY());
     bufferSprite.setTexture(bufferTexture, true);
 }
 
-void MainWindow::drawModel(Object &objInfo, std::vector<Vertex> viewportVertices)
-{
+void MainWindow::drawModel(Object &objInfo, std::vector<Vertex> viewportVertices) {
     auto color = &objInfo.cGetColor();
 
     /*
@@ -40,25 +39,31 @@ void MainWindow::drawModel(Object &objInfo, std::vector<Vertex> viewportVertices
 
     // /*
     // const int threadsCount = (unsigned int)ceil(polygons.size() / 10000.f);
-    const int threadsCount = std::min(
-        (unsigned int)ceil(polygons.size() / 10000.f),
-        ThreadPool::getInstance().getThreadsCount());
-    const double size = polygons.size() / (double)threadsCount;
+    const auto threadsCount = std::min(
+            (unsigned int) ceil(polygons.size() / 10000.f),
+            ThreadPool::getInstance().getThreadsCount());
+    const double size = polygons.size() / (double) threadsCount;
 
-    for (int i = 0; i < threadsCount; ++i)
-    {
+    for (int i = 0; i < threadsCount; ++i) {
         const int begin = floor(size * i);
         const int end = floor(size * (i + 1)) - 1;
 
         ThreadPool::getInstance().enqueue(
-            [this, begin, end, &polygons, &viewportVertices, color]()
-            {
-                for (int j = begin; j <= end; ++j)
-                {
-                    SHClipper::clip(polygons[j], viewportVertices, {{0, 0}, {window.getSize().x, 0}, {window.getSize().x, window.getSize().y}, {0, window.getSize().x}});
-                    drawPolygon(polygons[j], viewportVertices, color);
-                }
-            });
+                [this, begin, end, &polygons, &viewportVertices, color]() {
+                    for (int j = begin; j <= end; ++j) {
+                        /*
+                        SHClipper::clip(
+                                polygons[j],
+                                viewportVertices,
+                                {
+                                        {0,                        0},
+                                        {(int) window.getSize().x, 0},
+                                        {(int) window.getSize().x, (int) window.getSize().y},
+                                        {0,                        (int) window.getSize().x}});
+                        */
+                        drawPolygon(polygons[j], viewportVertices, color);
+                    }
+                });
     }
 
     ThreadPool::getInstance().waitAll();
@@ -70,8 +75,7 @@ void MainWindow::drawModel(Object &objInfo, std::vector<Vertex> viewportVertices
     */
 }
 
-void MainWindow::switchVideoMode(const bool isEscape)
-{
+void MainWindow::switchVideoMode(const bool isEscape) {
     if (!isFullscreen && isEscape)
         return;
 
@@ -79,8 +83,7 @@ void MainWindow::switchVideoMode(const bool isEscape)
 
     if (isFullscreen)
         videoMode = sf::VideoMode(lastResolution.cGetX(), lastResolution.cGetY());
-    else
-    {
+    else {
         lastResolution = Point(window.getSize().x, window.getSize().y);
         videoMode = sf::VideoMode::getDesktopMode();
     }
@@ -88,15 +91,14 @@ void MainWindow::switchVideoMode(const bool isEscape)
     isFullscreen = !isFullscreen;
 
     window.create(
-        videoMode,
-        "SFML Graphics",
-        isFullscreen ? sf::Style::Fullscreen : sf::Style::Default);
+            videoMode,
+            "SFML Graphics",
+            isFullscreen ? sf::Style::Fullscreen : sf::Style::Default);
 
     resize(videoMode.width, videoMode.height);
 }
 
-void MainWindow::resize(const int width, const int height)
-{
+void MainWindow::resize(const int width, const int height) {
     resolution = Point(width, height);
 
     delete[] pixels;
@@ -105,64 +107,102 @@ void MainWindow::resize(const int width, const int height)
     bufferTexture.create(width, height);
     bufferSprite.setTexture(bufferTexture, true);
 
+    clipper = std::make_unique<CSClipper>(resolution.cGetX() - 1, resolution.cGetY() - 1, 0, 0);
+
     auto view = sf::View(sf::FloatRect(0, 0, width, height));
     window.setView(view);
 }
 
-void MainWindow::clear()
-{
+void MainWindow::clear() {
     window.clear();
     std::fill(pixels, pixels + resolution.cGetX() * resolution.cGetY() * 4, 0x53u);
 }
 
-void MainWindow::drawPixels()
-{
+void MainWindow::drawPixels() {
     bufferTexture.update(pixels);
     window.draw(bufferSprite);
     window.display();
 }
 
 void MainWindow::drawPolygon(
-    const Polygon &polygon,
-    std::vector<Vertex> &drawableVertices,
-    const sf::Color *color)
-{
+        const Polygon &polygon,
+        std::vector<Vertex> &drawableVertices,
+        const sf::Color *color) {
     auto vIndexesCount = polygon.cGetVertexIdsCount();
-    bool isPolygonVisible = true;
+//    /*
+    bool isPolygonVisible = false;
 
     for (int i = 0; i < vIndexesCount; ++i)
-        isPolygonVisible &= drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1].IsVisible();
+        isPolygonVisible |= drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1].IsVisible();
 
     if (!isPolygonVisible)
         return;
+//    */
 
     auto polygonVertices = std::vector<Point>(vIndexesCount);
 
-    for (int i = 0; i < vIndexesCount; ++i)
-    {
+    for (int i = 0; i < vIndexesCount; ++i) {
         auto vertex = drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1];
         polygonVertices[i] = Point(vertex.cGetX(), vertex.cGetY());
 
         if (i < 1)
             continue;
 
+        std::cout << "  Before: " << std::endl;
+        std::cout << "(" << i - 1 << ") " << polygonVertices[i - 1].cGetX() << " " << polygonVertices[i - 1].cGetY()
+                  << std::endl;
+        std::cout << "(" << i << ") " << polygonVertices[i].cGetX() << " " << polygonVertices[i].cGetY() << std::endl;
+
+        auto firstDrawablePoint = polygonVertices[i - 1];
+        auto secondDrawablePoint = polygonVertices[i];
+
+        const auto result = clipper->clipLine(
+                firstDrawablePoint.getX(),
+                firstDrawablePoint.getY(),
+                secondDrawablePoint.getX(),
+                secondDrawablePoint.getY());
+
+        std::cout << "  Result: " << (int) result << std::endl;
+
+        if (result == ClipLineResult::Invisible) {
+            std::cout << "-------------------------------------" << std::endl;
+            continue;
+        }
+
+        std::cout << "  After: " << std::endl;
+        std::cout << "(" << i - 1 << ") " << firstDrawablePoint.cGetX() << " " << firstDrawablePoint.cGetY()
+                  << std::endl;
+        std::cout << "(" << i << ") " << secondDrawablePoint.cGetX() << " " << secondDrawablePoint.cGetY() << std::endl;
+        std::cout << "-------------------------------------" << std::endl;
+
         drawLineBr(
-            polygonVertices[i - 1],
-            polygonVertices[i],
-            color);
+                firstDrawablePoint,
+                secondDrawablePoint,
+                color);
     }
 
+    auto firstDrawablePoint = *(polygonVertices.end() - 1);
+    auto secondDrawablePoint = *polygonVertices.begin();
+
+    const auto result = clipper->clipLine(
+            firstDrawablePoint.getX(),
+            firstDrawablePoint.getY(),
+            secondDrawablePoint.getX(),
+            secondDrawablePoint.getY());
+
+    if (result == ClipLineResult::Invisible)
+        return;
+
     drawLineBr(
-        *(polygonVertices.cend() - 1),
-        *polygonVertices.cbegin(),
-        color);
+            firstDrawablePoint,
+            secondDrawablePoint,
+            color);
 }
 
 void MainWindow::drawLineBr(
-    const Point &p1,
-    const Point &p2,
-    const sf::Color *color)
-{
+        const Point &p1,
+        const Point &p2,
+        const sf::Color *color) {
     int x1 = p1.cGetX();
     int y1 = p1.cGetY();
 
@@ -182,19 +222,16 @@ void MainWindow::drawLineBr(
     // if (x2 < resolution.cGetX() && y2 < resolution.cGetY() && x2 > 0 && y2 > 0)
     drawPixel(x2, y2, color, xSize);
 
-    while (x1 != x2 || y1 != y2)
-    {
+    while (x1 != x2 || y1 != y2) {
         // if (x1 < resolution.cGetX() && y1 < resolution.cGetY() && x1 > 0 && y1 > 0)
         drawPixel(x1, y1, color, xSize);
 
         const int error2 = error * 2;
-        if (error2 > -deltaY)
-        {
+        if (error2 > -deltaY) {
             error -= deltaY;
             x1 += signX;
         }
-        if (error2 < deltaX)
-        {
+        if (error2 < deltaX) {
             error += deltaX;
             y1 += signY;
         }
