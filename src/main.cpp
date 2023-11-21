@@ -11,8 +11,10 @@ int main(int argc, char **argv) {
     std::cout << "Hello world!" << std::endl;
 
 //    auto parser = ObjParser(argv[1]);
-    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/untitled.obj");
+//    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/untitled.obj");
 //    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/rubik.obj");
+//    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/angel2.obj");
+    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Z3_OBJ.obj");
     auto objInfoPtFuture = std::async(
             std::launch::async,
             [&parser] {

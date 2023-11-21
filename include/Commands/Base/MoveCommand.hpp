@@ -4,13 +4,12 @@
 #include <Enums.hpp>
 #include <Scene.hpp>
 
-class MoveCommand : public Command
-{
+class MoveCommand : public Command {
 protected:
     MoveCommand(
-        const AxisName _axisName,
-        const Direction _direction,
-        const double _step);
+            const AxisName _axisName,
+            const Direction _direction,
+            const double _step);
 
 protected:
     const AxisName axisName;

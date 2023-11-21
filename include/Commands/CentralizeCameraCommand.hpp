@@ -4,12 +4,11 @@
 #include <Camera.hpp>
 #include <Command.hpp>
 
-class CentralizeCameraCommand : public Command
-{
+class CentralizeCameraCommand : public Command {
 public:
     CentralizeCameraCommand(
-        Camera &_camera,
-        Object &_object);
+            Camera &_camera,
+            Object &_object);
 
     void execute() override;
 

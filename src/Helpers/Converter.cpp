@@ -1,23 +1,20 @@
 #include <Converter.hpp>
 
-Matrix<4, 1> Converter::vertexToMatrix(const Vertex &value)
-{
-    return Matrix<4, 1>(value.cGetX(), value.cGetY(), value.cGetZ(), value.cGetW());
+Matrix<4, 1> Converter::vertexToMatrix(const Vertex &value) {
+    return {value.cGetX(), value.cGetY(), value.cGetZ(), value.cGetW()};
 }
 
-Vertex Converter::matrixToVertex(
-    const Matrix<4, 1> &value,
-    const bool isOutOfScreen)
-{
-    return Vertex(
-        value.cGetX(),
-        value.cGetY(),
-        value.cGetZ(),
-        value.cGetW(),
-        isOutOfScreen);
+DrawableVertex Converter::matrixToDrawableVertex(
+        const Matrix<4, 1> &value,
+        const bool isVisible,
+        const bool isWNegative) {
+    return {
+            static_cast<int>(std::round(value.cGetX())),
+            static_cast<int>(std::round(value.cGetY())),
+            isVisible,
+            isWNegative};
 }
 
-Point Converter::vertexToPoint(const Vertex &value)
-{
-    return Point(value.cGetX(), value.cGetY());
+Point Converter::drawableVertexToPoint(const DrawableVertex &value) {
+    return {value.CGetX(), value.CGetY()};
 }

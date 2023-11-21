@@ -4,14 +4,13 @@
 #include <Enums.hpp>
 #include <Camera.hpp>
 
-class RotateCameraAroundCommand : public Command
-{
+class RotateCameraAroundCommand : public Command {
 public:
     RotateCameraAroundCommand(
-        Camera &_camera,
-        const AxisName _axisName,
-        const Direction _direction,
-        const double _step);
+            Camera &_camera,
+            const AxisName _axisName,
+            const Direction _direction,
+            const double _step);
 
     void execute() override;
 

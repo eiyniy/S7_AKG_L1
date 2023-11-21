@@ -7,8 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <optional>
 
-class Scene
-{
+class Scene {
 private:
     const int floorStepsCount = 30;
 
@@ -17,6 +16,7 @@ private:
     Camera &camera;
 
     void generateFloor();
+
     void generateFloor(const int size, const int step, const Point &center);
 
 public:
@@ -27,40 +27,41 @@ public:
     const double rotationSpeed;
 
     Scene(
-        Camera &_camera,
-        const double _moveSpeed,
-        const double _rotationSpeed);
+            Camera &_camera,
+            const double _moveSpeed,
+            const double _rotationSpeed);
 
     ~Scene();
 
     void centralizeCamera();
+
     void addObject(const std::string &key, Object *object);
 
     const Object *cGetObject(const std::string &key) const;
+
     const std::vector<std::string> cGetAllObjectNames() const;
+
     const std::string cGetSelectedObjectName() const;
+
     const Camera &cGetCamera() const;
 
     Object *getObject(const std::string &key);
+
     Camera &getCamera();
 };
 
-inline const Object *Scene::cGetObject(const std::string &key) const
-{
+inline const Object *Scene::cGetObject(const std::string &key) const {
     return objects.at(key);
 }
 
-inline const Camera &Scene::cGetCamera() const
-{
+inline const Camera &Scene::cGetCamera() const {
     return camera;
 }
 
-inline Object *Scene::getObject(const std::string &key)
-{
+inline Object *Scene::getObject(const std::string &key) {
     return objects.at(key);
 }
 
-inline Camera &Scene::getCamera()
-{
+inline Camera &Scene::getCamera() {
     return camera;
 }

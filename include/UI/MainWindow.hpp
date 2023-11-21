@@ -19,7 +19,7 @@ public:
 
     void drawPixels();
 
-    void drawModel(Object &objInfo, std::vector<Vertex> viewportVertices);
+    void drawModel(Object &objInfo, std::vector<DrawableVertex> viewportVertices);
 
     sf::RenderWindow &getWindow();
 
@@ -28,12 +28,12 @@ public:
 private:
     void drawPolygon(
             const Polygon &polygon,
-            std::vector<Vertex> &drawableVertices,
+            std::vector<DrawableVertex> &drawableVertices,
             const sf::Color *color);
 
     void drawLineBr(
-            const Point &p1,
-            const Point &p2,
+            const DrawableVertex &p1,
+            const DrawableVertex &p2,
             const sf::Color *color);
 
     void drawPixel(

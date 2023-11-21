@@ -19,21 +19,9 @@ MainWindow::MainWindow(Point &_resolution)
     bufferSprite.setTexture(bufferTexture, true);
 }
 
-void MainWindow::drawModel(Object &objInfo, std::vector<Vertex> viewportVertices) {
-    auto color = &objInfo.cGetColor();
-
-    /*
-    for (auto vertex : viewportVertices)
-    {
-        if (!vertex.IsVisible())
-            continue;
-
-        int x = std::trunc(vertex.cGetX());
-        int y = std::trunc(vertex.cGetY());
-
-        drawPixel(x, y, color, resolution.cGetX());
-    }
-    */
+void MainWindow::drawModel(Object &objInfo, std::vector<DrawableVertex> viewportVertices) {
+    const auto color = &objInfo.cGetColor();
+    const auto vColor = sf::Color::Red;
 
     auto polygons = objInfo.getPolygons();
 
@@ -51,23 +39,36 @@ void MainWindow::drawModel(Object &objInfo, std::vector<Vertex> viewportVertices
         ThreadPool::getInstance().enqueue(
                 [this, begin, end, &polygons, &viewportVertices, color]() {
                     for (int j = begin; j <= end; ++j) {
-                        /*
-                        SHClipper::clip(
-                                polygons[j],
-                                viewportVertices,
-                                {
-                                        {0,                        0},
-                                        {(int) window.getSize().x, 0},
-                                        {(int) window.getSize().x, (int) window.getSize().y},
-                                        {0,                        (int) window.getSize().x}});
-                        */
                         drawPolygon(polygons[j], viewportVertices, color);
                     }
                 });
     }
 
     ThreadPool::getInstance().waitAll();
-    // */
+//     */
+
+    /*
+for (auto vertex: viewportVertices) {
+    if (!vertex.IsVisible())
+        continue;
+
+    int x = vertex.CGetX();
+    int y = vertex.CGetY();
+
+//        if (x - 1 < 0 || x + 1 >= resolution.cGetX() || y - 1 < 0 || y + 1 >= resolution.cGetY())
+//            continue;
+
+    drawPixel(x - 1, y - 1, &vColor, resolution.cGetX());
+    drawPixel(x - 1, y, &vColor, resolution.cGetX());
+    drawPixel(x - 1, y + 1, &vColor, resolution.cGetX());
+    drawPixel(x, y - 1, &vColor, resolution.cGetX());
+    drawPixel(x, y, &vColor, resolution.cGetX());
+    drawPixel(x, y + 1, &vColor, resolution.cGetX());
+    drawPixel(x + 1, y - 1, &vColor, resolution.cGetX());
+    drawPixel(x + 1, y, &vColor, resolution.cGetX());
+    drawPixel(x + 1, y + 1, &vColor, resolution.cGetX());
+}
+*/
 
     /*
     for (int j = 0; j < polygons.size(); ++j)
@@ -126,7 +127,7 @@ void MainWindow::drawPixels() {
 
 void MainWindow::drawPolygon(
         const Polygon &polygon,
-        std::vector<Vertex> &drawableVertices,
+        std::vector<DrawableVertex> &drawableVertices,
         const sf::Color *color) {
     auto vIndexesCount = polygon.cGetVertexIdsCount();
 //    /*
@@ -139,41 +140,55 @@ void MainWindow::drawPolygon(
         return;
 //    */
 
-    auto polygonVertices = std::vector<Point>(vIndexesCount);
+    auto polygonVertices = std::vector<DrawableVertex>(vIndexesCount);
 
     for (int i = 0; i < vIndexesCount; ++i) {
-        auto vertex = drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1];
-        polygonVertices[i] = Point(vertex.cGetX(), vertex.cGetY());
+        auto drawableVertex = drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1];
+
+//        std::cout << "  Vertex: " << std::endl;
+//        std::cout << drawableVertex.CGetX() << " " << drawableVertex.CGetY() << std::endl;
+
+        polygonVertices[i] = drawableVertex;
 
         if (i < 1)
             continue;
 
-        std::cout << "  Before: " << std::endl;
-        std::cout << "(" << i - 1 << ") " << polygonVertices[i - 1].cGetX() << " " << polygonVertices[i - 1].cGetY()
-                  << std::endl;
-        std::cout << "(" << i << ") " << polygonVertices[i].cGetX() << " " << polygonVertices[i].cGetY() << std::endl;
+//        std::cout << "  Before: " << std::endl;
+//        std::cout << "(" << i - 1 << ") " << polygonVertices[i - 1].CGetX() << " " << polygonVertices[i - 1].CGetY()
+//                  << std::endl;
+//        std::cout << "(" << i << ") " << polygonVertices[i].CGetX() << " " << polygonVertices[i].CGetY() << std::endl;
 
         auto firstDrawablePoint = polygonVertices[i - 1];
         auto secondDrawablePoint = polygonVertices[i];
 
-        const auto result = clipper->clipLine(
-                firstDrawablePoint.getX(),
-                firstDrawablePoint.getY(),
-                secondDrawablePoint.getX(),
-                secondDrawablePoint.getY());
+//        if (!firstDrawablePoint.IsVisible() || !secondDrawablePoint.IsVisible())
+//            continue;
 
-        std::cout << "  Result: " << (int) result << std::endl;
+        if (firstDrawablePoint.IsWNegative() || secondDrawablePoint.IsWNegative())
+            continue;
+
+//        /*
+
+        const auto result = clipper->clipLine(
+                firstDrawablePoint.GetX(),
+                firstDrawablePoint.GetY(),
+                secondDrawablePoint.GetX(),
+                secondDrawablePoint.GetY());
+
+//        std::cout << "  Result: " << (int) result << std::endl;
 
         if (result == ClipLineResult::Invisible) {
-            std::cout << "-------------------------------------" << std::endl;
+//            std::cout << "-------------------------------------" << std::endl;
             continue;
         }
 
-        std::cout << "  After: " << std::endl;
-        std::cout << "(" << i - 1 << ") " << firstDrawablePoint.cGetX() << " " << firstDrawablePoint.cGetY()
-                  << std::endl;
-        std::cout << "(" << i << ") " << secondDrawablePoint.cGetX() << " " << secondDrawablePoint.cGetY() << std::endl;
-        std::cout << "-------------------------------------" << std::endl;
+//        std::cout << "  After: " << std::endl;
+//        std::cout << "(" << i - 1 << ") " << firstDrawablePoint.CGetX() << " " << firstDrawablePoint.CGetY()
+//                  << std::endl;
+//        std::cout << "(" << i << ") " << secondDrawablePoint.CGetX() << " " << secondDrawablePoint.CGetY() << std::endl;
+//        std::cout << "-------------------------------------" << std::endl;
+
+//         */
 
         drawLineBr(
                 firstDrawablePoint,
@@ -184,14 +199,24 @@ void MainWindow::drawPolygon(
     auto firstDrawablePoint = *(polygonVertices.end() - 1);
     auto secondDrawablePoint = *polygonVertices.begin();
 
+//    if (!firstDrawablePoint.IsVisible() || !secondDrawablePoint.IsVisible())
+//        return;
+
+    if (firstDrawablePoint.IsWNegative() || secondDrawablePoint.IsWNegative())
+        return;
+
+//    /*
+
     const auto result = clipper->clipLine(
-            firstDrawablePoint.getX(),
-            firstDrawablePoint.getY(),
-            secondDrawablePoint.getX(),
-            secondDrawablePoint.getY());
+            firstDrawablePoint.GetX(),
+            firstDrawablePoint.GetY(),
+            secondDrawablePoint.GetX(),
+            secondDrawablePoint.GetY());
 
     if (result == ClipLineResult::Invisible)
         return;
+
+//     */
 
     drawLineBr(
             firstDrawablePoint,
@@ -200,14 +225,14 @@ void MainWindow::drawPolygon(
 }
 
 void MainWindow::drawLineBr(
-        const Point &p1,
-        const Point &p2,
+        const DrawableVertex &p1,
+        const DrawableVertex &p2,
         const sf::Color *color) {
-    int x1 = p1.cGetX();
-    int y1 = p1.cGetY();
+    int x1 = p1.CGetX();
+    int y1 = p1.CGetY();
 
-    const int x2 = p2.cGetX();
-    const int y2 = p2.cGetY();
+    const int x2 = p2.CGetX();
+    const int y2 = p2.CGetY();
 
     const int xSize = resolution.cGetX();
 

@@ -6,17 +6,16 @@
 #include <memory>
 #include <queue>
 
-class Engine
-{
+class Engine {
 public:
     Engine(Scene &_scene, MainWindow &_mainWindow);
 
     void start();
 
     static Matrix<4, 1> getTransition(
-        const AxisName axis,
-        const Direction direction,
-        const double step);
+            const AxisName axis,
+            const Direction direction,
+            const double step);
 
 private:
     const int defaultFps = 165;
@@ -33,8 +32,12 @@ private:
     std::queue<std::unique_ptr<Command>> commandsQueue;
 
     void handleEvents();
+
     void updateInput(const sf::Event &event);
+
     void sendInputCommand(const sf::Event &event);
+
     void update();
+
     void draw();
 };

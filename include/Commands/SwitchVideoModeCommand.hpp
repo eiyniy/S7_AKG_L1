@@ -5,13 +5,12 @@
 #include <Scene.hpp>
 #include <MainWindow.hpp>
 
-class SwitchVideoModeCommand : public Command
-{
+class SwitchVideoModeCommand : public Command {
 public:
     SwitchVideoModeCommand(
-        Scene &_scene,
-        MainWindow &_mainWindow,
-        const bool _isEscape);
+            Scene &_scene,
+            MainWindow &_mainWindow,
+            const bool _isEscape);
 
     void execute() override;
 
