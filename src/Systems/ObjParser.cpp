@@ -6,7 +6,6 @@
 #include <ObjParser.hpp>
 #include <Enums.hpp>
 #include <Timer.hpp>
-#include <ThreadPool.hpp>
 
 ObjParser::ObjParser(const std::string &_pathToFile) {
     if (!std::filesystem::exists(_pathToFile))
@@ -99,18 +98,25 @@ Object *ObjParser::parseEntries(const std::string &fileContent) {
     */
 
     // /*
-    for (int j = 0; j < lines.size(); ++j)
-        parseEntry(lines[j]);
+    for (const auto &line: lines)
+        parseEntry(line);
     // */
+
+    for (const auto &line: polygonStrings) {
+        const auto triangulated = Polygon::parseAndTriangulate(line, vertices);
+        for (const auto &polygon: triangulated) {
+            polygons.emplace_back(polygon);
+        }
+    }
 
     const auto timeEnd = std::chrono::high_resolution_clock::now();
     auto parseTime = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count();
     std::cout << "Parse time: " << parseTime << " ms" << std::endl;
 
     return new Object(
-            vertexes,
-            tVertexes,
-            nVertexes,
+            vertices,
+            tVertices,
+            nVertices,
             polygons,
             sf::Color::White);
 }
@@ -122,16 +128,16 @@ void ObjParser::parseEntry(const std::string &line) {
 
     switch (*type) {
         case EntryType::Vertex:
-            vertexes.emplace_back(Vertex::parse(line));
+            vertices.emplace_back(Vertex::parse(line));
             break;
         case EntryType::TextureVertex:
-            tVertexes.emplace_back(TextureVertex::parse(line));
+            tVertices.emplace_back(TextureVertex::parse(line));
             break;
         case EntryType::NormalVertex:
-            nVertexes.emplace_back(NormalVertex::parse(line));
+            nVertices.emplace_back(NormalVertex::parse(line));
             break;
         case EntryType::Polygon:
-            polygons.emplace_back(Polygon::parse(line));
+            polygonStrings.emplace_back(line);
             break;
     }
 }

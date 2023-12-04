@@ -158,7 +158,7 @@ void Engine::sendInputCommand(const sf::Event &event) {
 
 void Engine::update() {
     while (!commandsQueue.empty()) {
-        auto command = std::move(commandsQueue.front());
+        const auto command = std::move(commandsQueue.front());
         commandsQueue.pop();
         command->execute();
     }

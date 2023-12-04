@@ -144,30 +144,16 @@ void MainWindow::drawPolygon(
 
     for (int i = 0; i < vIndexesCount; ++i) {
         auto drawableVertex = drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1];
-
-//        std::cout << "  Vertex: " << std::endl;
-//        std::cout << drawableVertex.CGetX() << " " << drawableVertex.CGetY() << std::endl;
-
         polygonVertices[i] = drawableVertex;
 
         if (i < 1)
             continue;
 
-//        std::cout << "  Before: " << std::endl;
-//        std::cout << "(" << i - 1 << ") " << polygonVertices[i - 1].CGetX() << " " << polygonVertices[i - 1].CGetY()
-//                  << std::endl;
-//        std::cout << "(" << i << ") " << polygonVertices[i].CGetX() << " " << polygonVertices[i].CGetY() << std::endl;
-
         auto firstDrawablePoint = polygonVertices[i - 1];
         auto secondDrawablePoint = polygonVertices[i];
 
-//        if (!firstDrawablePoint.IsVisible() || !secondDrawablePoint.IsVisible())
-//            continue;
-
         if (firstDrawablePoint.IsWNegative() || secondDrawablePoint.IsWNegative())
             continue;
-
-//        /*
 
         const auto result = clipper->clipLine(
                 firstDrawablePoint.GetX(),
@@ -175,20 +161,8 @@ void MainWindow::drawPolygon(
                 secondDrawablePoint.GetX(),
                 secondDrawablePoint.GetY());
 
-//        std::cout << "  Result: " << (int) result << std::endl;
-
-        if (result == ClipLineResult::Invisible) {
-//            std::cout << "-------------------------------------" << std::endl;
+        if (result == ClipLineResult::Invisible)
             continue;
-        }
-
-//        std::cout << "  After: " << std::endl;
-//        std::cout << "(" << i - 1 << ") " << firstDrawablePoint.CGetX() << " " << firstDrawablePoint.CGetY()
-//                  << std::endl;
-//        std::cout << "(" << i << ") " << secondDrawablePoint.CGetX() << " " << secondDrawablePoint.CGetY() << std::endl;
-//        std::cout << "-------------------------------------" << std::endl;
-
-//         */
 
         drawLineBr(
                 firstDrawablePoint,
@@ -199,13 +173,8 @@ void MainWindow::drawPolygon(
     auto firstDrawablePoint = *(polygonVertices.end() - 1);
     auto secondDrawablePoint = *polygonVertices.begin();
 
-//    if (!firstDrawablePoint.IsVisible() || !secondDrawablePoint.IsVisible())
-//        return;
-
     if (firstDrawablePoint.IsWNegative() || secondDrawablePoint.IsWNegative())
         return;
-
-//    /*
 
     const auto result = clipper->clipLine(
             firstDrawablePoint.GetX(),
@@ -215,8 +184,6 @@ void MainWindow::drawPolygon(
 
     if (result == ClipLineResult::Invisible)
         return;
-
-//     */
 
     drawLineBr(
             firstDrawablePoint,

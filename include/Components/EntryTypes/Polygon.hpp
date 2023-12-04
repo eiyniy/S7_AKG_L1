@@ -6,9 +6,9 @@
 #include <vector>
 #include <optional>
 #include <array>
+#include "Vertex.hpp"
 
-struct SValues
-{
+struct SValues {
     SValues(const std::vector<VertexIds> &values);
 
     VertexIds v1;
@@ -17,14 +17,18 @@ struct SValues
     std::optional<VertexIds> v4;
 };
 
-class Polygon
-{
+class Polygon {
 public:
     Polygon(const std::vector<VertexIds> &indexes);
 
     static Polygon parse(const std::string &line);
 
+    static std::vector<Polygon> parseAndTriangulate(
+            const std::string &line,
+            const std::vector<Vertex> &vertices);
+
     const int cGetVertexIdsCount() const;
+
     const VertexIds &cGetVertexIds(const int i) const;
 
 private:
@@ -35,4 +39,6 @@ private:
     std::optional<SValues> sValues;
 
     void moveValuesToDynamic();
+
+    static std::vector<VertexIds> parseInner(const std::string &line);
 };

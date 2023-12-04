@@ -3,6 +3,7 @@
 #include <Math.hpp>
 #include <Timer.hpp>
 #include <array>
+#include <EarClipper.hpp>
 
 SValues::SValues(const std::vector<VertexIds> &values)
         : v4(std::nullopt) {
@@ -30,25 +31,8 @@ Polygon::Polygon(const std::vector<VertexIds> &indexes) {
 }
 
 Polygon Polygon::parse(const std::string &line) {
-    auto entryType = ObjParser::getEntryType(line);
-    if (entryType != EntryType::Polygon)
-        throw std::logic_error("Could not parse value");
-
-    auto accumulator = std::vector<VertexIds>();
-    accumulator.reserve(3);
-
-    auto iter = line.cbegin();
-    auto iterEnd = line.cend();
-
-    ObjParser::getNextPart(&iter, iterEnd, ' ');
-
-    int i = 0;
-    while (auto strPart = ObjParser::getNextPart(&iter, iterEnd, ' ')) {
-        accumulator.emplace_back(VertexIds::parse(*strPart));
-        ++i;
-    }
-
-    return Polygon(accumulator);
+    const auto accumulator = parseInner(line);
+    return {accumulator};
 }
 
 const int Polygon::cGetVertexIdsCount() const {
@@ -90,4 +74,33 @@ void Polygon::moveValuesToDynamic() {
     dValues->at(1) = sValues->v2;
     dValues->at(2) = sValues->v3;
     dValues->at(3) = *sValues->v4;
+}
+
+std::vector<Polygon> Polygon::parseAndTriangulate(
+        const std::string &line,
+        const std::vector<Vertex> &vertices) {
+    const auto accumulator = parseInner(line);
+    return EarClipper::triangulate(accumulator, vertices);
+}
+
+std::vector<VertexIds> Polygon::parseInner(const std::string &line) {
+    auto entryType = ObjParser::getEntryType(line);
+    if (entryType != EntryType::Polygon)
+        throw std::logic_error("Could not parse value");
+
+    std::vector<VertexIds> accumulator{};
+    accumulator.reserve(3);
+
+    auto iter = line.cbegin();
+    auto iterEnd = line.cend();
+
+    ObjParser::getNextPart(&iter, iterEnd, ' ');
+
+    int i = 0;
+    while (auto strPart = ObjParser::getNextPart(&iter, iterEnd, ' ')) {
+        accumulator.emplace_back(VertexIds::parse(*strPart));
+        ++i;
+    }
+
+    return accumulator;
 }

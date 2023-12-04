@@ -6,6 +6,7 @@
 #include <Scene.hpp>
 #include <Camera.hpp>
 #include <Engine.hpp>
+#include "EarClipper.hpp"
 
 int main(int argc, char **argv) {
     std::cout << "Hello world!" << std::endl;
@@ -30,23 +31,7 @@ int main(int argc, char **argv) {
     auto engine = Engine(scene, mainWindow);
 
     auto objInfoPt = objInfoPtFuture.get();
-
     scene.addObject("MainObject", objInfoPt);
-
-    /*
-        std::vector<Vertex> testVertices = {
-            {100, 100, 0, 1, false},
-            {200, 200, 0, 1, false},
-            {100, 300, 0, 1, false}};
-        Polygon testPolygon{{{1}, {2}, {3}}};
-        std::vector<Point> testClipper = {
-            {0, 150},
-            {400, 150},
-            {400, 250},
-            {0, 250}};
-    */
-
-    // SHClipper::clip(testPolygon, testVertices, testClipper);
 
     engine.start();
 

@@ -29,10 +29,11 @@ public:
             const bool allowEmpty = false);
 
 private:
-    std::vector<Vertex> vertexes;
-    std::vector<TextureVertex> tVertexes;
-    std::vector<NormalVertex> nVertexes;
+    std::vector<Vertex> vertices;
+    std::vector<TextureVertex> tVertices;
+    std::vector<NormalVertex> nVertices;
     std::vector<Polygon> polygons;
+    std::vector<std::string> polygonStrings;
 
     std::string pathToFile;
     std::ifstream readStream;
