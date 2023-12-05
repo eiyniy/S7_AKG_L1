@@ -6,11 +6,13 @@ Matrix<4, 1> Converter::vertexToMatrix(const Vertex &value) {
 
 DrawableVertex Converter::matrixToDrawableVertex(
         const Matrix<4, 1> &value,
+        double w,
         const bool isVisible,
         const bool isWNegative) {
     return {
-            static_cast<int>(std::round(value.cGetX())),
-            static_cast<int>(std::round(value.cGetY())),
+            (int) (std::round(value.cGetX())),
+            (int) (std::round(value.cGetY())),
+            w,
             isVisible,
             isWNegative};
 }

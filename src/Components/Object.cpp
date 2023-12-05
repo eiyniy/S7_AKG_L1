@@ -160,7 +160,11 @@ const DrawableVertex convertVertex(
         isWNegative = true;
     }
 
+    const auto w = mVertex.cGetW();
     mVertex /= mVertex.cGetW();
+//    mVertex.getX() /= mVertex.cGetW();
+//    mVertex.getY() /= mVertex.cGetW();
+//    mVertex.getZ() /= mVertex.cGetW();
 
     if (mVertex.cGetX() < -1 || mVertex.cGetX() > 1 ||
         mVertex.cGetY() < -1 || mVertex.cGetY() > 1 ||
@@ -169,5 +173,5 @@ const DrawableVertex convertVertex(
 
     mVertex = viewportConvert * mVertex;
 
-    return Converter::matrixToDrawableVertex(mVertex, isVisible, isWNegative);
+    return Converter::matrixToDrawableVertex(mVertex, w, isVisible, isWNegative);
 }

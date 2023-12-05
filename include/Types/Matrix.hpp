@@ -29,7 +29,7 @@ public:
 
     Matrix &operator-=(const Matrix &m);
 
-    Matrix<Rows, Cols> &operator*=(const Matrix<Rows, Cols> &m)requires(Rows == Cols);
+    Matrix<Rows, Cols> &operator*=(const Matrix<Rows, Cols> &m) requires(Rows == Cols);
 
     Matrix &operator+=(const double v);
 

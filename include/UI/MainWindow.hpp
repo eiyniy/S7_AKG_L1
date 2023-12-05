@@ -19,7 +19,7 @@ public:
 
     void drawPixels();
 
-    void drawModel(Object &objInfo, std::vector<DrawableVertex> viewportVertices);
+    void drawModel(Object &objInfo, std::vector<DrawableVertex> &viewportVertices);
 
     sf::RenderWindow &getWindow();
 
@@ -50,11 +50,16 @@ private:
     sf::Uint8 *pixels;
     std::mutex pixelsMutex;
 
+    double *depthBuffer;
+
     sf::RenderWindow window;
     sf::Texture bufferTexture;
     sf::Sprite bufferSprite;
 
     std::unique_ptr<CSClipper> clipper;
+
+    std::vector<sf::Color> colors;
+    int colorNumber;
 };
 
 inline sf::RenderWindow &MainWindow::getWindow() {

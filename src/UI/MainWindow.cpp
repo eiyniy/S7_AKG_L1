@@ -4,6 +4,7 @@
 #include <Converter.hpp>
 #include <ThreadPool.hpp>
 #include <SHClipper.hpp>
+#include <BarycentricRasterizer.hpp>
 
 MainWindow::MainWindow(Point &_resolution)
         : window(sf::RenderWindow(
@@ -15,37 +16,46 @@ MainWindow::MainWindow(Point &_resolution)
           lastResolution(Point(1280, 720)),
           clipper(std::make_unique<CSClipper>(resolution.cGetX() - 1, resolution.cGetY() - 1, 0, 0)) {
     pixels = new sf::Uint8[resolution.cGetX() * resolution.cGetY() * 4];
+
+    depthBuffer = new double[resolution.cGetX() * resolution.cGetY()];
+    std::fill(depthBuffer, depthBuffer + resolution.cGetX() * resolution.cGetY(), INT_MAX);
+
     bufferTexture.create(resolution.cGetX(), resolution.cGetY());
     bufferSprite.setTexture(bufferTexture, true);
 }
 
-void MainWindow::drawModel(Object &objInfo, std::vector<DrawableVertex> viewportVertices) {
+void MainWindow::drawModel(Object &objInfo, std::vector<DrawableVertex> &viewportVertices) {
+    colorNumber = 0;
+
     const auto color = &objInfo.cGetColor();
-    const auto vColor = sf::Color::Red;
 
     auto polygons = objInfo.getPolygons();
 
-    // /*
-    // const int threadsCount = (unsigned int)ceil(polygons.size() / 10000.f);
-    const auto threadsCount = std::min(
-            (unsigned int) ceil(polygons.size() / 10000.f),
-            ThreadPool::getInstance().getThreadsCount());
-    const double size = polygons.size() / (double) threadsCount;
+    /*
+   // const int threadsCount = (unsigned int)ceil(polygons.size() / 10000.f);
+   const auto threadsCount = std::min(
+           (unsigned int) ceil(polygons.size() / 10000.f),
+           ThreadPool::getInstance().getThreadsCount());
+   const double size = polygons.size() / (double) threadsCount;
 
-    for (int i = 0; i < threadsCount; ++i) {
-        const int begin = floor(size * i);
-        const int end = floor(size * (i + 1)) - 1;
+   for (int i = 0; i < threadsCount; ++i) {
+       const int begin = floor(size * i);
+       const int end = floor(size * (i + 1)) - 1;
 
-        ThreadPool::getInstance().enqueue(
-                [this, begin, end, &polygons, &viewportVertices, color]() {
-                    for (int j = begin; j <= end; ++j) {
-                        drawPolygon(polygons[j], viewportVertices, color);
-                    }
-                });
+       ThreadPool::getInstance().enqueue(
+               [this, begin, end, &polygons, &viewportVertices, color]() {
+                   for (int j = begin; j <= end; ++j) {
+                       drawPolygon(polygons[j], viewportVertices, color);
+                   }
+               });
+   }
+
+   ThreadPool::getInstance().waitAll();
+    */
+
+    for (int j = 0; j <= polygons.size(); ++j) {
+        drawPolygon(polygons[j], viewportVertices, color);
     }
-
-    ThreadPool::getInstance().waitAll();
-//     */
 
     /*
 for (auto vertex: viewportVertices) {
@@ -105,6 +115,10 @@ void MainWindow::resize(const int width, const int height) {
     delete[] pixels;
     pixels = new sf::Uint8[width * height * 4];
 
+    depthBuffer = new double[width * height];
+    std::fill(depthBuffer, depthBuffer + resolution.cGetX() * resolution.cGetY(), INT_MAX);
+
+
     bufferTexture.create(width, height);
     bufferSprite.setTexture(bufferTexture, true);
 
@@ -117,6 +131,7 @@ void MainWindow::resize(const int width, const int height) {
 void MainWindow::clear() {
     window.clear();
     std::fill(pixels, pixels + resolution.cGetX() * resolution.cGetY() * 4, 0x53u);
+    std::fill(depthBuffer, depthBuffer + resolution.cGetX() * resolution.cGetY(), INT_MAX);
 }
 
 void MainWindow::drawPixels() {
@@ -129,6 +144,11 @@ void MainWindow::drawPolygon(
         const Polygon &polygon,
         std::vector<DrawableVertex> &drawableVertices,
         const sf::Color *color) {
+    if (colors.empty()) {
+        for (int i = 0; i < 10; ++i)
+            colors.emplace_back(rand() % 255, rand() % 255, rand() % 255);
+    }
+
     auto vIndexesCount = polygon.cGetVertexIdsCount();
 //    /*
     bool isPolygonVisible = false;
@@ -140,17 +160,12 @@ void MainWindow::drawPolygon(
         return;
 //    */
 
-    auto polygonVertices = std::vector<DrawableVertex>(vIndexesCount);
-
+    /*
     for (int i = 0; i < vIndexesCount; ++i) {
-        auto drawableVertex = drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1];
-        polygonVertices[i] = drawableVertex;
+        const auto j = (i + 1) % vIndexesCount;
 
-        if (i < 1)
-            continue;
-
-        auto firstDrawablePoint = polygonVertices[i - 1];
-        auto secondDrawablePoint = polygonVertices[i];
+        auto firstDrawablePoint = drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1];
+        auto secondDrawablePoint = drawableVertices[polygon.cGetVertexIds(j).cGetVertexId() - 1];
 
         if (firstDrawablePoint.IsWNegative() || secondDrawablePoint.IsWNegative())
             continue;
@@ -169,26 +184,22 @@ void MainWindow::drawPolygon(
                 secondDrawablePoint,
                 color);
     }
+    */
 
-    auto firstDrawablePoint = *(polygonVertices.end() - 1);
-    auto secondDrawablePoint = *polygonVertices.begin();
+//    /*
+    BarycentricRasterizer::rasterize(
+            polygon,
+            drawableVertices,
+            depthBuffer,
+            resolution.cGetX(),
+            pixels,
+            &colors.at(colorNumber));
+//    for (const auto &i: result) {
+//        drawPixel(i.CGetX(), i.CGetY(), &colors.at(colorNumber), resolution.cGetX());
+//    }
 
-    if (firstDrawablePoint.IsWNegative() || secondDrawablePoint.IsWNegative())
-        return;
-
-    const auto result = clipper->clipLine(
-            firstDrawablePoint.GetX(),
-            firstDrawablePoint.GetY(),
-            secondDrawablePoint.GetX(),
-            secondDrawablePoint.GetY());
-
-    if (result == ClipLineResult::Invisible)
-        return;
-
-    drawLineBr(
-            firstDrawablePoint,
-            secondDrawablePoint,
-            color);
+    colorNumber = (colorNumber + 1) % colors.size();
+//    */
 }
 
 void MainWindow::drawLineBr(

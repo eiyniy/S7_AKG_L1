@@ -13,9 +13,9 @@ int main(int argc, char **argv) {
 
 //    auto parser = ObjParser(argv[1]);
 //    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/untitled.obj");
-//    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/rubik.obj");
+    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/rubik.obj");
 //    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/angel2.obj");
-    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Z3_OBJ.obj");
+//    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Z3_OBJ.obj");
     auto objInfoPtFuture = std::async(
             std::launch::async,
             [&parser] {
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 
     auto videoMode = sf::VideoMode::getDesktopMode();
     auto cameraResolution = Point(videoMode.width, videoMode.height);
-    auto camera = Camera({0, 1, 0}, {1, 1, 1}, {0, 0, 0}, cameraResolution, 100);
+    auto camera = Camera({0, 1, 0}, {1, 100, 1}, {0, 0, 0}, cameraResolution, 100);
     auto scene = Scene(camera, 0.5, 0.5);
     auto mainWindow = MainWindow(cameraResolution);
     auto engine = Engine(scene, mainWindow);

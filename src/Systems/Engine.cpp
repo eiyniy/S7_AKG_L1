@@ -1,5 +1,4 @@
 #include <Engine.hpp>
-#include <iostream>
 #include <MoveCameraCommand.hpp>
 #include <MoveObjectCommand.hpp>
 #include <RotateCameraAroundCommand.hpp>
@@ -175,9 +174,11 @@ void Engine::draw() {
         if (key == scene.floorObjectName)
             continue;
 
+        auto drawableVertices = scene.getObject(key)->getDrawable(scene.cGetCamera());
+
         mainWindow.drawModel(
                 *scene.getObject(key),
-                scene.getObject(key)->getDrawable(scene.cGetCamera()));
+                drawableVertices);
     }
 
     mainWindow.drawPixels();

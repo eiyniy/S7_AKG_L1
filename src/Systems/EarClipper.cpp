@@ -96,8 +96,8 @@ Polygon EarClipper::clipEar(
 
         const Polygon result{{
                                      it->second,
-                                     itPrev->second,
-                                     itNext->second}};
+                                     itNext->second,
+                                     itPrev->second}};
 
         polygonVertices.erase(it);
 
