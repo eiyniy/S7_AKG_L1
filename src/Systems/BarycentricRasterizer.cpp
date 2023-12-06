@@ -5,10 +5,14 @@
 void BarycentricRasterizer::rasterize(
         const Polygon &polygon,
         const std::vector<DrawableVertex> &drawableVertices,
+        const std::vector<NormalVertex> &normalVertices,
+        const sf::Color &color,
         double *depthBuffer,
         const int xSize,
         sf::Uint8 *pixels,
-        sf::Color *color) {
+        ShadingModel shadingModel,
+        const BaseLightingModel *lightingModel,
+        const BaseLightSource *lightSource) {
     const auto &a = drawableVertices.at(polygon.cGetVertexIds(0).cGetVertexId() - 1);
     const auto &b = drawableVertices.at(polygon.cGetVertexIds(1).cGetVertexId() - 1);
     const auto &c = drawableVertices.at(polygon.cGetVertexIds(2).cGetVertexId() - 1);
@@ -23,10 +27,13 @@ void BarycentricRasterizer::rasterize(
         return;
 
     const auto windowingRectangle = findWindowingRectangle(polygon, drawableVertices);
-    const auto minX = windowingRectangle.first.cGetX();
-    const auto minY = windowingRectangle.first.cGetY();
-    const auto maxX = windowingRectangle.second.cGetX();
-    const auto maxY = windowingRectangle.second.cGetY();
+    const int minX = windowingRectangle.first.cGetX();
+    const int minY = windowingRectangle.first.cGetY();
+    const int maxX = windowingRectangle.second.cGetX();
+    const int maxY = windowingRectangle.second.cGetY();
+
+//    std::cout << "HERE" << std::endl;
+    // TODO: Передавать сюда не drawable Vertex а double
 
     auto w0 = edgeFunction(b, c, {minX, minY, 0}) / area;
     auto w1 = edgeFunction(c, a, {minX, minY, 0}) / area;
@@ -67,7 +74,19 @@ void BarycentricRasterizer::rasterize(
 
                 if (z < depthBuffer[i * xSize + j]) {
                     depthBuffer[i * xSize + j] = z;
-                    std::memcpy(pixels + (4 * (i * xSize + j)), color, 4);
+
+                    const auto shadedColor = getShadedColor(
+                            color,
+                            polygon,
+                            normalVertices,
+                            lightSource->getLightDirection({0, 0, 0}),
+                            shadingModel,
+                            lightingModel);
+
+                    std::memcpy(
+                            pixels + (4 * (i * xSize + j)),
+                            &shadedColor,
+                            4);
                 }
             }
 
@@ -91,10 +110,10 @@ std::pair<Point, Point> BarycentricRasterizer::findWindowingRectangle(
         const std::vector<DrawableVertex> &vertices) {
     const auto &firstVertex = vertices.at(polygon.cGetVertexIds(0).cGetVertexId() - 1);
 
-    auto minX = firstVertex.CGetX();
-    auto maxX = firstVertex.CGetX();
-    auto minY = firstVertex.CGetY();
-    auto maxY = firstVertex.CGetY();
+    auto minX = (int) std::floor(firstVertex.CGetX());
+    auto maxX = (int) std::ceil(firstVertex.CGetX());
+    auto minY = (int) std::floor(firstVertex.CGetY());
+    auto maxY = (int) std::ceil(firstVertex.CGetY());
 
     const auto size = polygon.cGetVertexIdsCount();
     for (int i = 0; i < size; ++i) {
@@ -108,4 +127,43 @@ std::pair<Point, Point> BarycentricRasterizer::findWindowingRectangle(
 
     return {{minX, minY},
             {maxX, maxY}};
+}
+
+sf::Color BarycentricRasterizer::getShadedColor(
+        const sf::Color &color,
+        const Polygon &polygon,
+        const std::vector<NormalVertex> &normalVertices,
+        const Matrix<4, 1> &lightDirection,
+        ShadingModel shadingModel,
+        const BaseLightingModel *lightingModel) {
+    sf::Color result;
+
+    switch (shadingModel) {
+        case Flat: {
+            const auto id0 = polygon.cGetVertexIds(0).cGetNormalVertexId();
+            const auto id1 = polygon.cGetVertexIds(1).cGetNormalVertexId();
+            const auto id2 = polygon.cGetVertexIds(2).cGetNormalVertexId();
+
+            if (!id0.has_value() || !id1.has_value() || !id2.has_value())
+                throw std::runtime_error("Can not get Normal");
+
+            const auto n0 = normalVertices.at(*id0 - 1);
+            const auto n1 = normalVertices.at(*id1 - 1);
+            const auto n2 = normalVertices.at(*id2 - 1);
+
+            const auto invLightDir = lightDirection * -1;
+
+            const auto intensity0 = lightingModel->getLightIntensity(n0, invLightDir);
+            const auto intensity1 = lightingModel->getLightIntensity(n1, invLightDir);
+            const auto intensity2 = lightingModel->getLightIntensity(n2, invLightDir);
+
+            const auto averageIntensity = (intensity0 + intensity1 + intensity2) / 3;
+
+            result = sf::Color(color.r * averageIntensity, color.g * averageIntensity, color.b * averageIntensity);
+
+            break;
+        }
+    }
+
+    return result;
 }

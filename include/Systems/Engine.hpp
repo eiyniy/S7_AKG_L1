@@ -26,6 +26,8 @@ private:
     AxisName moveAxis;
     Direction moveDirection;
 
+    BaseLightingModel *lightingModel;
+
     sf::Clock clock;
     int dt;
 

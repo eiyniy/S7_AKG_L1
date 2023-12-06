@@ -8,10 +8,12 @@
 #include <ResizeCommand.hpp>
 #include <ThreadPool.hpp>
 #include <Timer.hpp>
+#include <LambertModel.hpp>
 
 Engine::Engine(Scene &_scene, MainWindow &_mainWindow)
         : scene(_scene),
-          mainWindow(_mainWindow) {
+          mainWindow(_mainWindow),
+          lightingModel(new LambertModel{}) {
 //    mainWindow.getWindow().setFramerateLimit(defaultFps);
     draw();
 }
@@ -178,7 +180,9 @@ void Engine::draw() {
 
         mainWindow.drawModel(
                 *scene.getObject(key),
-                drawableVertices);
+                drawableVertices,
+                lightingModel,
+                scene.cGetLightSource());
     }
 
     mainWindow.drawPixels();

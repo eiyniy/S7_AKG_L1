@@ -28,14 +28,6 @@ bool EarClipper::isConvexVertex(
         const Vertex &vertex,
         const Vertex &prevVertex,
         const Vertex &nextVertex) {
-//    const auto slope1 = (nextVertex.cGetY() - vertex.cGetY()) / (nextVertex.cGetX() - vertex.cGetX());
-//    const auto slope2 = (prevVertex.cGetY() - vertex.cGetY()) / (prevVertex.cGetX() - vertex.cGetX());
-//
-//    const auto angle1 = std::atan(slope1);
-//    const auto angle2 = std::atan(slope2);
-//
-//    return std::fabs(angle1 - angle2) < M_PI;
-
     const auto matrix = Converter::vertexToMatrix(vertex);
     const auto prevMatrix = Converter::vertexToMatrix(prevVertex);
     const auto nextMatrix = Converter::vertexToMatrix(nextVertex);

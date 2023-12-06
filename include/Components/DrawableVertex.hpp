@@ -2,7 +2,7 @@
 
 class DrawableVertex {
 private:
-    int x, y;
+    double x, y;
     double z;
     bool isVisible, isWNegative;
 
@@ -14,18 +14,18 @@ public:
     DrawableVertex &operator=(const DrawableVertex &drawableVertex);
 
     DrawableVertex(
-            int x, int y, double z,
+            double x, double y, double z,
             bool isVisible = true, bool isWNegative = false);
 
-    [[nodiscard]] int CGetX() const;
+    [[nodiscard]] double CGetX() const;
 
-    [[nodiscard]] int CGetY() const;
+    [[nodiscard]] double CGetY() const;
 
     [[nodiscard]] double CGetZ() const;
 
-    [[nodiscard]] int &GetX();
+    [[nodiscard]] double &GetX();
 
-    [[nodiscard]] int &GetY();
+    [[nodiscard]] double &GetY();
 
     [[nodiscard]] double &GetZ();
 
@@ -34,11 +34,11 @@ public:
     [[nodiscard]] bool IsWNegative() const;
 };
 
-inline int &DrawableVertex::GetX() {
+inline double &DrawableVertex::GetX() {
     return x;
 }
 
-inline int &DrawableVertex::GetY() {
+inline double &DrawableVertex::GetY() {
     return y;
 }
 
@@ -46,11 +46,11 @@ inline double &DrawableVertex::GetZ() {
     return z;
 }
 
-inline int DrawableVertex::CGetX() const {
+inline double DrawableVertex::CGetX() const {
     return x;
 }
 
-inline int DrawableVertex::CGetY() const {
+inline double DrawableVertex::CGetY() const {
     return y;
 }
 

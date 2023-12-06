@@ -10,13 +10,21 @@ DrawableVertex Converter::matrixToDrawableVertex(
         const bool isVisible,
         const bool isWNegative) {
     return {
-            (int) (std::round(value.cGetX())),
-            (int) (std::round(value.cGetY())),
+            value.cGetX(),
+            value.cGetY(),
             w,
             isVisible,
             isWNegative};
 }
 
 Point Converter::drawableVertexToPoint(const DrawableVertex &value) {
-    return {value.CGetX(), value.CGetY()};
+    return {(int) std::round(value.CGetX()), (int) std::round(value.CGetY())};
+}
+
+Matrix<4, 1> Converter::nVertexToMatrix(const NormalVertex &value) {
+    return {value.getI(), value.getJ(), value.getK(), 0};
+}
+
+Vertex Converter::matrixToVertex(const Matrix<4, 1> &value, double w) {
+    return {value.cGetX(), value.cGetY(), w};
 }

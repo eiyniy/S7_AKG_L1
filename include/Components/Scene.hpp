@@ -6,6 +6,7 @@
 #include <Enums.hpp>
 #include <SFML/Graphics.hpp>
 #include <optional>
+#include <BaseLightSource.hpp>
 
 class Scene {
 private:
@@ -14,6 +15,7 @@ private:
     std::string selectedObjectName;
     std::map<std::string, Object *> objects;
     Camera &camera;
+    BaseLightSource *lightSource;
 
     void generateFloor();
 
@@ -28,6 +30,7 @@ public:
 
     Scene(
             Camera &_camera,
+            BaseLightSource *_lightSource,
             const double _moveSpeed,
             const double _rotationSpeed);
 
@@ -44,6 +47,8 @@ public:
     const std::string cGetSelectedObjectName() const;
 
     const Camera &cGetCamera() const;
+
+    const BaseLightSource *cGetLightSource() const;
 
     Object *getObject(const std::string &key);
 

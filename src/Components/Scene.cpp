@@ -9,9 +9,11 @@
 
 Scene::Scene(
         Camera &_camera,
+        BaseLightSource *_lightSource,
         const double _moveSpeed,
         const double _rotationSpeed)
         : camera(_camera),
+          lightSource(_lightSource),
           defaultFrameTime(1.f * 1000.f / 60),
           moveSpeed(_moveSpeed),
           rotationSpeed(_rotationSpeed) {
@@ -106,4 +108,8 @@ const std::vector<std::string> Scene::cGetAllObjectNames() const {
 
 const std::string Scene::cGetSelectedObjectName() const {
     return selectedObjectName;
+}
+
+const BaseLightSource *Scene::cGetLightSource() const {
+    return lightSource;
 }

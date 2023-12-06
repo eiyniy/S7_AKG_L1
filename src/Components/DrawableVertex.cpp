@@ -26,7 +26,7 @@ DrawableVertex &DrawableVertex::operator=(const DrawableVertex &drawableVertex) 
 }
 
 DrawableVertex::DrawableVertex(
-        const int x, const int y, const double z,
+        const double x, const double y, const double z,
         const bool isVisible, const bool isWNegative)
         : x(x), y(y), z(z),
           isVisible(isVisible),

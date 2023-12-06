@@ -6,6 +6,8 @@
 #include <mutex>
 #include <memory>
 #include <CSClipper.hpp>
+#include <BaseLightingModel.hpp>
+#include <BaseLightSource.hpp>
 
 class MainWindow {
 public:
@@ -19,7 +21,11 @@ public:
 
     void drawPixels();
 
-    void drawModel(Object &objInfo, std::vector<DrawableVertex> &viewportVertices);
+    void drawModel(
+            Object &objInfo,
+            std::vector<DrawableVertex> &viewportVertices,
+            const BaseLightingModel *lightingModel,
+            const BaseLightSource *lightSource);
 
     sf::RenderWindow &getWindow();
 
@@ -28,8 +34,11 @@ public:
 private:
     void drawPolygon(
             const Polygon &polygon,
-            std::vector<DrawableVertex> &drawableVertices,
-            const sf::Color *color);
+            const std::vector<NormalVertex> &normalVertices,
+            const std::vector<DrawableVertex> &drawableVertices,
+            const sf::Color *color,
+            const BaseLightingModel *lightingModel,
+            const BaseLightSource *lightSource);
 
     void drawLineBr(
             const DrawableVertex &p1,

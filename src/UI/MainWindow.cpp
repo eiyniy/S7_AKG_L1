@@ -24,7 +24,11 @@ MainWindow::MainWindow(Point &_resolution)
     bufferSprite.setTexture(bufferTexture, true);
 }
 
-void MainWindow::drawModel(Object &objInfo, std::vector<DrawableVertex> &viewportVertices) {
+void MainWindow::drawModel(
+        Object &objInfo,
+        std::vector<DrawableVertex> &viewportVertices,
+        const BaseLightingModel *lightingModel,
+        const BaseLightSource *lightSource) {
     colorNumber = 0;
 
     const auto color = &objInfo.cGetColor();
@@ -54,7 +58,13 @@ void MainWindow::drawModel(Object &objInfo, std::vector<DrawableVertex> &viewpor
     */
 
     for (int j = 0; j <= polygons.size(); ++j) {
-        drawPolygon(polygons[j], viewportVertices, color);
+        drawPolygon(
+                polygons[j],
+                objInfo.cGetNVertices(),
+                viewportVertices,
+                color,
+                lightingModel,
+                lightSource);
     }
 
     /*
@@ -142,8 +152,11 @@ void MainWindow::drawPixels() {
 
 void MainWindow::drawPolygon(
         const Polygon &polygon,
-        std::vector<DrawableVertex> &drawableVertices,
-        const sf::Color *color) {
+        const std::vector<NormalVertex> &normalVertices,
+        const std::vector<DrawableVertex> &drawableVertices,
+        const sf::Color *color,
+        const BaseLightingModel *lightingModel,
+        const BaseLightSource *lightSource) {
     if (colors.empty()) {
         for (int i = 0; i < 10; ++i)
             colors.emplace_back(rand() % 255, rand() % 255, rand() % 255);
@@ -190,10 +203,15 @@ void MainWindow::drawPolygon(
     BarycentricRasterizer::rasterize(
             polygon,
             drawableVertices,
+            normalVertices,
+            *color,
+//            colors.at(colorNumber),
             depthBuffer,
             resolution.cGetX(),
             pixels,
-            &colors.at(colorNumber));
+            ShadingModel::Flat,
+            lightingModel,
+            lightSource);
 //    for (const auto &i: result) {
 //        drawPixel(i.CGetX(), i.CGetY(), &colors.at(colorNumber), resolution.cGetX());
 //    }

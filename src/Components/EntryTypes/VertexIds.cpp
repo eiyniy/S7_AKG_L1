@@ -34,3 +34,7 @@ VertexIds VertexIds::parse(const std::string &str) {
 const int VertexIds::cGetVertexId() const {
     return vertexId;
 }
+
+const std::optional<int> VertexIds::cGetNormalVertexId() const {
+    return nVertexId;
+}
