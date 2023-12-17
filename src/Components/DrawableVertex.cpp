@@ -1,16 +1,11 @@
 #include <DrawableVertex.hpp>
 
 DrawableVertex::DrawableVertex()
-        : x(0), y(0),
+        : x(0), y(0), z(0),
           isVisible(true),
           isWNegative(false) {}
 
-DrawableVertex::DrawableVertex(const DrawableVertex &drawableVertex)
-        : x(drawableVertex.x),
-          y(drawableVertex.y),
-          z(drawableVertex.z),
-          isVisible(drawableVertex.isVisible),
-          isWNegative(drawableVertex.isWNegative) {}
+DrawableVertex::DrawableVertex(const DrawableVertex &drawableVertex) = default;
 
 DrawableVertex &DrawableVertex::operator=(const DrawableVertex &drawableVertex) {
     if (this == &drawableVertex)
@@ -26,8 +21,15 @@ DrawableVertex &DrawableVertex::operator=(const DrawableVertex &drawableVertex) 
 }
 
 DrawableVertex::DrawableVertex(
-        const double x, const double y, const double z,
-        const bool isVisible, const bool isWNegative)
-        : x(x), y(y), z(z),
-          isVisible(isVisible),
-          isWNegative(isWNegative) {}
+        const double _x, const double _y, const double _z,
+        const bool _isVisible, const bool _isWNegative)
+        : x(_x), y(_y), z(_z),
+          isVisible(_isVisible),
+          isWNegative(_isWNegative) {}
+
+DrawableVertex::DrawableVertex(
+        const int _x, const int _y, const double _z,
+        const bool _isVisible, const bool _isWNegative)
+        : x(_x), y(_y), z(_z),
+          isVisible(_isVisible),
+          isWNegative(_isWNegative) {}

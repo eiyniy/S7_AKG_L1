@@ -10,6 +10,5 @@ MoveObjectCommand::MoveObjectCommand(
           object(_object) {}
 
 void MoveObjectCommand::execute() {
-    auto transition = Engine::getTransition(axisName, direction, step);
-    object.move(transition);
+    object.move(getTransition());
 }

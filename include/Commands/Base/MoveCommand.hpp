@@ -7,11 +7,12 @@
 class MoveCommand : public Command {
 protected:
     MoveCommand(
-            const AxisName _axisName,
-            const Direction _direction,
-            const double _step);
+            AxisName _axisName,
+            Direction _direction,
+            double _step);
 
-protected:
+    Matrix<4, 1> getTransition();
+
     const AxisName axisName;
     const Direction direction;
     const double step;

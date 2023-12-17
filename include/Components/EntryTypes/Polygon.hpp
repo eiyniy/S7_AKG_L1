@@ -1,15 +1,18 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
 #include <VertexIds.hpp>
 #include <Enums.hpp>
 #include <string>
 #include <vector>
 #include <optional>
 #include <array>
-#include "Vertex.hpp"
+#include <Vertex.hpp>
+#include <Matrix.hpp>
 
-struct SValues {
-    SValues(const std::vector<VertexIds> &values);
+struct SValues
+{
+    explicit SValues(const std::vector<VertexIds> &values);
 
     VertexIds v1;
     VertexIds v2;
@@ -17,19 +20,24 @@ struct SValues {
     std::optional<VertexIds> v4;
 };
 
-class Polygon {
+class Polygon
+{
 public:
-    Polygon(const std::vector<VertexIds> &indexes);
+    sf::Color color;
+
+    explicit Polygon(const std::vector<VertexIds> &indexes);
 
     static Polygon parse(const std::string &line);
 
     static std::vector<Polygon> parseAndTriangulate(
-            const std::string &line,
-            const std::vector<Vertex> &vertices);
+        const std::string &line,
+        const std::vector<Matrix<4, 1>> &vertices);
 
-    const int cGetVertexIdsCount() const;
+    const Matrix<4, 1> &getNormal(const std::vector<Matrix<4, 1>> &vertices);
 
-    const VertexIds &cGetVertexIds(const int i) const;
+    [[nodiscard]] int cGetVertexIdsCount() const;
+
+    [[nodiscard]] const VertexIds &cGetVertexIds(int i) const;
 
 private:
     StorageMode storageMode;
@@ -37,6 +45,8 @@ private:
 
     std::optional<std::vector<VertexIds>> dValues;
     std::optional<SValues> sValues;
+
+    std::optional<Matrix<4, 1>> normal;
 
     void moveValuesToDynamic();
 

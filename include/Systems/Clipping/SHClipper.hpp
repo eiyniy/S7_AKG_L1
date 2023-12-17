@@ -18,7 +18,7 @@ private:
             std::vector<DrawableVertex> &vertices,
             const Point &edgeP1, const Point &edgeP2);
 
-    static const Point findIntersection(
+    static Point findIntersection(
             const Point &line1P1, const Point &line1P2,
             const Point &line2P1, const Point &line2P2);
 

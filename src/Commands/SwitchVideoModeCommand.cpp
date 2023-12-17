@@ -1,15 +1,14 @@
 #include <SwitchVideoModeCommand.hpp>
 
 SwitchVideoModeCommand::SwitchVideoModeCommand(
-    Scene &_scene,
-    MainWindow &_mainWindow,
-    const bool _isEscape)
-    : scene(_scene),
-      mainWindow(_mainWindow),
-      isEscape(_isEscape) {}
+        Camera &_camera,
+        MainWindow &_mainWindow,
+        const bool _isEscape)
+        : camera(_camera),
+          mainWindow(_mainWindow),
+          isEscape(_isEscape) {}
 
-void SwitchVideoModeCommand::execute()
-{
+void SwitchVideoModeCommand::execute() {
     mainWindow.switchVideoMode(isEscape);
-    scene.getCamera().setResolution(mainWindow.cGetResolution());
+    camera.setResolution(mainWindow.cGetResolution());
 }

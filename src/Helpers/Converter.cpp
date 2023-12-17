@@ -22,9 +22,17 @@ Point Converter::drawableVertexToPoint(const DrawableVertex &value) {
 }
 
 Matrix<4, 1> Converter::nVertexToMatrix(const NormalVertex &value) {
-    return {value.getI(), value.getJ(), value.getK(), 0};
+    return {value.cGetI(), value.cGetJ(), value.cGetK(), 0};
 }
 
 Vertex Converter::matrixToVertex(const Matrix<4, 1> &value, double w) {
     return {value.cGetX(), value.cGetY(), w};
+}
+
+Matrix<4, 1> Converter::drawableVertexToMatrix(const DrawableVertex &value) {
+    return {value.CGetX(), value.CGetY(), value.CGetZ()};
+}
+
+Matrix<4, 1> Converter::normalVertexToMatrix(const NormalVertex &value) {
+    return {value.cGetI(), value.cGetJ(), value.cGetK(), 0};
 }

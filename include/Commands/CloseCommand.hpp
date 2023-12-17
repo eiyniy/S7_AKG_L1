@@ -3,11 +3,12 @@
 #include <MainWindow.hpp>
 #include <Command.hpp>
 
-class CloseCommand : public Command
-{
+class CloseCommand : public Command {
 public:
-    CloseCommand(MainWindow &_mainWindow);
+    explicit CloseCommand(MainWindow &_mainWindow);
 
+    ~CloseCommand() override = default;
+ 
     void execute() override;
 
 private:

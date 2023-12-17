@@ -7,19 +7,33 @@ class VertexIds {
 public:
     VertexIds();
 
-    VertexIds(
-            const int _vertexId,
+    explicit VertexIds(
+            int _vertexId,
             const std::optional<int> &_tVertexId = std::nullopt,
             const std::optional<int> &_nVertexId = std::nullopt);
 
     static VertexIds parse(const std::string &str);
 
-    const int cGetVertexId() const;
+    [[nodiscard]] int cGetVertexId() const;
 
-    const std::optional<int> cGetNormalVertexId() const;
+    [[nodiscard]] std::optional<int> cGetNormalVertexId() const;
+
+    [[nodiscard]] std::optional<int> cGetTextureVertexId() const;
 
 private:
     int vertexId;
     std::optional<int> tVertexId;
     std::optional<int> nVertexId;
 };
+
+inline int VertexIds::cGetVertexId() const {
+    return vertexId;
+}
+
+inline std::optional<int> VertexIds::cGetNormalVertexId() const {
+    return nVertexId;
+}
+
+inline std::optional<int> VertexIds::cGetTextureVertexId() const {
+    return tVertexId;
+}

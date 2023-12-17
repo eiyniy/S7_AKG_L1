@@ -3,14 +3,27 @@
 #include <BaseVertex.hpp>
 #include <string>
 
-class TextureVertex : public BaseVertex
-{
+class TextureVertex : public BaseVertex {
 public:
-    TextureVertex(const double u, const double v = 0, const double w = 0);
+    explicit TextureVertex(double u, double v = 0, double w = 0);
 
     static TextureVertex parse(const std::string &line);
 
-    const double getU() const;
-    const double getV() const;
-    const double getW() const;
+    [[nodiscard]] double cGetU() const;
+
+    [[nodiscard]] double cGetV() const;
+
+    [[nodiscard]] double cGetW() const;
 };
+
+inline double TextureVertex::cGetU() const {
+    return v1;
+}
+
+inline double TextureVertex::cGetV() const {
+    return v2;
+}
+
+inline double TextureVertex::cGetW() const {
+    return v3;
+}

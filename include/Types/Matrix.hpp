@@ -16,10 +16,10 @@ public:
     Matrix();
 
     Matrix(
-            const double x,
-            const double y,
-            const double z,
-            const double w = 1.f)requires(Rows == 4 && Cols == 1);
+            double x,
+            double y,
+            double z,
+            double w = 1.f) requires (Rows == 4 && Cols == 1);
 
     Matrix(const Matrix &m);
 
@@ -31,13 +31,13 @@ public:
 
     Matrix<Rows, Cols> &operator*=(const Matrix<Rows, Cols> &m) requires(Rows == Cols);
 
-    Matrix &operator+=(const double v);
+    Matrix &operator+=(double v);
 
-    Matrix &operator-=(const double v);
+    Matrix &operator-=(double v);
 
-    Matrix &operator*=(const double v);
+    Matrix &operator*=(double v);
 
-    Matrix &operator/=(const double v);
+    Matrix &operator/=(double v);
 
     Matrix operator+(const Matrix &m) const;
 
@@ -46,25 +46,25 @@ public:
     template<int Rows2, int Cols2>
     Matrix<Rows, Cols2> operator*(const Matrix<Rows2, Cols2> &m) const requires(Cols == Rows2);
 
-    Matrix operator+(const double v) const;
+    Matrix operator+(double v) const;
 
-    Matrix operator-(const double v) const;
+    Matrix operator-(double v) const;
 
-    Matrix operator*(const double v) const;
+    Matrix operator*(double v) const;
 
-    Matrix operator/(const double v) const;
+    Matrix operator/(double v) const;
 
-    double &getValue(const int i, const int j);
+    double &getValue(int i, int j);
 
-    const double &cGetValue(const int i, const int j) const;
+    const double &cGetValue(int i, int j) const;
 
-    const double cGetX() const requires(Rows == 4 && Cols == 1);
+    double cGetX() const requires(Rows == 4 && Cols == 1);
 
-    const double cGetY() const requires(Rows == 4 && Cols == 1);
+    double cGetY() const requires(Rows == 4 && Cols == 1);
 
-    const double cGetZ() const requires(Rows == 4 && Cols == 1);
+    double cGetZ() const requires(Rows == 4 && Cols == 1);
 
-    const double cGetW() const requires(Rows == 4 && Cols == 1);
+    double cGetW() const requires(Rows == 4 && Cols == 1);
 
     double &getX()requires(Rows == 4 && Cols == 1);
 
@@ -74,11 +74,11 @@ public:
 
     double &getW()requires(Rows == 4 && Cols == 1);
 
-    const double scalarMultiply(const Matrix<4, 1> &vector) const requires(Rows == 4 && Cols == 1);
+    double scalarMultiply(const Matrix<4, 1> &vector) const requires(Rows == 4 && Cols == 1);
 
-    const Matrix<4, 1> vectorMultiply(const Matrix<4, 1> &vector) const requires(Rows == 4 && Cols == 1);
+    Matrix<4, 1> vectorMultiply(const Matrix<4, 1> &vector) const requires(Rows == 4 && Cols == 1);
 
-    const double getLength() const requires(Rows == 4 && Cols == 1);
+    double getLength() const requires(Rows == 4 && Cols == 1);
 
     void normalize()requires(Rows == 4 && Cols == 1);
 
@@ -95,8 +95,8 @@ public:
             const Matrix<4, 1> &scale);
 
     static Matrix<4, 4> getRotateConvert(
-            const AxisName axis,
-            const double angle);
+            AxisName axis,
+            double angle);
 
     static Matrix<4, 4> getViewConvert(
             const Matrix<4, 1> &eye,
@@ -104,16 +104,16 @@ public:
             const Matrix<4, 1> &up);
 
     static Matrix<4, 4> getProjectionConvert(
-            const double fov,
-            const double aspect,
-            const double zFar,
-            const double zNear);
+            double fov,
+            double aspect,
+            double zFar,
+            double zNear);
 
     static Matrix<4, 4> getViewportConvert(
-            const double width,
-            const double height,
-            const double xMin,
-            const double yMin);
+            double width,
+            double height,
+            double xMin,
+            double yMin);
 
     void log() const;
 
@@ -133,41 +133,41 @@ inline const double &Matrix<Rows, Cols>::cGetValue(const int i, const int j) con
 }
 
 template<int Rows, int Cols>
-inline const double Matrix<Rows, Cols>::cGetX() const requires(Rows == 4 && Cols == 1) {
+inline double Matrix<Rows, Cols>::cGetX() const requires(Rows == 4 && Cols == 1) {
     return values[0];
 }
 
 template<int Rows, int Cols>
-inline const double Matrix<Rows, Cols>::cGetY() const requires(Rows == 4 && Cols == 1) {
+inline double Matrix<Rows, Cols>::cGetY() const requires(Rows == 4 && Cols == 1) {
     return values[1];
 }
 
 template<int Rows, int Cols>
-inline const double Matrix<Rows, Cols>::cGetZ() const requires(Rows == 4 && Cols == 1) {
+inline double Matrix<Rows, Cols>::cGetZ() const requires(Rows == 4 && Cols == 1) {
     return values[2];
 }
 
 template<int Rows, int Cols>
-inline const double Matrix<Rows, Cols>::cGetW() const requires(Rows == 4 && Cols == 1) {
+inline double Matrix<Rows, Cols>::cGetW() const requires(Rows == 4 && Cols == 1) {
     return values[3];
 }
 
 template<int Rows, int Cols>
-inline double &Matrix<Rows, Cols>::getX()requires(Rows == 4 && Cols == 1) {
+inline double &Matrix<Rows, Cols>::getX() requires (Rows == 4 && Cols == 1) {
     return values[0];
 }
 
 template<int Rows, int Cols>
-inline double &Matrix<Rows, Cols>::getY()requires(Rows == 4 && Cols == 1) {
+inline double &Matrix<Rows, Cols>::getY() requires (Rows == 4 && Cols == 1) {
     return values[1];
 }
 
 template<int Rows, int Cols>
-inline double &Matrix<Rows, Cols>::getZ()requires(Rows == 4 && Cols == 1) {
+inline double &Matrix<Rows, Cols>::getZ() requires (Rows == 4 && Cols == 1) {
     return values[2];
 }
 
 template<int Rows, int Cols>
-inline double &Matrix<Rows, Cols>::getW()requires(Rows == 4 && Cols == 1) {
+inline double &Matrix<Rows, Cols>::getW() requires (Rows == 4 && Cols == 1) {
     return values[3];
 }

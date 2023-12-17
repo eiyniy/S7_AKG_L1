@@ -9,6 +9,8 @@ public:
     CentralizeCameraCommand(
             Camera &_camera,
             Object &_object);
+ 
+    ~CentralizeCameraCommand() override = default;
 
     void execute() override;
 

@@ -8,9 +8,11 @@ class RotateCameraAroundCommand : public Command {
 public:
     RotateCameraAroundCommand(
             Camera &_camera,
-            const AxisName _axisName,
-            const Direction _direction,
-            const double _step);
+            AxisName _axisName,
+            Direction _direction,
+            double _step);
+
+    ~RotateCameraAroundCommand() override = default;
 
     void execute() override;
 

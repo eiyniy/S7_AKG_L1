@@ -8,48 +8,56 @@
 #include <CSClipper.hpp>
 #include <BaseLightingModel.hpp>
 #include <BaseLightSource.hpp>
+#include <BarycentricRasterizer.hpp>
+#include <Enums.hpp>
 
-class MainWindow {
+class MainWindow
+{
 public:
-    MainWindow(Point &_resolution);
+    MainWindow(
+        Point &_resolution,
+        const BaseLightingModel *_lightingModel,
+        const BaseLightSource *_lightSource,
+        const ShadingModel &_shadingModel);
 
-    void switchVideoMode(const bool isEscape = false);
+    void switchVideoMode(bool isEscape = false);
 
-    void resize(const int width, const int height);
+    void resize(int width, int height);
 
     void clear();
 
     void drawPixels();
 
     void drawModel(
-            Object &objInfo,
-            std::vector<DrawableVertex> &viewportVertices,
-            const BaseLightingModel *lightingModel,
-            const BaseLightSource *lightSource);
+        Object &objInfo,
+        std::vector<DrawableVertex> &viewportVertices,
+        const Matrix<4, 1> &sightDir);
 
     sf::RenderWindow &getWindow();
 
     const Point &cGetResolution() const;
 
 private:
+    static bool isPolygonFrontOriented(
+        Polygon &polygon,
+        const std::vector<Matrix<4, 1>> &vertices,
+        const Matrix<4, 1> &sightDir);
+
     void drawPolygon(
-            const Polygon &polygon,
-            const std::vector<NormalVertex> &normalVertices,
-            const std::vector<DrawableVertex> &drawableVertices,
-            const sf::Color *color,
-            const BaseLightingModel *lightingModel,
-            const BaseLightSource *lightSource);
+        Polygon &polygon,
+        const std::vector<Matrix<4, 1>> &vertices,
+        const std::vector<DrawableVertex> &drawableVertices,
+        const sf::Color *color);
 
     void drawLineBr(
-            const DrawableVertex &p1,
-            const DrawableVertex &p2,
-            const sf::Color *color);
+        const DrawableVertex &p1,
+        const DrawableVertex &p2,
+        const sf::Color *color);
 
-    void drawPixel(
-            const int x,
-            const int y,
-            const sf::Color *color,
-            const int xSize);
+    static void drawPixel(
+        sf::Uint8 *pixels,
+        int pos,
+        const sf::Color *color);
 
     bool isFullscreen;
 
@@ -61,29 +69,36 @@ private:
 
     double *depthBuffer;
 
+    BarycentricRasterizer rasterizer;
+
     sf::RenderWindow window;
     sf::Texture bufferTexture;
     sf::Sprite bufferSprite;
-
-    std::unique_ptr<CSClipper> clipper;
-
-    std::vector<sf::Color> colors;
-    int colorNumber;
 };
 
-inline sf::RenderWindow &MainWindow::getWindow() {
+inline sf::RenderWindow &MainWindow::getWindow()
+{
     return window;
 }
 
-inline const Point &MainWindow::cGetResolution() const {
+inline const Point &MainWindow::cGetResolution() const
+{
     return resolution;
 }
 
 inline void MainWindow::drawPixel(
-        const int x,
-        const int y,
-        const sf::Color *color,
-        const int xSize) {
-    // std::unique_lock<std::mutex> pixelsLock(pixelsMutex);
-    std::memcpy(pixels + (4 * (y * xSize + x)), color, 4);
+    sf::Uint8 *pixels,
+    const int pos,
+    const sf::Color *color)
+{
+    static const auto colorSize = (int)sizeof(sf::Color);
+    std::memcpy(pixels + (colorSize * pos), color, colorSize);
+}
+
+inline bool MainWindow::isPolygonFrontOriented(
+    Polygon &polygon,
+    const std::vector<Matrix<4, 1>> &vertices,
+    const Matrix<4, 1> &sightDir)
+{
+    return polygon.getNormal(vertices).scalarMultiply(sightDir) < 0;
 }

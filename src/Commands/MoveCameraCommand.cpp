@@ -10,6 +10,5 @@ MoveCameraCommand::MoveCameraCommand(
           camera(_camera) {}
 
 void MoveCameraCommand::execute() {
-    auto transition = Engine::getTransition(axisName, direction, step);
-    camera.move(transition);
+    camera.move(getTransition());
 }

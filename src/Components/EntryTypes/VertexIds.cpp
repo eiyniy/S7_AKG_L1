@@ -14,7 +14,7 @@ VertexIds::VertexIds(
           nVertexId(_nVertexId) {}
 
 VertexIds VertexIds::parse(const std::string &str) {
-    auto accumulator = std::array<std::optional<double>, 3>();
+    auto accumulator = std::array<std::optional<int>, 3>();
 
     auto iter = str.cbegin();
     auto iterEnd = str.cend();
@@ -28,13 +28,5 @@ VertexIds VertexIds::parse(const std::string &str) {
     if (!accumulator[0].has_value())
         throw std::logic_error("Invalid argument");
 
-    return VertexIds(*accumulator[0], accumulator[1], accumulator[2]);
-}
-
-const int VertexIds::cGetVertexId() const {
-    return vertexId;
-}
-
-const std::optional<int> VertexIds::cGetNormalVertexId() const {
-    return nVertexId;
+    return VertexIds{*accumulator[0], accumulator[1], accumulator[2]};
 }

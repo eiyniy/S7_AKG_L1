@@ -1,13 +1,12 @@
 #include <SHClipper.hpp>
 #include <Converter.hpp>
 #include <VertexIds.hpp>
-#include <iostream>
 
 void SHClipper::clip(
         Polygon &polygon,
         std::vector<DrawableVertex> &vertices,
         const std::vector<Point> &clipper) {
-    const int clipperSize = clipper.size();
+    const int clipperSize = (int) clipper.size();
 
     for (int i = 0; i < clipperSize; ++i) {
         const int k = (i + 1) % clipperSize;
@@ -53,12 +52,12 @@ void SHClipper::clipByEdge(
 
             newVertexIds.emplace_back(vertices.size());
             newVertexIds.emplace_back(polygon.cGetVertexIds(k).cGetVertexId());
-        } else if (p1Rel < 0 && p2Rel >= 0) {
+        } else if (p1Rel < 0) {
             const auto intersection = findIntersection(point1, point2, edgeP1, edgeP2);
 
             vertices.emplace_back(intersection.cGetX(), intersection.cGetY(), 0);
 
-            newVertexIds.emplace_back(VertexIds(vertices.size()));
+            newVertexIds.emplace_back(vertices.size());
         }
     }
 
@@ -74,7 +73,7 @@ void SHClipper::clipByEdge(
 */
 }
 
-const Point SHClipper::findIntersection(
+Point SHClipper::findIntersection(
         const Point &line1P1, const Point &line1P2,
         const Point &line2P1, const Point &line2P2) {
     const int a = line1P1.cGetX() * line1P2.cGetY() - line1P1.cGetY() * line1P2.cGetX();

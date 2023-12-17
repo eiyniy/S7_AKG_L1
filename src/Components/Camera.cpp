@@ -12,7 +12,7 @@ Camera::Camera(
           position(_position),
           target(_target),
           resolution(_resolution),
-          fov(_fov * M_PI / 180) {}
+          fov((int) (_fov * M_PI / 180)) {}
 
 void Camera::move(const Matrix<4, 1> &transition) {
     target += transition;

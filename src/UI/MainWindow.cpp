@@ -6,18 +6,29 @@
 #include <SHClipper.hpp>
 #include <BarycentricRasterizer.hpp>
 
-MainWindow::MainWindow(Point &_resolution)
-        : window(sf::RenderWindow(
-        sf::VideoMode(_resolution.cGetX(), _resolution.cGetY()),
-        "SFML Graphics",
-        sf::Style::Fullscreen)),
-          isFullscreen(true),
-          resolution(_resolution),
-          lastResolution(Point(1280, 720)),
-          clipper(std::make_unique<CSClipper>(resolution.cGetX() - 1, resolution.cGetY() - 1, 0, 0)) {
-    pixels = new sf::Uint8[resolution.cGetX() * resolution.cGetY() * 4];
-
-    depthBuffer = new double[resolution.cGetX() * resolution.cGetY()];
+MainWindow::MainWindow(
+    Point &_resolution,
+    const BaseLightingModel *_lightingModel,
+    const BaseLightSource *_lightSource,
+    const ShadingModel &_shadingModel)
+    : window(sf::RenderWindow{
+          sf::VideoMode(_resolution.cGetX(), _resolution.cGetY()),
+          "SFML Graphics",
+          sf::Style::Fullscreen}),
+      isFullscreen(true),
+      resolution(_resolution),
+      lastResolution{1280, 720},
+      pixels(new sf::Uint8[resolution.cGetX() * resolution.cGetY() * 4]),
+      depthBuffer(new double[resolution.cGetX() * resolution.cGetY()]),
+      rasterizer(BarycentricRasterizer{
+          _lightingModel,
+          _lightSource,
+          _shadingModel,
+          _resolution.cGetX(),
+          &drawPixel,
+          pixels,
+          depthBuffer})
+{
     std::fill(depthBuffer, depthBuffer + resolution.cGetX() * resolution.cGetY(), INT_MAX);
 
     bufferTexture.create(resolution.cGetX(), resolution.cGetY());
@@ -25,47 +36,59 @@ MainWindow::MainWindow(Point &_resolution)
 }
 
 void MainWindow::drawModel(
-        Object &objInfo,
-        std::vector<DrawableVertex> &viewportVertices,
-        const BaseLightingModel *lightingModel,
-        const BaseLightSource *lightSource) {
-    colorNumber = 0;
-
+    Object &objInfo,
+    std::vector<DrawableVertex> &viewportVertices,
+    const Matrix<4, 1> &sightDir)
+{
     const auto color = &objInfo.cGetColor();
-
     auto polygons = objInfo.getPolygons();
 
     /*
-   // const int threadsCount = (unsigned int)ceil(polygons.size() / 10000.f);
-   const auto threadsCount = std::min(
-           (unsigned int) ceil(polygons.size() / 10000.f),
-           ThreadPool::getInstance().getThreadsCount());
-   const double size = polygons.size() / (double) threadsCount;
+    // const int threadsCount = (unsigned int)ceil(polygons.size() / 10000.f);
+    const auto threadsCount = std::min(
+            (unsigned int) std::ceil(polygons.size() / 1000.f),
+            ThreadPool::getInstance().getThreadsCount());
+    const double size = polygons.size() / (double) threadsCount;
 
-   for (int i = 0; i < threadsCount; ++i) {
-       const int begin = floor(size * i);
-       const int end = floor(size * (i + 1)) - 1;
+    for (int i = 0; i < threadsCount; ++i) {
+        const int begin = floor(size * i);
+        const int end = floor(size * (i + 1)) - 1;
 
-       ThreadPool::getInstance().enqueue(
-               [this, begin, end, &polygons, &viewportVertices, color]() {
-                   for (int j = begin; j <= end; ++j) {
-                       drawPolygon(polygons[j], viewportVertices, color);
-                   }
-               });
-   }
-
-   ThreadPool::getInstance().waitAll();
-    */
-
-    for (int j = 0; j <= polygons.size(); ++j) {
-        drawPolygon(
-                polygons[j],
-                objInfo.cGetNVertices(),
-                viewportVertices,
-                color,
-                lightingModel,
-                lightSource);
+        ThreadPool::getInstance().enqueue(
+                [this, begin, end, &polygons, color,
+                        &lightingModel, &lightSource, &viewportVertices,
+                        normalVertices = objInfo.cGetNVertices(),
+                        textureVertices = objInfo.cGetTVertices()]() {
+                    for (int j = begin; j <= end; ++j) {
+                        drawPolygon(
+                                drawablePolygon,
+                                color,
+                                lightingModel,
+                                lightSource);
+                    }
+                });
     }
+
+    ThreadPool::getInstance().waitAll();
+    */
+    //    /*
+    for (int j = 0; j < polygons.size(); ++j)
+    {
+        // std::cout << "Polygon: " << j << std::endl;
+
+        if (!isPolygonFrontOriented(polygons[j], objInfo.cGetVertices(), sightDir))
+            continue;
+
+        drawPolygon(
+            polygons[j],
+            objInfo.cGetVertices(),
+            viewportVertices,
+            color);
+    }
+
+    // std::cout << std::endl;
+
+    //    */
 
     /*
 for (auto vertex: viewportVertices) {
@@ -96,7 +119,8 @@ for (auto vertex: viewportVertices) {
     */
 }
 
-void MainWindow::switchVideoMode(const bool isEscape) {
+void MainWindow::switchVideoMode(const bool isEscape)
+{
     if (!isFullscreen && isEscape)
         return;
 
@@ -104,22 +128,24 @@ void MainWindow::switchVideoMode(const bool isEscape) {
 
     if (isFullscreen)
         videoMode = sf::VideoMode(lastResolution.cGetX(), lastResolution.cGetY());
-    else {
-        lastResolution = Point(window.getSize().x, window.getSize().y);
+    else
+    {
+        lastResolution = {(int)window.getSize().x, (int)window.getSize().y};
         videoMode = sf::VideoMode::getDesktopMode();
     }
 
     isFullscreen = !isFullscreen;
 
     window.create(
-            videoMode,
-            "SFML Graphics",
-            isFullscreen ? sf::Style::Fullscreen : sf::Style::Default);
+        videoMode,
+        "SFML Graphics",
+        isFullscreen ? sf::Style::Fullscreen : sf::Style::Default);
 
-    resize(videoMode.width, videoMode.height);
+    resize((int)videoMode.width, (int)videoMode.height);
 }
 
-void MainWindow::resize(const int width, const int height) {
+void MainWindow::resize(const int width, const int height)
+{
     resolution = Point(width, height);
 
     delete[] pixels;
@@ -128,50 +154,43 @@ void MainWindow::resize(const int width, const int height) {
     depthBuffer = new double[width * height];
     std::fill(depthBuffer, depthBuffer + resolution.cGetX() * resolution.cGetY(), INT_MAX);
 
-
     bufferTexture.create(width, height);
     bufferSprite.setTexture(bufferTexture, true);
 
-    clipper = std::make_unique<CSClipper>(resolution.cGetX() - 1, resolution.cGetY() - 1, 0, 0);
-
-    auto view = sf::View(sf::FloatRect(0, 0, width, height));
+    sf::View view{{0, 0, (float)width, (float)height}};
     window.setView(view);
 }
 
-void MainWindow::clear() {
+void MainWindow::clear()
+{
     window.clear();
     std::fill(pixels, pixels + resolution.cGetX() * resolution.cGetY() * 4, 0x53u);
     std::fill(depthBuffer, depthBuffer + resolution.cGetX() * resolution.cGetY(), INT_MAX);
 }
 
-void MainWindow::drawPixels() {
+void MainWindow::drawPixels()
+{
     bufferTexture.update(pixels);
     window.draw(bufferSprite);
     window.display();
 }
 
 void MainWindow::drawPolygon(
-        const Polygon &polygon,
-        const std::vector<NormalVertex> &normalVertices,
-        const std::vector<DrawableVertex> &drawableVertices,
-        const sf::Color *color,
-        const BaseLightingModel *lightingModel,
-        const BaseLightSource *lightSource) {
-    if (colors.empty()) {
-        for (int i = 0; i < 10; ++i)
-            colors.emplace_back(rand() % 255, rand() % 255, rand() % 255);
-    }
-
+    Polygon &polygon,
+    const std::vector<Matrix<4, 1>> &vertices,
+    const std::vector<DrawableVertex> &drawableVertices,
+    const sf::Color *color)
+{
     auto vIndexesCount = polygon.cGetVertexIdsCount();
-//    /*
+    //    /*
     bool isPolygonVisible = false;
 
     for (int i = 0; i < vIndexesCount; ++i)
-        isPolygonVisible |= drawableVertices[polygon.cGetVertexIds(i).cGetVertexId() - 1].IsVisible();
+        isPolygonVisible |= drawableVertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1).IsVisible();
 
     if (!isPolygonVisible)
         return;
-//    */
+    //    */
 
     /*
     for (int i = 0; i < vIndexesCount; ++i) {
@@ -199,36 +218,33 @@ void MainWindow::drawPolygon(
     }
     */
 
-//    /*
-    BarycentricRasterizer::rasterize(
-            polygon,
-            drawableVertices,
-            normalVertices,
-            *color,
-//            colors.at(colorNumber),
-            depthBuffer,
-            resolution.cGetX(),
-            pixels,
-            ShadingModel::Flat,
-            lightingModel,
-            lightSource);
-//    for (const auto &i: result) {
-//        drawPixel(i.CGetX(), i.CGetY(), &colors.at(colorNumber), resolution.cGetX());
-//    }
+    //    /*
+    rasterizer.rasterize(
+        polygon,
+        vertices,
+        drawableVertices,
+        *color
+        //            colors.at(colorNumber)
+    );
 
-    colorNumber = (colorNumber + 1) % colors.size();
-//    */
+    //    for (const auto &i: result) {
+    //        drawPixel(i.CGetX(), i.CGetY(), &colors.at(colorNumber), resolution.cGetX());
+    //    }
+
+    //    colorNumber = (colorNumber + 1) % colors.size();
+    //    */
 }
 
 void MainWindow::drawLineBr(
-        const DrawableVertex &p1,
-        const DrawableVertex &p2,
-        const sf::Color *color) {
-    int x1 = p1.CGetX();
-    int y1 = p1.CGetY();
+    const DrawableVertex &p1,
+    const DrawableVertex &p2,
+    const sf::Color *color)
+{
+    int x1 = (int)p1.CGetX();
+    int y1 = (int)p1.CGetY();
 
-    const int x2 = p2.CGetX();
-    const int y2 = p2.CGetY();
+    const int x2 = (int)p2.CGetX();
+    const int y2 = (int)p2.CGetY();
 
     const int xSize = resolution.cGetX();
 
@@ -241,18 +257,21 @@ void MainWindow::drawLineBr(
     int error = deltaX - deltaY;
 
     // if (x2 < resolution.cGetX() && y2 < resolution.cGetY() && x2 > 0 && y2 > 0)
-    drawPixel(x2, y2, color, xSize);
+    drawPixel(pixels, y2 * xSize + x2, color);
 
-    while (x1 != x2 || y1 != y2) {
+    while (x1 != x2 || y1 != y2)
+    {
         // if (x1 < resolution.cGetX() && y1 < resolution.cGetY() && x1 > 0 && y1 > 0)
-        drawPixel(x1, y1, color, xSize);
+        drawPixel(pixels, y1 * xSize + x1, color);
 
         const int error2 = error * 2;
-        if (error2 > -deltaY) {
+        if (error2 > -deltaY)
+        {
             error -= deltaY;
             x1 += signX;
         }
-        if (error2 < deltaX) {
+        if (error2 < deltaX)
+        {
             error += deltaX;
             y1 += signY;
         }

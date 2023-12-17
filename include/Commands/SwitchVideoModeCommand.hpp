@@ -8,14 +8,16 @@
 class SwitchVideoModeCommand : public Command {
 public:
     SwitchVideoModeCommand(
-            Scene &_scene,
+            Camera &_camera,
             MainWindow &_mainWindow,
-            const bool _isEscape);
+            bool _isEscape);
+
+    ~SwitchVideoModeCommand() override = default;
 
     void execute() override;
 
 private:
-    Scene &scene;
+    Camera &camera;
     MainWindow &mainWindow;
 
     const bool isEscape;

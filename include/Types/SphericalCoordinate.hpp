@@ -2,19 +2,18 @@
 
 #include <Enums.hpp>
 
-class SphericalCoordinate
-{
+class SphericalCoordinate {
 public:
     SphericalCoordinate(
-        const double _r,
-        const double _a,
-        const double _b);
+            double _r,
+            double _a,
+            double _b);
 
     void move(
-        const AxisName axisName,
-        const Direction direction,
-        const double step,
-        bool &isCameraReversed);
+            AxisName axisName,
+            Direction direction,
+            double step,
+            bool &isCameraReversed);
 
     double r, a, b;
 };

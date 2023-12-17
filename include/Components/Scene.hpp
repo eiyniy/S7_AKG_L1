@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <BaseLightSource.hpp>
+#include <BaseLightingModel.hpp>
 
 class Scene {
 private:
@@ -15,11 +16,12 @@ private:
     std::string selectedObjectName;
     std::map<std::string, Object *> objects;
     Camera &camera;
+
     BaseLightSource *lightSource;
 
     void generateFloor();
 
-    void generateFloor(const int size, const int step, const Point &center);
+    void generateFloor(int size, int step, const Point &center);
 
 public:
     const std::string floorObjectName = "_FLOOR";
@@ -31,24 +33,22 @@ public:
     Scene(
             Camera &_camera,
             BaseLightSource *_lightSource,
-            const double _moveSpeed,
-            const double _rotationSpeed);
+            double _moveSpeed,
+            double _rotationSpeed);
 
     ~Scene();
 
-    void centralizeCamera();
-
     void addObject(const std::string &key, Object *object);
 
-    const Object *cGetObject(const std::string &key) const;
+    [[nodiscard]] const Object *cGetObject(const std::string &key) const;
 
-    const std::vector<std::string> cGetAllObjectNames() const;
+    [[nodiscard]] std::vector<std::string> cGetAllObjectNames() const;
 
-    const std::string cGetSelectedObjectName() const;
+    [[nodiscard]] const std::string &cGetSelectedObjectName() const;
 
-    const Camera &cGetCamera() const;
+    [[nodiscard]] const Camera &cGetCamera() const;
 
-    const BaseLightSource *cGetLightSource() const;
+    [[nodiscard]] const BaseLightSource *cGetLightSource() const;
 
     Object *getObject(const std::string &key);
 

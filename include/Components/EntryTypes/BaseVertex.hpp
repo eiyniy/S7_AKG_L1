@@ -5,15 +5,16 @@
 #include <string>
 #include <optional>
 
-class BaseVertex
-{
+class BaseVertex {
 public:
     BaseVertex() = default;
+
     BaseVertex(
-        const double _v1,
-        const double _v2,
-        const double _v3,
-        const double _v4 = 0);
+            double _v1,
+            double _v2,
+            double _v3,
+            double _v4 = 0);
+
     BaseVertex(const BaseVertex &bv);
 
     BaseVertex &operator=(const BaseVertex &bv);

@@ -7,9 +7,11 @@ class MoveCameraCommand : public MoveCommand {
 public:
     MoveCameraCommand(
             Camera &_camera,
-            const AxisName _axisName,
-            const Direction _direction,
-            const double _step);
+            AxisName _axisName,
+            Direction _direction,
+            double _step);
+
+    ~MoveCameraCommand() override = default;
 
     void execute() override;
 

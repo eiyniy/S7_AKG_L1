@@ -1,4 +1,3 @@
-#include <iostream>
 #include <future>
 #include <thread>
 #include <memory>
@@ -17,11 +16,11 @@ Scene::Scene(
           defaultFrameTime(1.f * 1000.f / 60),
           moveSpeed(_moveSpeed),
           rotationSpeed(_rotationSpeed) {
-    generateFloor(25, 20, Point(0, 0));
+    // generateFloor(25, 20, Point(0, 0));
 }
 
 Scene::~Scene() {
-    for (auto pair: objects)
+    for (const auto &pair: objects)
         delete pair.second;
 }
 
@@ -33,8 +32,8 @@ void Scene::generateFloor() {
         if (pair.first == floorObjectName)
             continue;
 
-        auto maxXZ = Converter::vertexToMatrix(pair.second->getMaxXZ());
-        auto minXZ = Converter::vertexToMatrix(pair.second->getMinXZ());
+        auto maxXZ = pair.second->getMaxXZ();
+        auto minXZ = pair.second->getMinXZ();
 
         auto floorSize = maxXZ - minXZ;
 
@@ -43,9 +42,8 @@ void Scene::generateFloor() {
         if (biggerDimensionSize > maxDimensionSize) {
             maxDimensionSize = biggerDimensionSize;
 
-            center = Point(
-                    pair.second->getCenter().cGetX(),
-                    pair.second->getCenter().cGetZ());
+            center = {(int) pair.second->getCenter().cGetX(),
+                      (int) pair.second->getCenter().cGetZ()};
         }
     }
 
@@ -58,7 +56,7 @@ void Scene::generateFloor() {
 void Scene::generateFloor(const int size, const int step, const Point &center) {
     auto color = sf::Color(255U, 255U, 255U, 64U);
 
-    std::vector<Vertex> vertexes;
+    std::vector<Matrix<4, 1>> vertices;
     std::vector<Polygon> polygons;
 
     const auto evenSize = size % 2 == 0 ? size + 1 : size;
@@ -66,7 +64,7 @@ void Scene::generateFloor(const int size, const int step, const Point &center) {
 
     for (int i = -halfSize; i <= halfSize; ++i) {
         for (int j = -halfSize; j <= halfSize; ++j)
-            vertexes.emplace_back(Vertex(j * step + center.cGetX(), 0, i * step + center.cGetY()));
+            vertices.emplace_back(j * step + center.cGetX(), 0, i * step + center.cGetY());
     }
 
     for (int i = 0; i < evenSize - 1; ++i) {
@@ -77,11 +75,11 @@ void Scene::generateFloor(const int size, const int step, const Point &center) {
                     VertexIds((j + 1) * evenSize + i + 2),
                     VertexIds((j + 1) * evenSize + i + 1)};
 
-            polygons.emplace_back(Polygon(vertexesIndexes));
+            polygons.emplace_back(vertexesIndexes);
         }
     }
 
-    auto floorPt = new Object(vertexes, {}, {}, polygons, color);
+    auto floorPt = new Object(vertices, {}, {}, polygons, color);
 
     objects.insert_or_assign(floorObjectName, floorPt);
 }
@@ -94,19 +92,19 @@ void Scene::addObject(const std::string &key, Object *object) {
 
     objects[key] = object;
 
-    generateFloor();
+    // generateFloor();
 }
 
-const std::vector<std::string> Scene::cGetAllObjectNames() const {
+std::vector<std::string> Scene::cGetAllObjectNames() const {
     auto res = std::vector<std::string>();
 
-    for (auto pair: objects)
+    for (const auto &pair: objects)
         res.emplace_back(pair.first);
 
     return res;
 }
 
-const std::string Scene::cGetSelectedObjectName() const {
+const std::string &Scene::cGetSelectedObjectName() const {
     return selectedObjectName;
 }
 

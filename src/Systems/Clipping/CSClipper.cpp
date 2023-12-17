@@ -1,6 +1,5 @@
 #include <cmath>
 #include <CSClipper.hpp>
-#include <Converter.hpp>
 
 int CSClipper::computeCode(const double x, const double y) const {
     int code = INSIDE;

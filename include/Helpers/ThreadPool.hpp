@@ -6,17 +6,19 @@
 #include <mutex>
 #include <random>
 
-class ThreadPool
-{
+class ThreadPool {
 public:
-    ThreadPool(unsigned int n);
+    explicit ThreadPool(unsigned int n);
+
     ~ThreadPool();
 
     static ThreadPool &getInstance(unsigned int n = std::thread::hardware_concurrency());
 
     unsigned int getThreadsCount();
-    template <class F>
+
+    template<class F>
     void enqueue(F &&f);
+
     void waitAll();
 
 private:
@@ -33,9 +35,8 @@ private:
     void threadFunc();
 };
 
-template <class F>
-void ThreadPool::enqueue(F &&f)
-{
+template<class F>
+void ThreadPool::enqueue(F &&f) {
     std::unique_lock<std::mutex> lock(queueMutex);
     tasks.push(std::forward<F>(f));
     taskCV.notify_one();

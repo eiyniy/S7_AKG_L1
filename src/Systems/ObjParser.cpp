@@ -6,8 +6,10 @@
 #include <ObjParser.hpp>
 #include <Enums.hpp>
 #include <Timer.hpp>
+#include <ThreadPool.hpp>
 
-ObjParser::ObjParser(const std::string &_pathToFile) {
+ObjParser::ObjParser(const std::string &_pathToFile)
+{
     if (!std::filesystem::exists(_pathToFile))
         throw std::logic_error("Could not open file");
 
@@ -20,7 +22,8 @@ ObjParser::ObjParser(const std::string &_pathToFile) {
 
 #pragma region Static
 
-std::optional<EntryType> ObjParser::getEntryType(const std::string &line) {
+std::optional<EntryType> ObjParser::getEntryType(const std::string &line)
+{
     auto iter = line.begin();
 
     auto type = getNextPart(&iter, line.end(), ' ');
@@ -38,10 +41,11 @@ std::optional<EntryType> ObjParser::getEntryType(const std::string &line) {
 }
 
 std::optional<std::string> ObjParser::getNextPart(
-        std::string::const_iterator *iter,
-        std::string::const_iterator iterEnd,
-        char divider,
-        bool allowEmpty) {
+    std::string::const_iterator *iter,
+    std::string::const_iterator iterEnd,
+    char divider,
+    bool allowEmpty)
+{
     if (*iter >= iterEnd)
         return std::nullopt;
 
@@ -54,11 +58,15 @@ std::optional<std::string> ObjParser::getNextPart(
 
     *iter = iterSecond;
 
-    if (allowEmpty) {
-        do {
+    if (allowEmpty)
+    {
+        do
+        {
             ++(*iter);
         } while (*iter < iterEnd && **iter != divider && **iter != '-' && !isdigit(**iter));
-    } else {
+    }
+    else
+    {
         while (*iter < iterEnd && (**iter == divider || **iter == '\r'))
             ++(*iter);
     }
@@ -68,7 +76,8 @@ std::optional<std::string> ObjParser::getNextPart(
 
 #pragma endregion Static
 
-Object *ObjParser::parseEntries(const std::string &fileContent) {
+Object *ObjParser::parseEntries(const std::string &fileContent)
+{
     const auto timeStart = std::chrono::high_resolution_clock::now();
 
     const auto lines = splitByLines(fileContent);
@@ -98,15 +107,15 @@ Object *ObjParser::parseEntries(const std::string &fileContent) {
     */
 
     // /*
-    for (const auto &line: lines)
+    for (const auto &line : lines)
         parseEntry(line);
     // */
 
-    for (const auto &line: polygonStrings) {
+    for (const auto &line : polygonStrings)
+    {
         const auto triangulated = Polygon::parseAndTriangulate(line, vertices);
-        for (const auto &polygon: triangulated) {
+        for (const auto &polygon : triangulated)
             polygons.emplace_back(polygon);
-        }
     }
 
     const auto timeEnd = std::chrono::high_resolution_clock::now();
@@ -114,35 +123,83 @@ Object *ObjParser::parseEntries(const std::string &fileContent) {
     std::cout << "Parse time: " << parseTime << " ms" << std::endl;
 
     return new Object(
-            vertices,
-            tVertices,
-            nVertices,
-            polygons,
-            sf::Color::White);
+        vertices,
+        tVertices,
+        nVertices,
+        polygons,
+        sf::Color::White);
 }
 
-void ObjParser::parseEntry(const std::string &line) {
+void ObjParser::parseEntry(const std::string &line)
+{
     const auto type = getEntryType(line);
     if (!type.has_value())
         return;
 
-    switch (*type) {
-        case EntryType::Vertex:
-            vertices.emplace_back(Vertex::parse(line));
-            break;
-        case EntryType::TextureVertex:
-            tVertices.emplace_back(TextureVertex::parse(line));
-            break;
-        case EntryType::NormalVertex:
-            nVertices.emplace_back(NormalVertex::parse(line));
-            break;
-        case EntryType::Polygon:
-            polygonStrings.emplace_back(line);
-            break;
+    std::array<std::optional<double>, 4> acc;
+    if (type != EntryType::Polygon)
+        acc = parseAcc(line);
+
+    switch (*type)
+    {
+    case EntryType::Polygon:
+        polygonStrings.emplace_back(line);
+        break;
+    case EntryType::Vertex:
+        vertices.emplace_back(parseVertex(acc));
+        break;
+    case EntryType::NormalVertex:
+        nVertices.emplace_back(parseNVertex(acc));
+        break;
+    case EntryType::TextureVertex:
+        tVertices.emplace_back(parseTVertex(acc));
+        break;
     }
 }
 
-std::vector<std::string> ObjParser::splitByLines(const std::string &string) {
+std::array<std::optional<double>, 4> ObjParser::parseAcc(const std::string &line)
+{
+    const auto entryType = ObjParser::getEntryType(line);
+    if (entryType != EntryType::Vertex &&
+        entryType != EntryType::TextureVertex &&
+        entryType != EntryType::NormalVertex)
+        throw std::logic_error("Could not parse value");
+
+    std::optional<std::string> strPart;
+    auto accumulator = std::array<std::optional<double>, 4>();
+
+    auto iter = line.cbegin();
+    const auto iterEnd = line.cend();
+
+    ObjParser::getNextPart(&iter, iterEnd, ' ');
+
+    int i = 0;
+    for (; (strPart = ObjParser::getNextPart(&iter, line.end(), ' ')); ++i)
+        accumulator[i] = std::stod(*strPart);
+
+    if (i < 1)
+        throw std::logic_error("Can't parse value");
+
+    return accumulator;
+}
+
+Matrix<4, 1> ObjParser::parseVertex(const std::array<std::optional<double>, 4> &acc)
+{
+    return {*acc[0], *acc[1], *acc[2], acc[3].value_or(1)};
+}
+
+Matrix<4, 1> ObjParser::parseNVertex(const std::array<std::optional<double>, 4> &acc)
+{
+    return {*acc[0], *acc[1], *acc[2], 0};
+}
+
+Matrix<4, 1> ObjParser::parseTVertex(const std::array<std::optional<double>, 4> &acc)
+{
+    return {*acc[0], acc[1].value_or(0), acc[2].value_or(0), 1};
+}
+
+std::vector<std::string> ObjParser::splitByLines(const std::string &string)
+{
     auto result = std::vector<std::string>{};
     auto ss = std::stringstream{string};
 
@@ -152,7 +209,8 @@ std::vector<std::string> ObjParser::splitByLines(const std::string &string) {
     return result;
 }
 
-std::string ObjParser::readFile() {
+std::string ObjParser::readFile()
+{
     readStream.seekg(0, std::ios::end);
     auto size = readStream.tellg();
     auto buffer = std::string(size, ' ');

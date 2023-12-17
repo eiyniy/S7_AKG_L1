@@ -4,7 +4,7 @@
 
 class LambertModel : public BaseLightingModel {
 public:
-    double getLightIntensity(
-            const NormalVertex &normalVertex,
+    [[nodiscard]] double getLightIntensity(
+            const Matrix<4, 1> &normal,
             const Matrix<4, 1> &lightDirection) const override;
 };

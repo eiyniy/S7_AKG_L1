@@ -5,16 +5,16 @@
 #include <iostream>
 
 BaseVertex::BaseVertex(
-        const double _v1,
-        const double _v2,
-        const double _v3,
-        const double _v4)
-        : v1(_v1), v2(_v2), v3(_v3), v4(_v4) {}
+    const double _v1,
+    const double _v2,
+    const double _v3,
+    const double _v4)
+    : v1(_v1), v2(_v2), v3(_v3), v4(_v4) {}
 
-BaseVertex::BaseVertex(const BaseVertex &bv)
-        : v1(bv.v1), v2(bv.v2), v3(bv.v3), v4(bv.v4) {}
+BaseVertex::BaseVertex(const BaseVertex &bv) = default;
 
-BaseVertex &BaseVertex::operator=(const BaseVertex &bv) {
+BaseVertex &BaseVertex::operator=(const BaseVertex &bv)
+{
     if (this == &bv)
         return *this;
 
@@ -26,8 +26,9 @@ BaseVertex &BaseVertex::operator=(const BaseVertex &bv) {
     return *this;
 }
 
-std::array<double, 4> BaseVertex::parse(const std::string &line) {
-    auto entryType = ObjParser::getEntryType(line);
+std::array<double, 4> BaseVertex::parse(const std::string &line)
+{
+    const auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Vertex &&
         entryType != EntryType::TextureVertex &&
         entryType != EntryType::NormalVertex)
@@ -37,12 +38,13 @@ std::array<double, 4> BaseVertex::parse(const std::string &line) {
     auto accumulator = std::array<std::optional<double>, 4>();
 
     auto iter = line.cbegin();
-    auto iterEnd = line.cend();
+    const auto iterEnd = line.cend();
 
     ObjParser::getNextPart(&iter, iterEnd, ' ');
 
     int i = 0;
-    while ((strPart = ObjParser::getNextPart(&iter, line.end(), ' '))) {
+    while ((strPart = ObjParser::getNextPart(&iter, line.end(), ' ')))
+    {
         accumulator[i] = stod(*strPart);
         ++i;
     }
@@ -51,16 +53,17 @@ std::array<double, 4> BaseVertex::parse(const std::string &line) {
         throw std::logic_error("Can't parse value");
 
     auto res = std::array{
-            accumulator[0].value(),
-            accumulator[1].value_or(0),
-            accumulator[2].value_or(0),
-            accumulator[3].value_or(1)};
+        accumulator[0].value(),
+        accumulator[1].value_or(0),
+        accumulator[2].value_or(0),
+        accumulator[3].value_or(1)};
 
     accumulator.fill(std::nullopt);
 
     return res;
 }
 
-void BaseVertex::log() const {
+void BaseVertex::log() const
+{
     std::cout << v1 << ' ' << v2 << ' ' << v3 << ' ' << v4 << std::endl;
 }

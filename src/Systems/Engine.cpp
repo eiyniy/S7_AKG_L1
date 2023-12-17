@@ -12,56 +12,51 @@
 
 Engine::Engine(Scene &_scene, MainWindow &_mainWindow)
         : scene(_scene),
-          mainWindow(_mainWindow),
-          lightingModel(new LambertModel{}) {
+          mainWindow(_mainWindow) {
 //    mainWindow.getWindow().setFramerateLimit(defaultFps);
     draw();
 }
 
 void Engine::start() {
+    auto ts = std::chrono::high_resolution_clock::now();
+    auto te = std::chrono::high_resolution_clock::now();
+
     while (mainWindow.getWindow().isOpen()) {
+//        ts = std::chrono::high_resolution_clock::now();
         handleEvents();
+//        te = std::chrono::high_resolution_clock::now();
+//        const auto inputMs = std::chrono::duration_cast<std::chrono::milliseconds>(te - ts).count();
+
+//        ts = std::chrono::high_resolution_clock::now();
         update();
+//        te = std::chrono::high_resolution_clock::now();
+//        const auto updateMs = std::chrono::duration_cast<std::chrono::milliseconds>(te - ts).count();
+
+//        ts = std::chrono::high_resolution_clock::now();
         draw();
+//        te = std::chrono::high_resolution_clock::now();
+//        const auto drawMs = std::chrono::duration_cast<std::chrono::milliseconds>(te - ts).count();
+
+//        std::cout << "Input time: " << inputMs << " ms" << std::endl;
+//        std::cout << "Update time: " << updateMs << " ms" << std::endl;
+//        std::cout << "Draw time: " << drawMs << " ms" << std::endl;
+//        std::cout << "  calcBarycentric() time: " << Timer::getMcs() / 1000 << " ms" << std::endl;     // 26 ms
+//        std::cout << "  getShadedColor() time: " << Timer::getMcs() / 1000 << " ms" << std::endl;     // 26 ms
+//        std::cout << "  memcpy() time: " << Timer::getMcs() / 1000 << " ms" << std::endl;             // 16 ms
+//        std::cout << "  w step calc time: " << Timer::getMcs() / 1000 << " ms" << std::endl;          // 72 ms
+//        std::cout << "  rasterization cycle time: " << Timer::getMcs() / 1000 << " ms" << std::endl;  // 50 ms
+//        std::cout << "Frame time: " << inputMs + updateMs + drawMs << " ms" << std::endl;
+//        std::cout << std::endl;
+
+//        Timer::reset();
     }
-}
-
-Matrix<4, 1> Engine::getTransition(
-        const AxisName axis,
-        const Direction direction,
-        const double step) {
-    Matrix<4, 1> transition;
-
-    switch (axis) {
-        case AxisName::X:
-            if (direction == Direction::Forward)
-                transition = Matrix<4, 1>(step, 0, 0, 0);
-            else
-                transition = Matrix<4, 1>(-step, 0, 0, 0);
-
-            break;
-        case AxisName::Y:
-            if (direction == Direction::Forward)
-                transition = Matrix<4, 1>(0, step, 0, 0);
-            else
-                transition = Matrix<4, 1>(0, -step, 0, 0);
-
-            break;
-        case AxisName::Z:
-            if (direction == Direction::Forward)
-                transition = Matrix<4, 1>(0, 0, step, 0);
-            else
-                transition = Matrix<4, 1>(0, 0, -step, 0);
-
-            break;
-    }
-
-    return transition;
 }
 
 void Engine::handleEvents() {
     static sf::Event event;
-    mainWindow.getWindow().pollEvent(event);
+    const auto isPooled = mainWindow.getWindow().pollEvent(event);
+
+    if (!isPooled) return;
 
     switch (event.type) {
         case sf::Event::Closed:
@@ -150,7 +145,7 @@ void Engine::sendInputCommand(const sf::Event &event) {
         case sf::Keyboard::F11:
         case sf::Keyboard::Escape:
             commandsQueue.emplace(std::make_unique<SwitchVideoModeCommand>(
-                    scene,
+                    scene.getCamera(),
                     mainWindow,
                     event.key.code == sf::Keyboard::Escape));
             break;
@@ -158,11 +153,13 @@ void Engine::sendInputCommand(const sf::Event &event) {
 }
 
 void Engine::update() {
-    while (!commandsQueue.empty()) {
-        const auto command = std::move(commandsQueue.front());
-        commandsQueue.pop();
-        command->execute();
-    }
+    if (commandsQueue.empty()) return;
+
+//    while (!commandsQueue.empty()) {
+    const auto command = std::move(commandsQueue.front());
+    commandsQueue.pop();
+    command->execute();
+//    }
 }
 
 void Engine::draw() {
@@ -172,17 +169,20 @@ void Engine::draw() {
     //     *scene.getObject(scene.floorObjectName),
     //     scene.getObject(scene.floorObjectName)->getDrawable(scene.cGetCamera()));
 
-    for (auto key: scene.cGetAllObjectNames()) {
-        if (key == scene.floorObjectName)
-            continue;
+    for (const auto &key: scene.cGetAllObjectNames()) {
+        // if (key == scene.floorObjectName)
+            // continue;
 
         auto drawableVertices = scene.getObject(key)->getDrawable(scene.cGetCamera());
+
+        const auto &camera = scene.cGetCamera();
+        auto sightDir = camera.cGetTarget() - camera.cGetPosition();
+        sightDir.normalize();
 
         mainWindow.drawModel(
                 *scene.getObject(key),
                 drawableVertices,
-                lightingModel,
-                scene.cGetLightSource());
+                sightDir);
     }
 
     mainWindow.drawPixels();

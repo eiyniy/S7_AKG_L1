@@ -7,7 +7,7 @@
 
 class BaseLightingModel {
 public:
-    virtual double getLightIntensity(
-            const NormalVertex &normalVertex,
-            const Matrix<4, 1> &lightDirection) const = 0;
+    [[nodiscard]] virtual double getLightIntensity(
+        const Matrix<4, 1> &normal,
+        const Matrix<4, 1> &lightDirection) const = 0;
 };

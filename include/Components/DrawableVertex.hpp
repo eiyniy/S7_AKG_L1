@@ -14,8 +14,12 @@ public:
     DrawableVertex &operator=(const DrawableVertex &drawableVertex);
 
     DrawableVertex(
-            double x, double y, double z,
-            bool isVisible = true, bool isWNegative = false);
+            double _x, double _y, double _z,
+            bool _isVisible = true, bool _isWNegative = false);
+
+    DrawableVertex(
+            int _x, int _y, double _z,
+            bool _isVisible = true, bool _isWNegative = false);
 
     [[nodiscard]] double CGetX() const;
 

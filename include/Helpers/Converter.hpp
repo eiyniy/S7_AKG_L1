@@ -3,7 +3,7 @@
 #include <Vertex.hpp>
 #include <DrawableVertex.hpp>
 #include <Point.hpp>
-#include "NormalVertex.hpp"
+#include <NormalVertex.hpp>
 
 class Converter {
 public:
@@ -22,4 +22,8 @@ public:
             double w);
 
     static Point drawableVertexToPoint(const DrawableVertex &value);
+
+    static Matrix<4, 1> drawableVertexToMatrix(const DrawableVertex &value);
+
+    static Matrix<4, 1> normalVertexToMatrix(const NormalVertex &value);
 };

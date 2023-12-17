@@ -2,7 +2,6 @@
 #include <cmath>
 #include <format>
 #include <Matrix.hpp>
-#include <Converter.hpp>
 
 #pragma region CONSTRUCTION
 
@@ -19,14 +18,14 @@ Matrix<Rows, Cols>::Matrix(
         const double x,
         const double y,
         const double z,
-        const double w)requires(Rows == 4 && Cols == 1) {
+        const double w) requires (Rows == 4 && Cols == 1) {
     getX() = x;
     getY() = y;
     getZ() = z;
     getW() = w;
-};
+}
 
-// TODO: FIX STRORAGE ALLOCATION
+// TODO: FIX STORAGE ALLOCATION
 template<int Rows, int Cols>
 Matrix<Rows, Cols>::Matrix(const Matrix &m) {
     for (int i = 0; i < Rows; ++i) {
@@ -156,7 +155,7 @@ Matrix<Rows, Cols> Matrix<Rows, Cols>::operator/(const double v) const {
 
 template<int Rows, int Cols>
 template<int Rows2, int Cols2>
-Matrix<Rows, Cols2> Matrix<Rows, Cols>::operator*(const Matrix<Rows2, Cols2> &m) const requires(Cols == Rows2) {
+Matrix<Rows, Cols2> Matrix<Rows, Cols>::operator*(const Matrix<Rows2, Cols2> &m) const requires (Cols == Rows2) {
     auto temp = Matrix<Rows, Cols2>();
 
     for (int i = 0; i < Rows; ++i) {
@@ -174,7 +173,7 @@ Matrix<Rows, Cols2> Matrix<Rows, Cols>::operator*(const Matrix<Rows2, Cols2> &m)
 #pragma region FUNCTIONS
 
 template<int Rows, int Cols>
-const double Matrix<Rows, Cols>::scalarMultiply(const Matrix<4, 1> &vector) const requires(Rows == 4 && Cols == 1) {
+double Matrix<Rows, Cols>::scalarMultiply(const Matrix<4, 1> &vector) const requires (Rows == 4 && Cols == 1) {
     double result = 0;
 
     for (int i = 0; i < Rows; ++i)
@@ -184,8 +183,7 @@ const double Matrix<Rows, Cols>::scalarMultiply(const Matrix<4, 1> &vector) cons
 }
 
 template<int Rows, int Cols>
-const Matrix<4, 1>
-Matrix<Rows, Cols>::vectorMultiply(const Matrix<4, 1> &vector) const requires(Rows == 4 && Cols == 1) {
+Matrix<4, 1> Matrix<Rows, Cols>::vectorMultiply(const Matrix<4, 1> &vector) const requires (Rows == 4 && Cols == 1) {
     Matrix<4, 1> temp;
 
     // temp.values[0] = cGetY() * vector.cGetZ() - cGetZ() * vector.cGetY();
@@ -196,13 +194,14 @@ Matrix<Rows, Cols>::vectorMultiply(const Matrix<4, 1> &vector) const requires(Ro
     temp.getValue(0, 0) = (cGetY() * vector.cGetZ()) - (cGetZ() * vector.cGetY());
     temp.getValue(1, 0) = (cGetZ() * vector.cGetX()) - (cGetX() * vector.cGetZ());
     temp.getValue(2, 0) = (cGetX() * vector.cGetY()) - (cGetY() * vector.cGetX());
-    temp.getValue(3, 0) = 1;
+//    temp.getValue(3, 0) = 1;
+    temp.getValue(3, 0) = 0;
 
     return temp;
 }
 
 template<int Rows, int Cols>
-const double Matrix<Rows, Cols>::getLength() const requires(Rows == 4 && Cols == 1) {
+double Matrix<Rows, Cols>::getLength() const requires(Rows == 4 && Cols == 1) {
     if (length.has_value())
         return *length;
 
@@ -285,21 +284,18 @@ Matrix<4, 4> Matrix<Rows, Cols>::getRotateConvert(const AxisName axis, const dou
                     {0, cosA, sinA, 0},
                     {0, -sinA, cosA, 0},
                     {0, 0, 0, 1});
-            break;
         case AxisName::Y:
             return getConvertMatrix(
                     {cosA, 0, -sinA, 0},
                     {0, 1, 0, 0},
                     {sinA, 0, cosA, 0},
                     {0, 0, 0, 1});
-            break;
         case AxisName::Z:
             return getConvertMatrix(
                     {cosA, sinA, 0, 0},
                     {-sinA, cosA, 0, 0},
                     {0, 0, 1, 0},
                     {0, 0, 0, 1});
-            break;
     }
 }
 

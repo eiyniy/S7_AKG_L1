@@ -9,8 +9,10 @@ public:
     ResizeCommand(
             Camera &_camera,
             MainWindow &_mainWindow,
-            const int _width,
-            const int _height);
+            int _width,
+            int _height);
+
+    ~ResizeCommand() override = default;
 
     void execute() override;
 

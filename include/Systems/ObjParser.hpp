@@ -7,10 +7,12 @@
 #include <fstream>
 #include <vector>
 #include <memory>
+#include <Matrix.hpp>
 
-class ObjParser {
+class ObjParser
+{
 public:
-    ObjParser(const std::string &_pathToFile);
+    explicit ObjParser(const std::string &_pathToFile);
 
     std::string readFile();
 
@@ -18,20 +20,28 @@ public:
 
     void parseEntry(const std::string &line);
 
+    std::array<std::optional<double>, 4> parseAcc(const std::string &line);
+
+    Matrix<4, 1> parseVertex(const std::array<std::optional<double>, 4> &acc);
+
+    Matrix<4, 1> parseNVertex(const std::array<std::optional<double>, 4> &acc);
+
+    Matrix<4, 1> parseTVertex(const std::array<std::optional<double>, 4> &acc);
+
     static std::vector<std::string> splitByLines(const std::string &string);
 
     static std::optional<EntryType> getEntryType(const std::string &line);
 
     static std::optional<std::string> getNextPart(
-            std::string::const_iterator *iter,
-            std::string::const_iterator iterEnd,
-            const char divider,
-            const bool allowEmpty = false);
+        std::string::const_iterator *iter,
+        std::string::const_iterator iterEnd,
+        char divider,
+        bool allowEmpty = false);
 
 private:
-    std::vector<Vertex> vertices;
-    std::vector<TextureVertex> tVertices;
-    std::vector<NormalVertex> nVertices;
+    std::vector<Matrix<4, 1>> vertices;
+    std::vector<Matrix<4, 1>> nVertices;
+    std::vector<Matrix<4, 1>> tVertices;
     std::vector<Polygon> polygons;
     std::vector<std::string> polygonStrings;
 

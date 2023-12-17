@@ -3,14 +3,27 @@
 #include <BaseVertex.hpp>
 #include <string>
 
-class NormalVertex : public BaseVertex
-{
+class NormalVertex : public BaseVertex {
 public:
-    NormalVertex(const double i, const double j, const double k);
+    NormalVertex(double i, double j, double k);
 
     static NormalVertex parse(const std::string &line);
 
-    const double getI() const;
-    const double getJ() const;
-    const double getK() const;
+    [[nodiscard]] double cGetI() const;
+
+    [[nodiscard]] double cGetJ() const;
+
+    [[nodiscard]] double cGetK() const;
 };
+
+inline double NormalVertex::cGetI() const {
+    return v1;
+}
+
+inline double NormalVertex::cGetJ() const {
+    return v2;
+}
+
+inline double NormalVertex::cGetK() const {
+    return v3;
+}

@@ -8,23 +8,25 @@
 #include <Polygon.hpp>
 #include <Camera.hpp>
 #include <DrawableVertex.hpp>
+#include <Matrix.hpp>
 
-class Object {
+class Object
+{
 public:
     Object(
-            const std::vector<Vertex> &_vertices,
-            const std::vector<TextureVertex> &_tVertices,
-            const std::vector<NormalVertex> &_nVertices,
-            const std::vector<Polygon> &_polygons,
-            const sf::Color &_color);
+        const std::vector<Matrix<4, 1>> &_vertices,
+        const std::vector<Matrix<4, 1>> &_tVertices,
+        const std::vector<Matrix<4, 1>> &_nVertices,
+        const std::vector<Polygon> &_polygons,
+        const sf::Color &_color);
 
     void move(const Matrix<4, 1> &transition);
 
-    const std::vector<Vertex> &cGetVertices() const;
+    const std::vector<Matrix<4, 1>> &cGetVertices() const;
 
-    const std::vector<TextureVertex> &cGetTVertices() const;
+    const std::vector<Matrix<4, 1>> &cGetTVertices() const;
 
-    const std::vector<NormalVertex> &cGetNVertices() const;
+    const std::vector<Matrix<4, 1>> &cGetNVertices() const;
 
     const std::vector<Polygon> &cGetPolygons() const;
 
@@ -34,36 +36,38 @@ public:
 
     const sf::Color &cGetColor() const;
 
-    const std::vector<DrawableVertex> getDrawable(const Camera &camera);
+    std::vector<DrawableVertex> getDrawable(const Camera &camera);
 
-    const Vertex &getCenter();
+    const Matrix<4, 1> &getCenter();
 
-    const Vertex &getMaxXZ();
+    const Matrix<4, 1> &getMaxXZ();
 
-    const Vertex &getMinXZ();
+    const Matrix<4, 1> &getMinXZ();
 
 private:
     void calcGeometricParams();
 
-    const std::vector<Vertex> vertices;
-    const std::vector<TextureVertex> tVertices;
-    const std::vector<NormalVertex> nVertices;
+    const std::vector<Matrix<4, 1>> vertices;
+    const std::vector<Matrix<4, 1>> nVertices;
+    const std::vector<Matrix<4, 1>> tVertices;
     std::vector<Polygon> polygons;
 
     const sf::Color color;
 
-    std::optional<Vertex> center;
-    std::optional<Vertex> maxXZ, minXZ;
+    std::optional<Matrix<4, 1>> center;
+    std::optional<Matrix<4, 1>> maxXZ, minXZ;
 
     Matrix<4, 1> shift;
 
     std::vector<DrawableVertex> drawable;
 };
 
-inline const Matrix<4, 1> &Object::cGetShift() const {
+inline const Matrix<4, 1> &Object::cGetShift() const
+{
     return shift;
 }
 
-inline const sf::Color &Object::cGetColor() const {
+inline const sf::Color &Object::cGetColor() const
+{
     return color;
 }

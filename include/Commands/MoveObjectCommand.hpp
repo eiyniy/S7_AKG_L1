@@ -7,9 +7,11 @@ class MoveObjectCommand : public MoveCommand {
 public:
     MoveObjectCommand(
             Object &_object,
-            const AxisName _axisName,
-            const Direction _direction,
-            const double _step);
+            AxisName _axisName,
+            Direction _direction,
+            double _step);
+
+    ~MoveObjectCommand() override = default;
 
     void execute() override;
 

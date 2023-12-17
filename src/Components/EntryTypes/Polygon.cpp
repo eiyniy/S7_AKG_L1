@@ -1,12 +1,11 @@
 #include <Polygon.hpp>
 #include <ObjParser.hpp>
 #include <Math.hpp>
-#include <Timer.hpp>
-#include <array>
 #include <EarClipper.hpp>
 
 SValues::SValues(const std::vector<VertexIds> &values)
-        : v4(std::nullopt) {
+    : v4(std::nullopt)
+{
     if (values.size() != 3 && values.size() != 4)
         throw std::logic_error("Invalid argument");
 
@@ -18,51 +17,63 @@ SValues::SValues(const std::vector<VertexIds> &values)
         v4 = values[3];
 }
 
-Polygon::Polygon(const std::vector<VertexIds> &indexes) {
-    vertexIndexesCount = indexes.size();
+Polygon::Polygon(const std::vector<VertexIds> &indexes)
+{
+    vertexIndexesCount = (int)indexes.size();
 
-    if (vertexIndexesCount <= 4) {
+    if (vertexIndexesCount <= 4)
+    {
         storageMode = StorageMode::Static;
         sValues = SValues(indexes);
-    } else {
+    }
+    else
+    {
         storageMode = StorageMode::Dynamic;
         dValues = indexes;
     }
+
+    color = sf::Color(rand() % 255, rand() % 255, rand() % 255);
 }
 
-Polygon Polygon::parse(const std::string &line) {
+Polygon Polygon::parse(const std::string &line)
+{
     const auto accumulator = parseInner(line);
-    return {accumulator};
+    return Polygon{accumulator};
 }
 
-const int Polygon::cGetVertexIdsCount() const {
+int Polygon::cGetVertexIdsCount() const
+{
     return vertexIndexesCount;
 }
 
-const VertexIds &Polygon::cGetVertexIds(const int i) const {
-    switch (storageMode) {
-        case StorageMode::Static:
-            switch (i) {
-                case 0:
-                    return sValues->v1;
-                case 1:
-                    return sValues->v2;
-                case 2:
-                    return sValues->v3;
-                case 3:
-                    if (!sValues->v4.has_value())
-                        throw std::invalid_argument("Could not get VertexIds");
+const VertexIds &Polygon::cGetVertexIds(const int i) const
+{
+    switch (storageMode)
+    {
+    case StorageMode::Static:
+        switch (i)
+        {
+        case 0:
+            return sValues->v1;
+        case 1:
+            return sValues->v2;
+        case 2:
+            return sValues->v3;
+        case 3:
+            if (!sValues->v4.has_value())
+                throw std::invalid_argument("Could not get VertexIds");
 
-                    return *sValues->v4;
-                default:
-                    throw std::invalid_argument("Could not get VertexIds");
-            }
-        case StorageMode::Dynamic:
-            return dValues->at(i);
+            return *sValues->v4;
+        default:
+            throw std::invalid_argument("Could not get VertexIds");
+        }
+    case StorageMode::Dynamic:
+        return dValues->at(i);
     }
 }
 
-void Polygon::moveValuesToDynamic() {
+void Polygon::moveValuesToDynamic()
+{
     if (!sValues.has_value())
         throw std::logic_error("Could not store polygon");
 
@@ -77,13 +88,35 @@ void Polygon::moveValuesToDynamic() {
 }
 
 std::vector<Polygon> Polygon::parseAndTriangulate(
-        const std::string &line,
-        const std::vector<Vertex> &vertices) {
+    const std::string &line,
+    const std::vector<Matrix<4, 1>> &vertices)
+{
     const auto accumulator = parseInner(line);
     return EarClipper::triangulate(accumulator, vertices);
 }
 
-std::vector<VertexIds> Polygon::parseInner(const std::string &line) {
+const Matrix<4, 1> &Polygon::getNormal(const std::vector<Matrix<4, 1>> &vertices)
+{
+    if (!normal.has_value())
+    {
+        const auto &a = vertices.at(cGetVertexIds(0).cGetVertexId() - 1);
+        const auto &b = vertices.at(cGetVertexIds(1).cGetVertexId() - 1);
+        const auto &c = vertices.at(cGetVertexIds(2).cGetVertexId() - 1);
+
+        const auto v0 = b - a;
+        const auto v1 = c - a;
+
+        auto tNormal = v0.vectorMultiply(v1);
+        tNormal.normalize();
+
+        normal = tNormal;
+    }
+
+    return *normal;
+}
+
+std::vector<VertexIds> Polygon::parseInner(const std::string &line)
+{
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Polygon)
         throw std::logic_error("Could not parse value");
@@ -97,7 +130,8 @@ std::vector<VertexIds> Polygon::parseInner(const std::string &line) {
     ObjParser::getNextPart(&iter, iterEnd, ' ');
 
     int i = 0;
-    while (auto strPart = ObjParser::getNextPart(&iter, iterEnd, ' ')) {
+    while (auto strPart = ObjParser::getNextPart(&iter, iterEnd, ' '))
+    {
         accumulator.emplace_back(VertexIds::parse(*strPart));
         ++i;
     }
