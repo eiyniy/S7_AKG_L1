@@ -30,10 +30,11 @@ message(STATUS "[INFO] Found ${header_dir_list_count} header directories.")
 
 set(SFML_STATIC_LIBRARIES TRUE)
 find_package(SFML 2.6 COMPONENTS system window graphics REQUIRED)
-
 include_directories(${SFML_INCLUDE_DIRS})
+
+find_package(OpenMP)
 
 add_executable(${LOCAL_PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${LOCAL_PROJECT_NAME} PRIVATE sfml-system sfml-window sfml-graphics)
+target_link_libraries(${LOCAL_PROJECT_NAME} PRIVATE sfml-system sfml-window sfml-graphics PUBLIC OpenMP::OpenMP_CXX)
 target_include_directories(${LOCAL_PROJECT_NAME} PRIVATE ${header_dir_list})

@@ -36,7 +36,9 @@ public:
 
     const sf::Color &cGetColor() const;
 
-    std::vector<DrawableVertex> getDrawable(const Camera &camera);
+    void convertToDrawable(const Camera &camera);
+
+    const std::vector<DrawableVertex> &cGetDrawable();
 
     const Matrix<4, 1> &getCenter();
 
@@ -70,4 +72,34 @@ inline const Matrix<4, 1> &Object::cGetShift() const
 inline const sf::Color &Object::cGetColor() const
 {
     return color;
+}
+
+inline const std::vector<DrawableVertex> &Object::cGetDrawable()
+{
+    return drawable;
+}
+
+inline const std::vector<Matrix<4, 1>> &Object::cGetVertices() const
+{
+    return vertices;
+}
+
+inline const std::vector<Matrix<4, 1>> &Object::cGetTVertices() const
+{
+    return tVertices;
+}
+
+inline const std::vector<Matrix<4, 1>> &Object::cGetNVertices() const
+{
+    return nVertices;
+}
+
+inline const std::vector<Polygon> &Object::cGetPolygons() const
+{
+    return polygons;
+}
+
+inline std::vector<Polygon> &Object::getPolygons()
+{
+    return polygons;
 }

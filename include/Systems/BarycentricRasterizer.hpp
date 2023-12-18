@@ -10,6 +10,7 @@
 #include <NormalVertex.hpp>
 #include <BaseLightSource.hpp>
 #include <Timer.hpp>
+#include <omp.h>
 
 class BarycentricRasterizer
 {
@@ -18,9 +19,10 @@ public:
         const BaseLightingModel *_lightingModel,
         const BaseLightSource *_lightSource,
         ShadingModel _shadingModel,
-        int _xSize,
+        const Point &_resolution,
         void (*_drawPixel)(sf::Uint8 *, const int, const sf::Color *),
         sf::Uint8 *_pixels,
+        omp_lock_t *_pixelLocks,
         double *_depthBuffer);
 
     void rasterize(
@@ -34,7 +36,7 @@ private:
     const BaseLightSource *lightSource;
     const ShadingModel shadingModel;
 
-    const int xSize;
+    const Point &resolution;
 
     void (*drawPixel)(
         sf::Uint8 *pixels,
@@ -42,6 +44,7 @@ private:
         const sf::Color *color);
 
     sf::Uint8 *pixels;
+    omp_lock_t *pixelLocks;
     double *depthBuffer;
 
     static std::pair<Point, Point> findWindowingRectangle(
@@ -115,7 +118,7 @@ inline void BarycentricRasterizer::calcBarycentric(
 
     w0 = (d11 * d20 - d01 * d21) / denom;
     w1 = (d00 * d21 - d01 * d20) / denom;
-    w2 = 1.0f - w0 - w1;
+    w2 = 1.f - w0 - w1;
 }
 
 inline void BarycentricRasterizer::calcBarycentric(
@@ -141,13 +144,9 @@ inline void BarycentricRasterizer::calcBarycentric(
     const double invDen,
     double &w0, double &w1, double &w2)
 {
-    //    Timer::start();
-
     const DrawableVertex v2{p.CGetX() - a.CGetX(), p.CGetY() - a.CGetY(), 0};
 
     w1 = (v2.CGetX() * v1.CGetY() - v1.CGetX() * v2.CGetY()) * invDen;
     w2 = (v0.CGetX() * v2.CGetY() - v2.CGetX() * v0.CGetY()) * invDen;
     w0 = 1 - w2 - w1;
-
-    //    Timer::stop();
 }

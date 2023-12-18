@@ -31,7 +31,7 @@ void Object::move(const Matrix<4, 1> &transition)
     shift += transition;
 }
 
-std::vector<DrawableVertex> Object::getDrawable(const Camera &camera)
+void Object::convertToDrawable(const Camera &camera)
 {
     const auto convertMatrix =
         Matrix<4, 4>::getProjectionConvert(camera.cGetFOV(), camera.cGetAspect(), 2000, 0.1) *
@@ -69,36 +69,10 @@ std::vector<DrawableVertex> Object::getDrawable(const Camera &camera)
     */
 
     // /*
+    #pragma omp parallel for
     for (int j = 0; j < vertices.size(); ++j)
         drawable[j] = convertVertex(vertices[j], convertMatrix, viewportConvert);
     // */
-
-    return drawable;
-}
-
-const std::vector<Matrix<4, 1>> &Object::cGetVertices() const
-{
-    return vertices;
-}
-
-const std::vector<Matrix<4, 1>> &Object::cGetTVertices() const
-{
-    return tVertices;
-}
-
-const std::vector<Matrix<4, 1>> &Object::cGetNVertices() const
-{
-    return nVertices;
-}
-
-const std::vector<Polygon> &Object::cGetPolygons() const
-{
-    return polygons;
-}
-
-std::vector<Polygon> &Object::getPolygons()
-{
-    return polygons;
 }
 
 void Object::calcGeometricParams()
@@ -167,16 +141,12 @@ DrawableVertex convertVertex(
     const Matrix<4, 4> &toProjectionConvert,
     const Matrix<4, 4> &viewportConvert)
 {
-    bool isVisible = true;
     bool isWNegative = false;
 
     auto vertexCopy = toProjectionConvert * vertex;
 
     if (vertexCopy.cGetW() <= 0)
-    {
-        isVisible = false;
         isWNegative = true;
-    }
 
     const auto w = vertexCopy.cGetW();
     vertexCopy /= w;
@@ -188,5 +158,5 @@ DrawableVertex convertVertex(
 
     vertexCopy = viewportConvert * vertexCopy;
 
-    return Converter::matrixToDrawableVertex(vertexCopy, w, isVisible, isWNegative);
+    return Converter::matrixToDrawableVertex(vertexCopy, w, isWNegative);
 }

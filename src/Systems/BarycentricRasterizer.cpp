@@ -6,16 +6,18 @@ BarycentricRasterizer::BarycentricRasterizer(
     const BaseLightingModel *_lightingModel,
     const BaseLightSource *_lightSource,
     const ShadingModel _shadingModel,
-    const int _xSize,
+    const Point &_resolution,
     void (*_drawPixel)(sf::Uint8 *pixels, const int, const sf::Color *),
     sf::Uint8 *_pixels,
+    omp_lock_t *_pixelLocks,
     double *_depthBuffer)
     : lightingModel(_lightingModel),
       lightSource(_lightSource),
       shadingModel(_shadingModel),
-      xSize(_xSize),
+      resolution(_resolution),
       drawPixel(_drawPixel),
       pixels(_pixels),
+      pixelLocks(_pixelLocks),
       depthBuffer(_depthBuffer) {}
 
 void BarycentricRasterizer::rasterize(
@@ -40,10 +42,16 @@ void BarycentricRasterizer::rasterize(
     const auto invCZ = 1 / c.CGetZ();
 
     const auto windowingRectangle = findWindowingRectangle(polygon, drawableVertices);
-    const int minX = windowingRectangle.first.cGetX();
-    const int minY = windowingRectangle.first.cGetY();
-    const int maxX = windowingRectangle.second.cGetX();
-    const int maxY = windowingRectangle.second.cGetY();
+
+    // const int minX = windowingRectangle.first.cGetX();
+    // const int minY = windowingRectangle.first.cGetY();
+    // const int maxX = windowingRectangle.second.cGetX();
+    // const int maxY = windowingRectangle.second.cGetY();
+
+    const int minX = std::max(windowingRectangle.first.cGetX(), 0);
+    const int minY = std::max(windowingRectangle.first.cGetY(), 0);
+    const int maxX = std::min(windowingRectangle.second.cGetX(), resolution.cGetX() - 1);
+    const int maxY = std::min(windowingRectangle.second.cGetY(), resolution.cGetY() - 1);
 
     //    /*
     //    const Matrix<4, 1> minMinVertex{(double) minX, (double) minY, 0};
@@ -112,13 +120,16 @@ void BarycentricRasterizer::rasterize(
     // std::cout << "w0YStep: " << w0YStep << ", w1YStep: " << w1YStep << ", w2YStep: " << w2YStep << std::endl;
     // std::cout << std::endl;
 
-    const auto shadedColor = getShadedColor(
-        color,
-        polygon,
-        vertices,
-        lightSource->getLightDirection({0, 0, 0}),
-        shadingModel,
-        lightingModel);
+    sf::Color shadedColor{};
+
+    if (shadingModel == ShadingModel::Flat)
+        shadedColor = getShadedColor(
+            color,
+            polygon,
+            vertices,
+            lightSource->getLightDirection({0, 0, 0}),
+            shadingModel,
+            lightingModel);
 
     //    */
     for (int i = minY; i <= maxY; ++i, w0 += w0YStep, w1 += w1YStep, w2 += w2YStep)
@@ -132,15 +143,25 @@ void BarycentricRasterizer::rasterize(
 
             // const auto z = a.CGetZ() * w0 + b.CGetZ() * w1 + c.CGetZ() * w2;
             const auto z = 1 / (invAZ * w0 + invBZ * w1 + invCZ * w2);
-            const auto matrixPos = i * xSize + j;
+            const auto matrixPos = i * resolution.cGetX() + j;
 
-            if (z >= depthBuffer[matrixPos])
-                continue;
+            auto oldZ = depthBuffer[matrixPos];
+            if (z < oldZ)
+            {
+                omp_set_lock(&pixelLocks[matrixPos]);
 
-            depthBuffer[matrixPos] = z;
-            // drawPixel(pixels, matrixPos, &polygon.color);
-            drawPixel(pixels, matrixPos, &shadedColor);
-            // drawPixel(pixels, matrixPos, &color);
+                oldZ = depthBuffer[matrixPos];
+                if (z < oldZ)
+                {
+                    depthBuffer[matrixPos] = z;
+
+                    // drawPixel(pixels, matrixPos, &polygon.color);
+                    drawPixel(pixels, matrixPos, &shadedColor);
+                    // drawPixel(pixels, matrixPos, &color);
+                }
+
+                omp_unset_lock(&pixelLocks[matrixPos]);
+            }
         }
     }
 }

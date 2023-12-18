@@ -14,7 +14,6 @@ public:
     static DrawableVertex matrixToDrawableVertex(
             const Matrix<4, 1> &value,
             double w,
-            bool isVisible,
             bool isWNegative);
 
     static Vertex matrixToVertex(

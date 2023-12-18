@@ -21,12 +21,12 @@ void SHClipper::clipByEdge(
         const Point &edgeP1, const Point &edgeP2) {
     const int polygonSize = polygon.cGetVertexIdsCount();
 
-    bool allVisible = true;
-    for (int i = 0; i < polygonSize; ++i)
-        allVisible &= vertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1).IsVisible();
+    // bool allVisible = true;
+    // for (int i = 0; i < polygonSize; ++i)
+        // allVisible &= vertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1).IsVisible();
 
-    if (allVisible)
-        return;
+    // if (allVisible)
+        // return;
 
     std::vector<VertexIds> newVertexIds;
     newVertexIds.reserve(polygonSize);
@@ -34,8 +34,8 @@ void SHClipper::clipByEdge(
     for (int i = 0; i < polygonSize; ++i) {
         const int k = (i + 1) % polygonSize;
 
-        const auto vertex1 = vertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1);
-        const auto vertex2 = vertices.at(polygon.cGetVertexIds(k).cGetVertexId() - 1);
+        const auto &vertex1 = vertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1);
+        const auto &vertex2 = vertices.at(polygon.cGetVertexIds(k).cGetVertexId() - 1);
 
         const auto point1 = Converter::drawableVertexToPoint(vertex1);
         const auto point2 = Converter::drawableVertexToPoint(vertex2);

@@ -34,6 +34,7 @@ public:
         const std::vector<Matrix<4, 1>> &vertices);
 
     const Matrix<4, 1> &getNormal(const std::vector<Matrix<4, 1>> &vertices);
+    const Matrix<4, 1> &getCenter(const std::vector<Matrix<4, 1>> &vertices);
 
     [[nodiscard]] int cGetVertexIdsCount() const;
 
@@ -47,6 +48,7 @@ private:
     std::optional<SValues> sValues;
 
     std::optional<Matrix<4, 1>> normal;
+    std::optional<Matrix<4, 1>> center;
 
     void moveValuesToDynamic();
 

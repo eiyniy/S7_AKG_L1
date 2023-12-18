@@ -21,9 +21,7 @@ std::vector<Polygon> EarClipper::triangulate(std::vector<std::pair<Matrix<4, 1>,
     std::vector<Polygon> result;
 
     while (polygonVertices.size() >= 3)
-    {
         result.emplace_back(clipEar(polygonVertices));
-    }
 
     return result;
 }

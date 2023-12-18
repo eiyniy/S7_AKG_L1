@@ -78,6 +78,9 @@ std::optional<std::string> ObjParser::getNextPart(
 
 Object *ObjParser::parseEntries(const std::string &fileContent)
 {
+    // #pragma omp declare reduction(mergeMatrices : std::vector<Matrix<4, 1>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
+    // #pragma omp declare reduction(mergeStrings : std::vector<std::string> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
+
     const auto timeStart = std::chrono::high_resolution_clock::now();
 
     const auto lines = splitByLines(fileContent);
@@ -107,16 +110,21 @@ Object *ObjParser::parseEntries(const std::string &fileContent)
     */
 
     // /*
+    // #pragma omp parallel for reduction(mergeMatrices : vertices) reduction(mergeMatrices : tVertices) reduction(mergeMatrices : nVertices) reduction(mergeStrings : polygonStrings)
+    // #pragma omp parallel for
     for (const auto &line : lines)
         parseEntry(line);
     // */
 
+    Timer::start();
+    // #pragma omp parallel for
     for (const auto &line : polygonStrings)
     {
         const auto triangulated = Polygon::parseAndTriangulate(line, vertices);
         for (const auto &polygon : triangulated)
             polygons.emplace_back(polygon);
     }
+    Timer::stop();
 
     const auto timeEnd = std::chrono::high_resolution_clock::now();
     auto parseTime = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count();
@@ -143,17 +151,37 @@ void ObjParser::parseEntry(const std::string &line)
     switch (*type)
     {
     case EntryType::Polygon:
+    {
+        // #pragma omp critical(polygons)
+        // {
         polygonStrings.emplace_back(line);
+        // }
         break;
+    }
     case EntryType::Vertex:
+    {
+        // #pragma omp critical(vertices)
+        // {
         vertices.emplace_back(parseVertex(acc));
+        // }
         break;
+    }
     case EntryType::NormalVertex:
+    {
+        // #pragma omp critical(nVertices)
+        // {
         nVertices.emplace_back(parseNVertex(acc));
+        // }
         break;
+    }
     case EntryType::TextureVertex:
+    {
+        // #pragma omp critical(tVertices)
+        // {
         tVertices.emplace_back(parseTVertex(acc));
+        // }
         break;
+    }
     }
 }
 

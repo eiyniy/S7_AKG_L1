@@ -19,17 +19,22 @@ MainWindow::MainWindow(
       resolution(_resolution),
       lastResolution{1280, 720},
       pixels(new sf::Uint8[resolution.cGetX() * resolution.cGetY() * 4]),
+      pixelLocks(new omp_lock_t[resolution.cGetX() * resolution.cGetY()]),
       depthBuffer(new double[resolution.cGetX() * resolution.cGetY()]),
       rasterizer(BarycentricRasterizer{
           _lightingModel,
           _lightSource,
           _shadingModel,
-          _resolution.cGetX(),
+          _resolution,
           &drawPixel,
           pixels,
+          pixelLocks,
           depthBuffer})
 {
     std::fill(depthBuffer, depthBuffer + resolution.cGetX() * resolution.cGetY(), INT_MAX);
+
+    for (int i = 0; i < resolution.cGetX() * resolution.cGetY(); ++i)
+        omp_init_lock(&pixelLocks[i]);
 
     bufferTexture.create(resolution.cGetX(), resolution.cGetY());
     bufferSprite.setTexture(bufferTexture, true);
@@ -37,11 +42,10 @@ MainWindow::MainWindow(
 
 void MainWindow::drawModel(
     Object &objInfo,
-    std::vector<DrawableVertex> &viewportVertices,
-    const Matrix<4, 1> &sightDir)
+    const Matrix<4, 1> cameraPosition)
 {
     const auto color = &objInfo.cGetColor();
-    auto polygons = objInfo.getPolygons();
+    auto &polygons = objInfo.getPolygons();
 
     /*
     // const int threadsCount = (unsigned int)ceil(polygons.size() / 10000.f);
@@ -72,19 +76,31 @@ void MainWindow::drawModel(
     ThreadPool::getInstance().waitAll();
     */
     //    /*
+    // int backwardClippedCount{};
+
+#pragma omp parallel for
     for (int j = 0; j < polygons.size(); ++j)
     {
+        const auto sightDir = polygons[j].getCenter(objInfo.cGetVertices()) - cameraPosition;
+
         // std::cout << "Polygon: " << j << std::endl;
-
         if (!isPolygonFrontOriented(polygons[j], objInfo.cGetVertices(), sightDir))
+        {
+            // #pragma omp atomic
+            // ++backwardClippedCount;
             continue;
+        }
 
+        // Timer::start();
         drawPolygon(
             polygons[j],
             objInfo.cGetVertices(),
-            viewportVertices,
+            objInfo.cGetDrawable(),
             color);
+        // Timer::stop();
     }
+
+    // std::cout << "backwardClippedCount: " << backwardClippedCount << std::endl;
 
     // std::cout << std::endl;
 
@@ -183,10 +199,10 @@ void MainWindow::drawPolygon(
 {
     auto vIndexesCount = polygon.cGetVertexIdsCount();
     //    /*
-    bool isPolygonVisible = false;
+    bool isPolygonVisible = true;
 
     for (int i = 0; i < vIndexesCount; ++i)
-        isPolygonVisible |= drawableVertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1).IsVisible();
+        isPolygonVisible &= !drawableVertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1).IsWNegative();
 
     if (!isPolygonVisible)
         return;

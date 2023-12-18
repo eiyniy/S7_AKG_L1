@@ -10,6 +10,7 @@
 #include <BaseLightSource.hpp>
 #include <BarycentricRasterizer.hpp>
 #include <Enums.hpp>
+#include <omp.h>
 
 class MainWindow
 {
@@ -30,8 +31,7 @@ public:
 
     void drawModel(
         Object &objInfo,
-        std::vector<DrawableVertex> &viewportVertices,
-        const Matrix<4, 1> &sightDir);
+        const Matrix<4, 1> cameraPosition);
 
     sf::RenderWindow &getWindow();
 
@@ -65,7 +65,7 @@ private:
     Point lastResolution;
 
     sf::Uint8 *pixels;
-    std::mutex pixelsMutex;
+    omp_lock_t *pixelLocks;
 
     double *depthBuffer;
 
