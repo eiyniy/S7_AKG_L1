@@ -36,5 +36,6 @@ enum class SceneMatrixConvert {
 };
 
 enum ShadingModel {
-    Flat
+    Flat,
+    Fong
 };

@@ -8,5 +8,5 @@ CentralizeCameraCommand::CentralizeCameraCommand(
           object(_object) {}
 
 void CentralizeCameraCommand::execute() {
-    camera.setTarget(object.getCenter() + object.cGetShift());
+    camera.setTarget(object.getCenter());
 }

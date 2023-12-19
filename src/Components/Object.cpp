@@ -20,56 +20,37 @@ Object::Object(
       vertices(_vertices),
       tVertices(_tVertices),
       nVertices(_nVertices),
-      polygons(_polygons),
-      shift({0, 0, 0, 1})
+      polygons(_polygons)
 {
     drawable = std::vector<DrawableVertex>(vertices.size());
 }
 
 void Object::move(const Matrix<4, 1> &transition)
 {
-    shift += transition;
+    const auto moveConvert = Matrix<4, 4>::getMoveConvert(transition);
+
+    vertices[0].log();
+
+    // #pragma omp parallel for
+    for (int j = 0; j < vertices.size(); ++j)
+        vertices[j] = moveConvert * vertices[j];
+
+    vertices[0].log();
+    std::cout << std::endl;
 }
 
 void Object::convertToDrawable(const Camera &camera)
 {
     const auto convertMatrix =
         Matrix<4, 4>::getProjectionConvert(camera.cGetFOV(), camera.cGetAspect(), 2000, 0.1) *
-        Matrix<4, 4>::getViewConvert(camera.cGetPosition(), camera.cGetTarget(), camera.cGetUp()) *
-        Matrix<4, 4>::getMoveConvert(shift);
+        Matrix<4, 4>::getViewConvert(camera.cGetPosition(), camera.cGetTarget(), camera.cGetUp());
 
     const auto &resolution = camera.cGetResolution();
     const auto viewportConvert = Matrix<4, 4>::getViewportConvert(
         resolution.cGetX(), resolution.cGetY(), 0, 0);
 
-    /*
-    // const int threadsCount = (unsigned int)ceil(polygons.size() / 10000.f);
-    const int threadsCount = (int)std::min(
-        (unsigned int)std::ceil((float)vertices.size() / 10000.f),
-        ThreadPool::getInstance().getThreadsCount());
-    const double size = (double)vertices.size() / (double)threadsCount;
-
-    for (int i = 0; i < threadsCount; ++i)
-    {
-        const int begin = (int)std::floor(size * i);
-        const int end = (int)std::floor(size * (i + 1)) - 1;
-
-        ThreadPool::getInstance().enqueue(
-            [begin, end, &convertMatrix, &viewportConvert,
-             thisDrawable = &this->drawable,
-             thisVertices = &this->vertices]()
-            {
-                for (int j = begin; j <= end; ++j)
-                    thisDrawable->at(j) = convertVertex(
-                        thisVertices->at(j), convertMatrix, viewportConvert);
-            });
-    }
-
-    ThreadPool::getInstance().waitAll();
-    */
-
     // /*
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for (int j = 0; j < vertices.size(); ++j)
         drawable[j] = convertVertex(vertices[j], convertMatrix, viewportConvert);
     // */
@@ -114,24 +95,24 @@ void Object::calcGeometricParams()
 
 const Matrix<4, 1> &Object::getCenter()
 {
-    if (!center.has_value())
-        calcGeometricParams();
+    // if (!center.has_value())
+    calcGeometricParams();
 
     return *center;
 }
 
 const Matrix<4, 1> &Object::getMaxXZ()
 {
-    if (!maxXZ.has_value())
-        calcGeometricParams();
+    // if (!maxXZ.has_value())
+    calcGeometricParams();
 
     return *maxXZ;
 }
 
 const Matrix<4, 1> &Object::getMinXZ()
 {
-    if (!minXZ.has_value())
-        calcGeometricParams();
+    // if (!minXZ.has_value())
+    calcGeometricParams();
 
     return *minXZ;
 }

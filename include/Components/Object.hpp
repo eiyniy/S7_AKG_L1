@@ -32,8 +32,6 @@ public:
 
     std::vector<Polygon> &getPolygons();
 
-    const Matrix<4, 1> &cGetShift() const;
-
     const sf::Color &cGetColor() const;
 
     void convertToDrawable(const Camera &camera);
@@ -49,7 +47,7 @@ public:
 private:
     void calcGeometricParams();
 
-    const std::vector<Matrix<4, 1>> vertices;
+    std::vector<Matrix<4, 1>> vertices;
     const std::vector<Matrix<4, 1>> nVertices;
     const std::vector<Matrix<4, 1>> tVertices;
     std::vector<Polygon> polygons;
@@ -59,15 +57,8 @@ private:
     std::optional<Matrix<4, 1>> center;
     std::optional<Matrix<4, 1>> maxXZ, minXZ;
 
-    Matrix<4, 1> shift;
-
     std::vector<DrawableVertex> drawable;
 };
-
-inline const Matrix<4, 1> &Object::cGetShift() const
-{
-    return shift;
-}
 
 inline const sf::Color &Object::cGetColor() const
 {

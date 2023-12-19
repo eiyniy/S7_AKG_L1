@@ -22,24 +22,34 @@ BarycentricRasterizer::BarycentricRasterizer(
 
 void BarycentricRasterizer::rasterize(
     Polygon &polygon,
+    const Matrix<4, 1> &sightDir,
     const std::vector<Matrix<4, 1>> &vertices,
+    const std::vector<Matrix<4, 1>> &nVertices,
     const std::vector<DrawableVertex> &drawableVertices,
     const sf::Color &color)
 {
-    const auto &a = drawableVertices.at(polygon.cGetVertexIds(0).cGetVertexId() - 1);
-    const auto &b = drawableVertices.at(polygon.cGetVertexIds(1).cGetVertexId() - 1);
-    const auto &c = drawableVertices.at(polygon.cGetVertexIds(2).cGetVertexId() - 1);
+    const auto vId0 = polygon.cGetVertexIds(0).cGetVertexId();
+    const auto vId1 = polygon.cGetVertexIds(1).cGetVertexId();
+    const auto vId2 = polygon.cGetVertexIds(2).cGetVertexId();
 
-    // const auto area = edgeFunction(a, b, c);
+    const auto &aDrawable = drawableVertices.at(vId0 - 1);
+    const auto &bDrawable = drawableVertices.at(vId1 - 1);
+    const auto &cDrawable = drawableVertices.at(vId2 - 1);
+
+    const auto a = vertices.at(vId0 - 1);
+    const auto b = vertices.at(vId1 - 1);
+    const auto c = vertices.at(vId2 - 1);
+
+    // const auto area = edgeFunction(aDrawable, bDrawable, cDrawable);
     // if (area == 0)
     //     return;
     // const auto invArea = 1 / area;
 
-    // std::cout << a.CGetZ() << " " << b.CGetZ() << " " << c.CGetZ() << std::endl;
+    // std::cout << aDrawable.CGetZ() << " " << bDrawable.CGetZ() << " " << cDrawable.CGetZ() << std::endl;
 
-    const auto invAZ = 1 / a.CGetZ();
-    const auto invBZ = 1 / b.CGetZ();
-    const auto invCZ = 1 / c.CGetZ();
+    const auto invAZ = 1 / aDrawable.CGetZ();
+    const auto invBZ = 1 / bDrawable.CGetZ();
+    const auto invCZ = 1 / cDrawable.CGetZ();
 
     const auto windowingRectangle = findWindowingRectangle(polygon, drawableVertices);
 
@@ -65,38 +75,38 @@ void BarycentricRasterizer::rasterize(
     //    const auto v0 = bMatrix - aMatrix;
     //    const auto v1 = cMatrix - aMatrix;
 
-    const DrawableVertex v0{b.CGetX() - a.CGetX(), b.CGetY() - a.CGetY(), 0};
-    const DrawableVertex v1{c.CGetX() - a.CGetX(), c.CGetY() - a.CGetY(), 0};
+    const DrawableVertex v0{bDrawable.CGetX() - aDrawable.CGetX(), bDrawable.CGetY() - aDrawable.CGetY(), 0};
+    const DrawableVertex v1{cDrawable.CGetX() - aDrawable.CGetX(), cDrawable.CGetY() - aDrawable.CGetY(), 0};
 
     const auto invDen = 1 / (v0.CGetX() * v1.CGetY() - v1.CGetX() * v0.CGetY());
 
     double w0, w1, w2;
 
-    // w0 = edgeFunction(b, c, minMinVertex) * invArea;
-    // w1 = edgeFunction(c, a, minMinVertex) * invArea;
+    // w0 = edgeFunction(bDrawable, cDrawable, minMinVertex) * invArea;
+    // w1 = edgeFunction(cDrawable, aDrawable, minMinVertex) * invArea;
     // w2 = 1 - w0 - w1;
 
-    calcBarycentric(minMinVertex, a, v0, v1, invDen, w0, w1, w2);
+    calcBarycentric(minMinVertex, aDrawable, v0, v1, invDen, w0, w1, w2);
     //    calcBarycentric(minMinVertex, aMatrix, v0, v1, invDen, w0, w1, w2);
     //    calcBarycentric(minMinVertex, aMatrix, bMatrix, cMatrix, w0, w1, w2);
 
     double w0XLast, w1XLast, w2XLast;
 
-    // w0XLast = edgeFunction(b, c, maxMinVertex) * invArea;
-    // w1XLast = edgeFunction(c, a, maxMinVertex) * invArea;
+    // w0XLast = edgeFunction(bDrawable, cDrawable, maxMinVertex) * invArea;
+    // w1XLast = edgeFunction(cDrawable, aDrawable, maxMinVertex) * invArea;
     // w2XLast = 1 - w0XLast - w1XLast;
 
-    calcBarycentric(maxMinVertex, a, v0, v1, invDen, w0XLast, w1XLast, w2XLast);
+    calcBarycentric(maxMinVertex, aDrawable, v0, v1, invDen, w0XLast, w1XLast, w2XLast);
     //    calcBarycentric(maxMinVertex, aMatrix, v0, v1, invDen, w0XLast, w1XLast, w2XLast);
     //    calcBarycentric(maxMinVertex, aMatrix, bMatrix, cMatrix, w0XLast, w1XLast, w2XLast);
 
     double w0YLast, w1YLast, w2YLast;
 
-    // w0YLast = edgeFunction(b, c, minMaxVertex) * invArea;
-    // w1YLast = edgeFunction(c, a, minMaxVertex) * invArea;
+    // w0YLast = edgeFunction(bDrawable, cDrawable, minMaxVertex) * invArea;
+    // w1YLast = edgeFunction(cDrawable, aDrawable, minMaxVertex) * invArea;
     // w2YLast = 1 - w0YLast - w1YLast;
 
-    calcBarycentric(minMaxVertex, a, v0, v1, invDen, w0YLast, w1YLast, w2YLast);
+    calcBarycentric(minMaxVertex, aDrawable, v0, v1, invDen, w0YLast, w1YLast, w2YLast);
     //    calcBarycentric(minMaxVertex, aMatrix, v0, v1, invDen, w0YLast, w1YLast, w2YLast);
     //    calcBarycentric(minMaxVertex, aMatrix, bMatrix, cMatrix, w0YLast, w1YLast, w2YLast);
 
@@ -120,13 +130,16 @@ void BarycentricRasterizer::rasterize(
     // std::cout << "w0YStep: " << w0YStep << ", w1YStep: " << w1YStep << ", w2YStep: " << w2YStep << std::endl;
     // std::cout << std::endl;
 
-    sf::Color shadedColor{};
+    sf::Color shadedColor;
 
     if (shadingModel == ShadingModel::Flat)
         shadedColor = getShadedColor(
             color,
             polygon,
+            sightDir,
+            w0, w1, w2,
             vertices,
+            nVertices,
             lightSource->getLightDirection({0, 0, 0}),
             shadingModel,
             lightingModel);
@@ -136,12 +149,12 @@ void BarycentricRasterizer::rasterize(
     {
         for (int j = minX; j <= maxX; ++j, w0 += w0XStep, w1 += w1XStep, w2 += w2XStep)
         {
-            // calcBarycentric({j, i, 0}, a, v0, v1, invDen, w0, w1, w2);
+            // calcBarycentric({j, i, 0}, aDrawable, v0, v1, invDen, w0, w1, w2);
 
             if (w0 < 0 || w1 < 0 || w2 < 0)
                 continue;
 
-            // const auto z = a.CGetZ() * w0 + b.CGetZ() * w1 + c.CGetZ() * w2;
+            // const auto z = aDrawable.CGetZ() * w0 + bDrawable.CGetZ() * w1 + cDrawable.CGetZ() * w2;
             const auto z = 1 / (invAZ * w0 + invBZ * w1 + invCZ * w2);
             const auto matrixPos = i * resolution.cGetX() + j;
 
@@ -154,6 +167,22 @@ void BarycentricRasterizer::rasterize(
                 if (z < oldZ)
                 {
                     depthBuffer[matrixPos] = z;
+
+                    if (shadingModel == ShadingModel::Fong)
+                    {
+                        const auto p = a * w0 + b * w1 + c * w2;
+
+                        shadedColor = getShadedColor(
+                            color,
+                            polygon,
+                            sightDir,
+                            w0, w1, w2,
+                            vertices,
+                            nVertices,
+                            lightSource->getLightDirection(p),
+                            shadingModel,
+                            lightingModel);
+                    }
 
                     // drawPixel(pixels, matrixPos, &polygon.color);
                     drawPixel(pixels, matrixPos, &shadedColor);
@@ -203,27 +232,51 @@ std::pair<Point, Point> BarycentricRasterizer::findWindowingRectangle(
 sf::Color BarycentricRasterizer::getShadedColor(
     const sf::Color &color,
     Polygon &polygon,
+    const Matrix<4, 1> &sightDirection,
+    const double &w0, const double &w1, const double &w2,
     const std::vector<Matrix<4, 1>> &vertices,
+    const std::vector<Matrix<4, 1>> &nVertices,
     const Matrix<4, 1> &lightDirection,
     ShadingModel shadingModel,
     const BaseLightingModel *lightingModel)
 {
     sf::Color result;
+    const auto invLightDir = lightDirection * -1;
+    Matrix<4, 1> normal;
 
     switch (shadingModel)
     {
     case Flat:
     {
-        const auto invLightDir = lightDirection * -1;
+        normal = polygon.getNormal(vertices);
 
-        const auto normal = polygon.getNormal(vertices);
-        const auto intensity = lightingModel->getLightIntensity(normal, invLightDir);
+        break;
+    }
+    case Fong:
+    {
+        const auto nId0 = polygon.cGetVertexIds(0).cGetNormalVertexId();
+        const auto nId1 = polygon.cGetVertexIds(1).cGetNormalVertexId();
+        const auto nId2 = polygon.cGetVertexIds(2).cGetNormalVertexId();
 
-        result = sf::Color(color.r * intensity, color.g * intensity, color.b * intensity);
+        if (!nId0.has_value() || !nId2.has_value() || !nId2.has_value())
+            throw std::runtime_error("Can not get normal");
+
+        const auto &aNormal = nVertices.at(*nId0 - 1);
+        const auto &bNormal = nVertices.at(*nId1 - 1);
+        const auto &cNormal = nVertices.at(*nId2 - 1);
+
+        normal = aNormal * w0 + bNormal * w1 + cNormal * w2;
 
         break;
     }
     }
+
+    const auto intensity = lightingModel->getLightIntensity(normal, invLightDir, sightDirection);
+
+    result = sf::Color(
+        std::min(color.r * intensity, 255.0),
+        std::min(color.g * intensity, 255.0),
+        std::min(color.b * intensity, 255.0));
 
     return result;
 }

@@ -45,7 +45,9 @@ private:
 
     void drawPolygon(
         Polygon &polygon,
+        const Matrix<4, 1> &sightDir,
         const std::vector<Matrix<4, 1>> &vertices,
+        const std::vector<Matrix<4, 1>> &nVertices,
         const std::vector<DrawableVertex> &drawableVertices,
         const sf::Color *color);
 

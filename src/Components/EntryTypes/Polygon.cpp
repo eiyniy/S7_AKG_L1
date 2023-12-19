@@ -117,8 +117,8 @@ const Matrix<4, 1> &Polygon::getNormal(const std::vector<Matrix<4, 1>> &vertices
 
 const Matrix<4, 1> &Polygon::getCenter(const std::vector<Matrix<4, 1>> &vertices)
 {
-    if (!center.has_value())
-    {
+    // if (!center.has_value())
+    // {
         const auto &a = vertices.at(cGetVertexIds(0).cGetVertexId() - 1);
         const auto &b = vertices.at(cGetVertexIds(1).cGetVertexId() - 1);
         const auto &c = vertices.at(cGetVertexIds(2).cGetVertexId() - 1);
@@ -128,7 +128,7 @@ const Matrix<4, 1> &Polygon::getCenter(const std::vector<Matrix<4, 1>> &vertices
             (a.cGetY() + b.cGetY() + c.cGetY()) / 3,
             (a.cGetZ() + b.cGetZ() + c.cGetZ()) / 3,
         };
-    }
+    // }
 
     return *center;
 }

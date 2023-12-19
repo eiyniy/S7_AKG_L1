@@ -5,9 +5,11 @@
 #include <Matrix.hpp>
 #include <NormalVertex.hpp>
 
-class BaseLightingModel {
+class BaseLightingModel
+{
 public:
     [[nodiscard]] virtual double getLightIntensity(
         const Matrix<4, 1> &normal,
-        const Matrix<4, 1> &lightDirection) const = 0;
+        const Matrix<4, 1> &lightDirection,
+        const Matrix<4, 1> &sightDirection) const = 0;
 };

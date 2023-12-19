@@ -46,42 +46,13 @@ void MainWindow::drawModel(
 {
     const auto color = &objInfo.cGetColor();
     auto &polygons = objInfo.getPolygons();
-
-    /*
-    // const int threadsCount = (unsigned int)ceil(polygons.size() / 10000.f);
-    const auto threadsCount = std::min(
-            (unsigned int) std::ceil(polygons.size() / 1000.f),
-            ThreadPool::getInstance().getThreadsCount());
-    const double size = polygons.size() / (double) threadsCount;
-
-    for (int i = 0; i < threadsCount; ++i) {
-        const int begin = floor(size * i);
-        const int end = floor(size * (i + 1)) - 1;
-
-        ThreadPool::getInstance().enqueue(
-                [this, begin, end, &polygons, color,
-                        &lightingModel, &lightSource, &viewportVertices,
-                        normalVertices = objInfo.cGetNVertices(),
-                        textureVertices = objInfo.cGetTVertices()]() {
-                    for (int j = begin; j <= end; ++j) {
-                        drawPolygon(
-                                drawablePolygon,
-                                color,
-                                lightingModel,
-                                lightSource);
-                    }
-                });
-    }
-
-    ThreadPool::getInstance().waitAll();
-    */
-    //    /*
     // int backwardClippedCount{};
 
-#pragma omp parallel for
+    // #pragma omp parallel for
     for (int j = 0; j < polygons.size(); ++j)
     {
-        const auto sightDir = polygons[j].getCenter(objInfo.cGetVertices()) - cameraPosition;
+        auto sightDir = polygons[j].getCenter(objInfo.cGetVertices()) - cameraPosition;
+        sightDir.normalize();
 
         // std::cout << "Polygon: " << j << std::endl;
         if (!isPolygonFrontOriented(polygons[j], objInfo.cGetVertices(), sightDir))
@@ -94,7 +65,9 @@ void MainWindow::drawModel(
         // Timer::start();
         drawPolygon(
             polygons[j],
+            sightDir,
             objInfo.cGetVertices(),
+            objInfo.cGetNVertices(),
             objInfo.cGetDrawable(),
             color);
         // Timer::stop();
@@ -193,7 +166,9 @@ void MainWindow::drawPixels()
 
 void MainWindow::drawPolygon(
     Polygon &polygon,
+    const Matrix<4, 1> &sightDir,
     const std::vector<Matrix<4, 1>> &vertices,
+    const std::vector<Matrix<4, 1>> &nVertices,
     const std::vector<DrawableVertex> &drawableVertices,
     const sf::Color *color)
 {
@@ -237,7 +212,9 @@ void MainWindow::drawPolygon(
     //    /*
     rasterizer.rasterize(
         polygon,
+        sightDir,
         vertices,
+        nVertices,
         drawableVertices,
         *color
         //            colors.at(colorNumber)

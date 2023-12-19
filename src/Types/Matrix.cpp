@@ -255,10 +255,10 @@ Matrix<4, 4> Matrix<Rows, Cols>::getConvertMatrix(
 template<int Rows, int Cols>
 Matrix<4, 4> Matrix<Rows, Cols>::getMoveConvert(const Matrix<4, 1> &translation) {
     return getConvertMatrix(
-            {1, 0, 0, 0},
-            {0, 1, 0, 0},
-            {0, 0, 1, 0},
-            translation);
+        {1, 0, 0, 0},
+        {0, 1, 0, 0},
+        {0, 0, 1, 0},
+        {translation.cGetX(), translation.cGetY(), translation.cGetZ(), 1});
 }
 
 template<int Rows, int Cols>

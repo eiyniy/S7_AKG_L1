@@ -27,7 +27,9 @@ public:
 
     void rasterize(
         Polygon &polygon,
+        const Matrix<4, 1> &sightDir,
         const std::vector<Matrix<4, 1>> &vertices,
+        const std::vector<Matrix<4, 1>> &nVertices,
         const std::vector<DrawableVertex> &drawableVertices,
         const sf::Color &color);
 
@@ -54,7 +56,10 @@ private:
     static sf::Color getShadedColor(
         const sf::Color &color,
         Polygon &polygon,
+        const Matrix<4, 1> &sightDirection,
+        const double &w0, const double &w1, const double &w2,
         const std::vector<Matrix<4, 1>> &vertices,
+        const std::vector<Matrix<4, 1>> &nVertices,
         const Matrix<4, 1> &lightDirection,
         ShadingModel shadingModel,
         const BaseLightingModel *lightingModel);
