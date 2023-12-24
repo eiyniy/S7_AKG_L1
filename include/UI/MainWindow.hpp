@@ -9,7 +9,7 @@
 #include <BaseLightingModel.hpp>
 #include <BaseLightSource.hpp>
 #include <BarycentricRasterizer.hpp>
-#include <Enums.hpp>
+#include <Types.hpp>
 #include <omp.h>
 
 class MainWindow
@@ -31,7 +31,7 @@ public:
 
     void drawModel(
         Object &objInfo,
-        const Matrix<4, 1> cameraPosition);
+        const Matrix<4, 1> &cameraPosition);
 
     sf::RenderWindow &getWindow();
 
@@ -39,17 +39,14 @@ public:
 
 private:
     static bool isPolygonFrontOriented(
-        Polygon &polygon,
+        Triangle &polygon,
         const std::vector<Matrix<4, 1>> &vertices,
         const Matrix<4, 1> &sightDir);
 
     void drawPolygon(
-        Polygon &polygon,
-        const Matrix<4, 1> &sightDir,
-        const std::vector<Matrix<4, 1>> &vertices,
-        const std::vector<Matrix<4, 1>> &nVertices,
-        const std::vector<DrawableVertex> &drawableVertices,
-        const sf::Color *color);
+        Triangle &polygon,
+        const Matrix<4, 1> &cameraPosition,
+        const Object &object);
 
     void drawLineBr(
         const DrawableVertex &p1,
@@ -98,7 +95,7 @@ inline void MainWindow::drawPixel(
 }
 
 inline bool MainWindow::isPolygonFrontOriented(
-    Polygon &polygon,
+    Triangle &polygon,
     const std::vector<Matrix<4, 1>> &vertices,
     const Matrix<4, 1> &sightDir)
 {

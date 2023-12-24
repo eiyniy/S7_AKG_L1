@@ -1,7 +1,7 @@
 #include <EarClipper.hpp>
 #include <cmath>
 
-std::vector<Polygon> EarClipper::triangulate(
+std::vector<Triangle> EarClipper::triangulate(
     const std::vector<VertexIds> &indexes,
     const std::vector<Matrix<4, 1>> &vertices)
 {
@@ -16,9 +16,9 @@ std::vector<Polygon> EarClipper::triangulate(
     return triangulate(polygonVertices);
 }
 
-std::vector<Polygon> EarClipper::triangulate(std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices)
+std::vector<Triangle> EarClipper::triangulate(std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices)
 {
-    std::vector<Polygon> result;
+    std::vector<Triangle> result;
 
     while (polygonVertices.size() >= 3)
         result.emplace_back(clipEar(polygonVertices));
@@ -40,7 +40,7 @@ bool EarClipper::isConvexVertex(
     return sin > 0;
 }
 
-Polygon EarClipper::clipEar(std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices)
+Triangle EarClipper::clipEar(std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices)
 {
     int i = 0;
     const int size = (int)polygonVertices.size();
@@ -70,7 +70,7 @@ Polygon EarClipper::clipEar(std::vector<std::pair<Matrix<4, 1>, VertexIds>> &pol
                            polygonVertices))
             continue;
 
-        const Polygon result{{it->second,
+        const Triangle result{{it->second,
                               itNext->second,
                               itPrev->second}};
 

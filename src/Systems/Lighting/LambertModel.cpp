@@ -1,12 +1,15 @@
 #include <LambertModel.hpp>
 #include <Converter.hpp>
 
-double LambertModel::getLightIntensity(
+sf::Color LambertModel::getLightIntensity(
     const Matrix<4, 1> &normal,
+    const sf::Color &diffuseColor,
     const Matrix<4, 1> &lightDirection,
-    const Matrix<4, 1> &sightDirection) const
+    const Matrix<4, 1> &sightDirection,
+    const Matrix<4, 1> &mrao) const
 {
     const auto lightCos = normal.scalarMultiply(lightDirection);
+    const auto intensity = std::max(lightCos, 0.0);
 
-    return std::max(lightCos, 0.0);
+    return Converter::matrixToColor({intensity, intensity, intensity});
 }

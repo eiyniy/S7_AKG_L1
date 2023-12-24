@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Enums.hpp>
+#include <Types.hpp>
 
 class SphericalCoordinate {
 public:

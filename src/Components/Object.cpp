@@ -4,6 +4,7 @@
 #include <Converter.hpp>
 #include <ThreadPool.hpp>
 #include <Timer.hpp>
+#include <Globals.hpp>
 
 DrawableVertex convertVertex(
     const Matrix<4, 1> &,
@@ -14,13 +15,19 @@ Object::Object(
     const std::vector<Matrix<4, 1>> &_vertices,
     const std::vector<Matrix<4, 1>> &_tVertices,
     const std::vector<Matrix<4, 1>> &_nVertices,
-    const std::vector<Polygon> &_polygons,
-    const sf::Color &_color)
-    : color(_color),
-      vertices(_vertices),
+    const std::vector<Triangle> &_polygons,
+    const std::optional<Texture<sf::Color>> &_diffuseMap,
+    const std::optional<Texture<Matrix<4, 1>>> &_normalMap,
+    const std::optional<Texture<Matrix<4, 1>>> &_mraoMap,
+    const std::optional<Texture<sf::Color>> &_emissiveMap)
+    : vertices(_vertices),
       tVertices(_tVertices),
       nVertices(_nVertices),
-      polygons(_polygons)
+      polygons(_polygons),
+      diffuseMap(_diffuseMap),
+      normalMap(_normalMap),
+      mraoMap(_mraoMap),
+      emissiveMap(_emissiveMap)
 {
     drawable = std::vector<DrawableVertex>(vertices.size());
 }
@@ -29,13 +36,13 @@ void Object::move(const Matrix<4, 1> &transition)
 {
     const auto moveConvert = Matrix<4, 4>::getMoveConvert(transition);
 
-    vertices[0].log();
+    // vertices[0].log();
 
-    // #pragma omp parallel for
+#pragma omp parallel for if (!_DEBUG)
     for (int j = 0; j < vertices.size(); ++j)
         vertices[j] = moveConvert * vertices[j];
 
-    vertices[0].log();
+    // vertices[0].log();
     std::cout << std::endl;
 }
 
@@ -50,7 +57,7 @@ void Object::convertToDrawable(const Camera &camera)
         resolution.cGetX(), resolution.cGetY(), 0, 0);
 
     // /*
-    // #pragma omp parallel for
+#pragma omp parallel for if (!_DEBUG)
     for (int j = 0; j < vertices.size(); ++j)
         drawable[j] = convertVertex(vertices[j], convertMatrix, viewportConvert);
     // */

@@ -7,11 +7,6 @@ enum class EntryType {
     Polygon
 };
 
-enum class StorageMode {
-    Static,
-    Dynamic
-};
-
 enum class AxisName {
     X,
     Y,
@@ -37,5 +32,14 @@ enum class SceneMatrixConvert {
 
 enum ShadingModel {
     Flat,
-    Fong
+    Phong
 };
+
+enum class TextureType {
+    Diffuse,
+    Normal,
+    Specular
+};
+
+using uint = unsigned int;
+using ubyte = unsigned char;

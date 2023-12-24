@@ -14,7 +14,7 @@ Engine::Engine(Scene &_scene, MainWindow &_mainWindow)
     : scene(_scene),
       mainWindow(_mainWindow)
 {
-    //    mainWindow.getWindow().setFramerateLimit(defaultFps);
+    mainWindow.getWindow().setFramerateLimit(defaultFps);
 
     draw();
 }
@@ -176,11 +176,12 @@ void Engine::update()
     if (commandsQueue.empty())
         return;
 
-    //    while (!commandsQueue.empty()) {
+    // while (!commandsQueue.empty())
+    // {
     const auto command = std::move(commandsQueue.front());
     commandsQueue.pop();
     command->execute();
-    //    }
+    // }
 
     for (const auto &key : scene.cGetAllObjectNames())
         scene.getObject(key)->convertToDrawable(scene.cGetCamera());
@@ -190,19 +191,11 @@ void Engine::draw()
 {
     mainWindow.clear();
 
-    // mainWindow.drawModel(
-    //     *scene.getObject(scene.floorObjectName),
-    //     scene.getObject(scene.floorObjectName)->cGetDrawable(scene.cGetCamera()));
-
     const auto &cameraPosition = scene.cGetCamera().cGetPosition();
 
     for (const auto &key : scene.cGetAllObjectNames())
     {
         auto object = scene.getObject(key);
-
-        // if (key == scene.floorObjectName)
-        // continue;
-
         mainWindow.drawModel(*object, cameraPosition);
     }
 

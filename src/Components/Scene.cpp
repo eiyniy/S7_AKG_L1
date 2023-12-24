@@ -13,7 +13,7 @@ Scene::Scene(
         const double _rotationSpeed)
         : camera(_camera),
           lightSource(_lightSource),
-          defaultFrameTime(1.f * 1000.f / 60),
+          defaultFrameTime(1000.f / 60),
           moveSpeed(_moveSpeed),
           rotationSpeed(_rotationSpeed) {
     // generateFloor(25, 20, Point(0, 0));
@@ -57,7 +57,7 @@ void Scene::generateFloor(const int size, const int step, const Point &center) {
     auto color = sf::Color(255U, 255U, 255U, 64U);
 
     std::vector<Matrix<4, 1>> vertices;
-    std::vector<Polygon> polygons;
+    std::vector<Triangle> polygons;
 
     const auto evenSize = size % 2 == 0 ? size + 1 : size;
     const auto halfSize = evenSize / 2;
@@ -79,9 +79,9 @@ void Scene::generateFloor(const int size, const int step, const Point &center) {
         }
     }
 
-    auto floorPt = new Object(vertices, {}, {}, polygons, color);
+    // auto floorPt = new Object(vertices, {}, {}, polygons, color);
 
-    objects.insert_or_assign(floorObjectName, floorPt);
+    // objects.insert_or_assign(floorObjectName, floorPt);
 }
 
 void Scene::addObject(const std::string &key, Object *object) {

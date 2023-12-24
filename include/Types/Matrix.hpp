@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Enums.hpp>
+#include <Types.hpp>
 #include <vector>
 #include <stdexcept>
 #include <optional>

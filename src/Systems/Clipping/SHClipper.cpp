@@ -3,7 +3,7 @@
 #include <VertexIds.hpp>
 
 void SHClipper::clip(
-        Polygon &polygon,
+        Triangle &polygon,
         std::vector<DrawableVertex> &vertices,
         const std::vector<Point> &clipper) {
     const int clipperSize = (int) clipper.size();
@@ -16,7 +16,7 @@ void SHClipper::clip(
 }
 
 void SHClipper::clipByEdge(
-        Polygon &polygon,
+        Triangle &polygon,
         std::vector<DrawableVertex> &vertices,
         const Point &edgeP1, const Point &edgeP2) {
     const int polygonSize = polygon.cGetVertexIdsCount();
@@ -62,7 +62,7 @@ void SHClipper::clipByEdge(
     }
 
     if (newVertexIds.size() >= 3)
-        polygon = Polygon(newVertexIds);
+        polygon = Triangle(newVertexIds);
 
 /*
     for (int i = 0; i < polygon.cGetVertexIdsCount(); ++i)

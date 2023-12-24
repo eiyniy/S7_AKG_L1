@@ -1,8 +1,7 @@
 #pragma once
 
-#include <Polygon.hpp>
+#include <Triangle.hpp>
 #include <vector>
-#include <Vertex.hpp>
 #include <list>
 #include <Converter.hpp>
 
@@ -18,7 +17,7 @@ private:
             const std::pair<Matrix<4, 1>, VertexIds> &v2,
             const std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices);
 
-        static Polygon clipEar(
+        static Triangle clipEar(
             std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices);
 
         static bool isConvexVertex(
@@ -27,10 +26,10 @@ private:
             const Matrix<4, 1> &nextVertex);
 
 public:
-        static std::vector<Polygon> triangulate(
+        static std::vector<Triangle> triangulate(
             std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices);
 
-        static std::vector<Polygon> triangulate(
+        static std::vector<Triangle> triangulate(
             const std::vector<VertexIds> &indexes,
             const std::vector<Matrix<4, 1>> &vertices);
 };

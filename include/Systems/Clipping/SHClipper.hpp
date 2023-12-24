@@ -1,20 +1,19 @@
 #pragma once
 
 #include <Point.hpp>
-#include <Polygon.hpp>
-#include <Vertex.hpp>
+#include <Triangle.hpp>
 #include <DrawableVertex.hpp>
 
 class SHClipper {
 public:
     static void clip(
-            Polygon &polygon,
+            Triangle &polygon,
             std::vector<DrawableVertex> &vertices,
             const std::vector<Point> &clipper);
 
 private:
     static void clipByEdge(
-            Polygon &polygon,
+            Triangle &polygon,
             std::vector<DrawableVertex> &vertices,
             const Point &edgeP1, const Point &edgeP2);
 

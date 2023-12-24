@@ -1,7 +1,8 @@
 #include <cmath>
 #include <CSClipper.hpp>
 
-int CSClipper::computeCode(const double x, const double y) const {
+int CSClipper::computeCode(const double x, const double y) const
+{
     int code = INSIDE;
 
     if (x < xMin) // to the left of rectangle
@@ -17,27 +18,34 @@ int CSClipper::computeCode(const double x, const double y) const {
 }
 
 CSClipper::CSClipper(
-        const int xMax, const int yMax,
-        const int xMin, const int yMin)
-        : xMax(xMax), yMax(yMax),
-          xMin(xMin), yMin(yMin) {}
+    const int xMax, const int yMax,
+    const int xMin, const int yMin)
+    : xMax(xMax), yMax(yMax),
+      xMin(xMin), yMin(yMin) {}
 
-ClipLineResult CSClipper::clipLine(int &x1, int &y1, int &x2, int &y2) const {
+ClipLineResult CSClipper::clipLine(int &x1, int &y1, int &x2, int &y2) const
+{
     int code1 = computeCode(x1, y1);
     int code2 = computeCode(x2, y2);
 
     // Initialize line as outside the rectangular window
     ClipLineResult result = ClipLineResult::Nothing;
 
-    while (true) {
-        if (code1 == 0 && code2 == 0) {
+    while (true)
+    {
+        if (code1 == 0 && code2 == 0)
+        {
             // If both endpoints lie within rectangle
             break;
-        } else if (code1 & code2) {
+        }
+        else if (code1 & code2)
+        {
             // If both endpoints are outside rectangle, in same region
             result = ClipLineResult::Invisible;
             break;
-        } else {
+        }
+        else
+        {
             // Some segment of line lies within the rectangle
             int code_out;
             double x, y;
@@ -76,30 +84,40 @@ ClipLineResult CSClipper::clipLine(int &x1, int &y1, int &x2, int &y2) const {
             }
              */
 
-            if (code_out & TOP) {
-                x = x1 + (x2 - x1) * (yMin - y1) / (double) (y2 - y1);
+            if (code_out & TOP)
+            {
+                x = x1 + (x2 - x1) * (yMin - y1) / (double)(y2 - y1);
                 y = yMin;
-            } else if (code_out & BOTTOM) {
-                x = x1 + (x2 - x1) * (yMax - y1) / (double) (y2 - y1);
+            }
+            else if (code_out & BOTTOM)
+            {
+                x = x1 + (x2 - x1) * (yMax - y1) / (double)(y2 - y1);
                 y = yMax;
-            } else if (code_out & RIGHT) {
-                y = y1 + (y2 - y1) * (xMax - x1) / (double) (x2 - x1);
+            }
+            else if (code_out & RIGHT)
+            {
+                y = y1 + (y2 - y1) * (xMax - x1) / (double)(x2 - x1);
                 x = xMax;
-            } else if (code_out & LEFT) {
-                y = y1 + (y2 - y1) * (xMin - x1) / (double) (x2 - x1);
+            }
+            else if (code_out & LEFT)
+            {
+                y = y1 + (y2 - y1) * (xMin - x1) / (double)(x2 - x1);
                 x = xMin;
             }
 
             // Now intersection point x, y is found
             // We replace point outside rectangle
             // by intersection point
-            if (code_out == code1) {
+            if (code_out == code1)
+            {
                 x1 = floor(x);
                 y1 = floor(y);
 
                 code1 = computeCode(x1, y1);
                 result = result == ClipLineResult::Nothing ? ClipLineResult::First : ClipLineResult::Both;
-            } else {
+            }
+            else
+            {
                 x2 = floor(x);
                 y2 = floor(y);
 
@@ -116,7 +134,7 @@ ClipLineResult CSClipper::clipLine(int &x1, int &y1, int &x2, int &y2) const {
 
 /*
 void CSClipper::clipPolygon(
-        Polygon &polygon,
+        Triangle &polygon,
         std::vector<Vertex> &vertices) const {
     const int polygonSize = polygon.cGetVertexIdsCount();
 
@@ -171,24 +189,27 @@ void CSClipper::clipPolygon(
     }
 
     if (newVertexIds.size() >= 3)
-        polygon = Polygon(newVertexIds);
+        polygon = Triangle(newVertexIds);
 }
 */
 
 Point CSClipper::findIntersection(
-        const Point &line1P1, const Point &line1P2,
-        const Point &line2P1, const Point &line2P2) {
-    const long a = (long) line1P1.cGetX() * (long) line1P2.cGetY() - (long) line1P1.cGetY() * (long) line1P2.cGetX();
-    const long b = (long) line2P1.cGetX() * (long) line2P2.cGetY() - (long) line2P1.cGetY() * (long) line2P2.cGetX();
+    const Point &line1P1, const Point &line1P2,
+    const Point &line2P1, const Point &line2P2)
+{
+    const long a = (long)line1P1.cGetX() * (long)line1P2.cGetY() - (long)line1P1.cGetY() * (long)line1P2.cGetX();
+    const long b = (long)line2P1.cGetX() * (long)line2P2.cGetY() - (long)line2P1.cGetY() * (long)line2P2.cGetX();
 
     const long denominator =
-            ((long) line1P1.cGetX() - (long) line1P2.cGetX()) * ((long) line2P1.cGetY() - (long) line2P2.cGetY()) -
-            ((long) line1P1.cGetY() - (long) line1P2.cGetY()) * ((long) line2P1.cGetX() - (long) line2P2.cGetX());
+        ((long)line1P1.cGetX() - (long)line1P2.cGetX()) * ((long)line2P1.cGetY() - (long)line2P2.cGetY()) -
+        ((long)line1P1.cGetY() - (long)line1P2.cGetY()) * ((long)line2P1.cGetX() - (long)line2P2.cGetX());
 
-    const int x = (a * ((long) line2P1.cGetX() - (long) line2P2.cGetX()) -
-                   b * ((long) line1P1.cGetX() - (long) line1P2.cGetX())) / denominator;
-    const int y = (a * ((long) line2P1.cGetY() - (long) line2P2.cGetY()) -
-                   b * ((long) line1P1.cGetY() - (long) line1P2.cGetY())) / denominator;
+    const int x = (a * ((long)line2P1.cGetX() - (long)line2P2.cGetX()) -
+                   b * ((long)line1P1.cGetX() - (long)line1P2.cGetX())) /
+                  denominator;
+    const int y = (a * ((long)line2P1.cGetY() - (long)line2P2.cGetY()) -
+                   b * ((long)line1P1.cGetY() - (long)line1P2.cGetY())) /
+                  denominator;
 
     return {x, y};
 }

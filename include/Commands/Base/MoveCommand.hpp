@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Command.hpp>
-#include <Enums.hpp>
+#include <Types.hpp>
 #include <Scene.hpp>
 
 class MoveCommand : public Command {

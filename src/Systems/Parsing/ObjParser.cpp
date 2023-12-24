@@ -4,20 +4,30 @@
 #include <sstream>
 #include <mutex>
 #include <ObjParser.hpp>
-#include <Enums.hpp>
+#include <Types.hpp>
 #include <Timer.hpp>
 #include <ThreadPool.hpp>
+#include <ImageParser.hpp>
 
-ObjParser::ObjParser(const std::string &_pathToFile)
+ObjParser::ObjParser(
+    const std::string &_pathToObj,
+    const std::optional<std::string> &_pathToDiffuseMap,
+    const std::optional<std::string> &_pathToNormalMap,
+    const std::optional<std::string> &_pathToMRAOMap,
+    const std::optional<std::string> &_pathToEmissiveMap)
 {
-    if (!std::filesystem::exists(_pathToFile))
+    if (!std::filesystem::exists(_pathToObj) ||
+        (_pathToDiffuseMap.has_value() && !std::filesystem::exists(*_pathToDiffuseMap)) ||
+        (_pathToNormalMap.has_value() && !std::filesystem::exists(*_pathToNormalMap)) ||
+        (_pathToMRAOMap.has_value() && !std::filesystem::exists(*_pathToMRAOMap)) ||
+        (_pathToEmissiveMap.has_value() && !std::filesystem::exists(*_pathToEmissiveMap)))
         throw std::logic_error("Could not open file");
 
-    pathToFile = _pathToFile;
-
-    readStream.open(pathToFile);
-    if (!readStream.is_open())
-        throw std::logic_error("Could not open file");
+    pathToObj = _pathToObj;
+    pathToDiffuseMap = _pathToDiffuseMap;
+    pathToNormalMap = _pathToNormalMap;
+    pathToMRAOMap = _pathToMRAOMap;
+    pathToEmissiveMap = _pathToEmissiveMap;
 }
 
 #pragma region Static
@@ -76,45 +86,48 @@ std::optional<std::string> ObjParser::getNextPart(
 
 #pragma endregion Static
 
-Object *ObjParser::parseEntries(const std::string &fileContent)
+Object *ObjParser::parse()
 {
     const auto timeStart = std::chrono::high_resolution_clock::now();
 
-    const auto lines = splitByLines(fileContent);
-
-    /*
-    // const int threadsCount = (unsigned int)ceil(lines.size() / 10000.f);
-    const int threadsCount = std::min(
-        (unsigned int)ceil(lines.size() / 10000.f),
-        ThreadPool::getInstance().getThreadsCount());
-
-    const double size = lines.size() / (double)threadsCount;
-
-    for (int i = 0; i < threadsCount; ++i)
+    std::optional<Texture<sf::Color>> diffuseMap;
+    if (pathToDiffuseMap.has_value())
     {
-        const int begin = floor(size * i);
-        const int end = floor(size * (i + 1)) - 1;
-
-        ThreadPool::getInstance().enqueue(
-            [this, i, begin, end, &lines]()
-            {
-                for (int j = begin; j <= end; ++j)
-                    parseEntry(lines[j]);
-            });
+        const ImageParser<sf::Color> parser{*pathToDiffuseMap};
+        diffuseMap = parser.parse();
     }
 
-    ThreadPool::getInstance().waitAll();
-    */
+    std::optional<Texture<Matrix<4, 1>>> normlMap;
+    if (pathToNormalMap.has_value())
+    {
+        const ImageParser<Matrix<4, 1>> parser{*pathToNormalMap};
+        normlMap = parser.parse();
+    }
 
-    // /*
+    std::optional<Texture<Matrix<4, 1>>> mraoMap;
+    if (pathToMRAOMap.has_value())
+    {
+        const ImageParser<Matrix<4, 1>> parser{*pathToMRAOMap};
+        mraoMap = parser.parse();
+    }
+    
+    std::optional<Texture<sf::Color>> emissiveMap;
+    if (pathToEmissiveMap.has_value())
+    {
+        const ImageParser<sf::Color> parser{*pathToEmissiveMap};
+        emissiveMap = parser.parse();
+    }
+
+    const auto fileContent = readFile(pathToObj);
+    const auto lines = splitByLines(fileContent);
+
     for (const auto &line : lines)
         parseEntry(line);
-    // */
 
     Timer::start();
     for (const auto &line : polygonStrings)
     {
-        const auto triangulated = Polygon::parseAndTriangulate(line, vertices);
+        const auto triangulated = Triangle::parseAndTriangulate(line, vertices);
         for (const auto &polygon : triangulated)
             polygons.emplace_back(polygon);
     }
@@ -129,7 +142,10 @@ Object *ObjParser::parseEntries(const std::string &fileContent)
         tVertices,
         nVertices,
         polygons,
-        sf::Color::White);
+        diffuseMap,
+        normlMap,
+        mraoMap,
+        emissiveMap);
 }
 
 void ObjParser::parseEntry(const std::string &line)
@@ -211,8 +227,12 @@ std::vector<std::string> ObjParser::splitByLines(const std::string &string)
     return result;
 }
 
-std::string ObjParser::readFile()
+std::string ObjParser::readFile(const std::string &pathToFile)
 {
+    readStream.open(pathToFile);
+    if (!readStream.is_open())
+        throw std::logic_error("Could not open file");
+
     readStream.seekg(0, std::ios::end);
     auto size = readStream.tellg();
     auto buffer = std::string(size, ' ');

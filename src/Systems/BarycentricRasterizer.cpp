@@ -1,6 +1,7 @@
 #include <BarycentricRasterizer.hpp>
 #include <Converter.hpp>
 #include <iostream>
+#include <PhongModel.hpp>
 
 BarycentricRasterizer::BarycentricRasterizer(
     const BaseLightingModel *_lightingModel,
@@ -21,13 +22,13 @@ BarycentricRasterizer::BarycentricRasterizer(
       depthBuffer(_depthBuffer) {}
 
 void BarycentricRasterizer::rasterize(
-    Polygon &polygon,
-    const Matrix<4, 1> &sightDir,
-    const std::vector<Matrix<4, 1>> &vertices,
-    const std::vector<Matrix<4, 1>> &nVertices,
-    const std::vector<DrawableVertex> &drawableVertices,
-    const sf::Color &color)
+    Triangle &polygon,
+    const Matrix<4, 1> &cameraPosition,
+    const Object &object)
 {
+    const auto &drawableVertices = object.cGetDrawable();
+    const auto &vertices = object.cGetVertices();
+
     const auto vId0 = polygon.cGetVertexIds(0).cGetVertexId();
     const auto vId1 = polygon.cGetVertexIds(1).cGetVertexId();
     const auto vId2 = polygon.cGetVertexIds(2).cGetVertexId();
@@ -36,14 +37,14 @@ void BarycentricRasterizer::rasterize(
     const auto &bDrawable = drawableVertices.at(vId1 - 1);
     const auto &cDrawable = drawableVertices.at(vId2 - 1);
 
-    const auto a = vertices.at(vId0 - 1);
-    const auto b = vertices.at(vId1 - 1);
-    const auto c = vertices.at(vId2 - 1);
+    const auto &a = vertices.at(vId0 - 1);
+    const auto &b = vertices.at(vId1 - 1);
+    const auto &c = vertices.at(vId2 - 1);
 
-    // const auto area = edgeFunction(aDrawable, bDrawable, cDrawable);
-    // if (area == 0)
-    //     return;
-    // const auto invArea = 1 / area;
+    const auto area = edgeFunction(aDrawable, bDrawable, cDrawable);
+    if (area == 0)
+        return;
+    const auto invArea = 1 / area;
 
     // std::cout << aDrawable.CGetZ() << " " << bDrawable.CGetZ() << " " << cDrawable.CGetZ() << std::endl;
 
@@ -82,31 +83,31 @@ void BarycentricRasterizer::rasterize(
 
     double w0, w1, w2;
 
-    // w0 = edgeFunction(bDrawable, cDrawable, minMinVertex) * invArea;
-    // w1 = edgeFunction(cDrawable, aDrawable, minMinVertex) * invArea;
-    // w2 = 1 - w0 - w1;
+    w0 = edgeFunction(bDrawable, cDrawable, minMinVertex) * invArea;
+    w1 = edgeFunction(cDrawable, aDrawable, minMinVertex) * invArea;
+    w2 = 1 - w0 - w1;
 
-    calcBarycentric(minMinVertex, aDrawable, v0, v1, invDen, w0, w1, w2);
+    // calcBarycentric(minMinVertex, aDrawable, v0, v1, invDen, w0, w1, w2);
     //    calcBarycentric(minMinVertex, aMatrix, v0, v1, invDen, w0, w1, w2);
     //    calcBarycentric(minMinVertex, aMatrix, bMatrix, cMatrix, w0, w1, w2);
 
     double w0XLast, w1XLast, w2XLast;
 
-    // w0XLast = edgeFunction(bDrawable, cDrawable, maxMinVertex) * invArea;
-    // w1XLast = edgeFunction(cDrawable, aDrawable, maxMinVertex) * invArea;
-    // w2XLast = 1 - w0XLast - w1XLast;
+    w0XLast = edgeFunction(bDrawable, cDrawable, maxMinVertex) * invArea;
+    w1XLast = edgeFunction(cDrawable, aDrawable, maxMinVertex) * invArea;
+    w2XLast = 1 - w0XLast - w1XLast;
 
-    calcBarycentric(maxMinVertex, aDrawable, v0, v1, invDen, w0XLast, w1XLast, w2XLast);
+    // calcBarycentric(maxMinVertex, aDrawable, v0, v1, invDen, w0XLast, w1XLast, w2XLast);
     //    calcBarycentric(maxMinVertex, aMatrix, v0, v1, invDen, w0XLast, w1XLast, w2XLast);
     //    calcBarycentric(maxMinVertex, aMatrix, bMatrix, cMatrix, w0XLast, w1XLast, w2XLast);
 
     double w0YLast, w1YLast, w2YLast;
 
-    // w0YLast = edgeFunction(bDrawable, cDrawable, minMaxVertex) * invArea;
-    // w1YLast = edgeFunction(cDrawable, aDrawable, minMaxVertex) * invArea;
-    // w2YLast = 1 - w0YLast - w1YLast;
+    w0YLast = edgeFunction(bDrawable, cDrawable, minMaxVertex) * invArea;
+    w1YLast = edgeFunction(cDrawable, aDrawable, minMaxVertex) * invArea;
+    w2YLast = 1 - w0YLast - w1YLast;
 
-    calcBarycentric(minMaxVertex, aDrawable, v0, v1, invDen, w0YLast, w1YLast, w2YLast);
+    // calcBarycentric(minMaxVertex, aDrawable, v0, v1, invDen, w0YLast, w1YLast, w2YLast);
     //    calcBarycentric(minMaxVertex, aMatrix, v0, v1, invDen, w0YLast, w1YLast, w2YLast);
     //    calcBarycentric(minMaxVertex, aMatrix, bMatrix, cMatrix, w0YLast, w1YLast, w2YLast);
 
@@ -133,16 +134,20 @@ void BarycentricRasterizer::rasterize(
     sf::Color shadedColor;
 
     if (shadingModel == ShadingModel::Flat)
+    {
+        auto sightDir = polygon.getCenter(vertices) - cameraPosition;
+        sightDir.normalize();
+
         shadedColor = getShadedColor(
-            color,
             polygon,
             sightDir,
             w0, w1, w2,
-            vertices,
-            nVertices,
-            lightSource->getLightDirection({0, 0, 0}),
+            invAZ, invBZ, invCZ,
+            object,
+            lightSource->getLightDirection(polygon.getCenter(vertices)),
             shadingModel,
             lightingModel);
+    }
 
     //    */
     for (int i = minY; i <= maxY; ++i, w0 += w0YStep, w1 += w1YStep, w2 += w2YStep)
@@ -168,17 +173,18 @@ void BarycentricRasterizer::rasterize(
                 {
                     depthBuffer[matrixPos] = z;
 
-                    if (shadingModel == ShadingModel::Fong)
+                    if (shadingModel == ShadingModel::Phong)
                     {
                         const auto p = a * w0 + b * w1 + c * w2;
+                        auto sightDir = p - cameraPosition;
+                        sightDir.normalize();
 
                         shadedColor = getShadedColor(
-                            color,
                             polygon,
                             sightDir,
                             w0, w1, w2,
-                            vertices,
-                            nVertices,
+                            invAZ, invBZ, invCZ,
+                            object,
                             lightSource->getLightDirection(p),
                             shadingModel,
                             lightingModel);
@@ -196,7 +202,7 @@ void BarycentricRasterizer::rasterize(
 }
 
 std::pair<Point, Point> BarycentricRasterizer::findWindowingRectangle(
-    const Polygon &polygon,
+    const Triangle &polygon,
     const std::vector<DrawableVertex> &drawableVertices)
 {
     //    const auto &firstVertex = vertices.at(polygon.cGetVertexIds(0).cGetVertexId() - 1);
@@ -230,53 +236,140 @@ std::pair<Point, Point> BarycentricRasterizer::findWindowingRectangle(
 }
 
 sf::Color BarycentricRasterizer::getShadedColor(
-    const sf::Color &color,
-    Polygon &polygon,
+    Triangle &polygon,
     const Matrix<4, 1> &sightDirection,
     const double &w0, const double &w1, const double &w2,
-    const std::vector<Matrix<4, 1>> &vertices,
-    const std::vector<Matrix<4, 1>> &nVertices,
+    const double invZ0, const double invZ1, const double invZ2,
+    const Object &object,
     const Matrix<4, 1> &lightDirection,
     ShadingModel shadingModel,
     const BaseLightingModel *lightingModel)
 {
-    sf::Color result;
     const auto invLightDir = lightDirection * -1;
+
+    sf::Color result;
     Matrix<4, 1> normal;
+    sf::Color diffuseColor;
+    Matrix<4, 1> mrao;
+    sf::Color emissiveColor;
 
-    switch (shadingModel)
+    const auto tId0 = polygon.cGetVertexIds(0).cGetTextureVertexId();
+    const auto tId1 = polygon.cGetVertexIds(1).cGetTextureVertexId();
+    const auto tId2 = polygon.cGetVertexIds(2).cGetTextureVertexId();
+
+    if (!tId0.has_value() || !tId2.has_value() || !tId2.has_value())
+        throw std::runtime_error("Can not get diffuseMap");
+
+    const auto &vertices = object.cGetVertices();
+    const auto &tVertices = object.cGetTVertices();
+
+    const auto &aMapId = tVertices.at(*tId0 - 1);
+    const auto &bMapId = tVertices.at(*tId1 - 1);
+    const auto &cMapId = tVertices.at(*tId2 - 1);
+
+    const auto mapIdNominator = aMapId * invZ0 * w0 + bMapId * invZ1 * w1 + cMapId * invZ2 * w2;
+    const auto mapIdDenominator = invZ0 * w0 + invZ1 * w1 + invZ2 * w2;
+    const auto mapId = mapIdNominator / mapIdDenominator;
+
+    const auto &diffuseMap = object.cGetDiffuseMap();
+    if (diffuseMap.has_value())
     {
-    case Flat:
+        const auto width = diffuseMap->cGetWidth() - 1;
+        const auto height = diffuseMap->cGetHeight() - 1;
+
+        const Point normMapId{
+            (int)(mapId.cGetX() * width),
+            (int)(height - mapId.cGetY() * height)};
+
+        diffuseColor = diffuseMap->cGetData().at(normMapId.cGetX() + (width + 1) * normMapId.cGetY());
+    }
+    else
+        diffuseColor = sf::Color::White;
+
+    const auto &normalMap = object.cGetNormalMap();
+    if (normalMap.has_value())
     {
-        normal = polygon.getNormal(vertices);
+        const auto width = normalMap->cGetWidth() - 1;
+        const auto height = normalMap->cGetHeight() - 1;
 
-        break;
+        const Point normMapId{
+            (int)(mapId.cGetX() * width),
+            (int)(height - mapId.cGetY() * height)};
+
+        normal = normalMap->cGetData().at(normMapId.cGetX() + (width + 1) * normMapId.cGetY());
     }
-    case Fong:
+    else
     {
-        const auto nId0 = polygon.cGetVertexIds(0).cGetNormalVertexId();
-        const auto nId1 = polygon.cGetVertexIds(1).cGetNormalVertexId();
-        const auto nId2 = polygon.cGetVertexIds(2).cGetNormalVertexId();
+        switch (shadingModel)
+        {
+        case Flat:
+        {
+            normal = polygon.getNormal(vertices);
 
-        if (!nId0.has_value() || !nId2.has_value() || !nId2.has_value())
-            throw std::runtime_error("Can not get normal");
+            break;
+        }
+        case Phong:
+        {
+            const auto nId0 = polygon.cGetVertexIds(0).cGetNormalVertexId();
+            const auto nId1 = polygon.cGetVertexIds(1).cGetNormalVertexId();
+            const auto nId2 = polygon.cGetVertexIds(2).cGetNormalVertexId();
 
-        const auto &aNormal = nVertices.at(*nId0 - 1);
-        const auto &bNormal = nVertices.at(*nId1 - 1);
-        const auto &cNormal = nVertices.at(*nId2 - 1);
+            if (!nId0.has_value() || !nId2.has_value() || !nId2.has_value())
+                throw std::runtime_error("Can not get normal");
 
-        normal = aNormal * w0 + bNormal * w1 + cNormal * w2;
+            const auto &nVertices = object.cGetNVertices();
 
-        break;
+            const auto &aNormal = nVertices.at(*nId0 - 1);
+            const auto &bNormal = nVertices.at(*nId1 - 1);
+            const auto &cNormal = nVertices.at(*nId2 - 1);
+
+            normal = aNormal * w0 + bNormal * w1 + cNormal * w2;
+            normal.normalize();
+
+            break;
+        }
+        }
     }
+
+    const auto &mraoMap = object.cGetMRAOMap();
+    if (mraoMap.has_value())
+    {
+        const auto width = mraoMap->cGetWidth() - 1;
+        const auto height = mraoMap->cGetHeight() - 1;
+
+        const Point normMapId{
+            (int)(mapId.cGetX() * width),
+            (int)(height - mapId.cGetY() * height)};
+
+        mrao = mraoMap->cGetData().at(normMapId.cGetX() + (width + 1) * normMapId.cGetY());
+    }
+    else
+    {
+        const auto phongModel = ((PhongModel *)lightingModel);
+        mrao = Matrix<4, 1>(1, 1, phongModel != nullptr ? phongModel->cGetAmbientCoeff() : 1);
     }
 
-    const auto intensity = lightingModel->getLightIntensity(normal, invLightDir, sightDirection);
+    const auto &emissiveMap = object.cGetEmissiveMap();
+    if (emissiveMap.has_value())
+    {
+        const auto width = emissiveMap->cGetWidth() - 1;
+        const auto height = emissiveMap->cGetHeight() - 1;
+
+        const Point normMapId{
+            (int)(mapId.cGetX() * width),
+            (int)(height - mapId.cGetY() * height)};
+
+        emissiveColor = emissiveMap->cGetData().at(normMapId.cGetX() + (width + 1) * normMapId.cGetY());
+    }
+    else
+        emissiveColor = sf::Color(0, 0, 0);
+
+    const auto color = lightingModel->getLightIntensity(normal, diffuseColor, invLightDir, sightDirection, mrao);
 
     result = sf::Color(
-        std::min(color.r * intensity, 255.0),
-        std::min(color.g * intensity, 255.0),
-        std::min(color.b * intensity, 255.0));
+        std::min(color.r + emissiveColor.r, 255),
+        std::min(color.g + emissiveColor.g, 255),
+        std::min(color.b + emissiveColor.b, 255));
 
     return result;
 }

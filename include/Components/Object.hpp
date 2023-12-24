@@ -2,13 +2,11 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <Vertex.hpp>
-#include <TextureVertex.hpp>
-#include <NormalVertex.hpp>
-#include <Polygon.hpp>
+#include <Triangle.hpp>
 #include <Camera.hpp>
 #include <DrawableVertex.hpp>
 #include <Matrix.hpp>
+#include <Texture.hpp>
 
 class Object
 {
@@ -17,8 +15,11 @@ public:
         const std::vector<Matrix<4, 1>> &_vertices,
         const std::vector<Matrix<4, 1>> &_tVertices,
         const std::vector<Matrix<4, 1>> &_nVertices,
-        const std::vector<Polygon> &_polygons,
-        const sf::Color &_color);
+        const std::vector<Triangle> &_polygons,
+        const std::optional<Texture<sf::Color>> &_diffuseMap,
+        const std::optional<Texture<Matrix<4, 1>>> &_normalMap,
+        const std::optional<Texture<Matrix<4, 1>>> &_mraoMap,
+        const std::optional<Texture<sf::Color>> &_emissiveMap);
 
     void move(const Matrix<4, 1> &transition);
 
@@ -28,15 +29,21 @@ public:
 
     const std::vector<Matrix<4, 1>> &cGetNVertices() const;
 
-    const std::vector<Polygon> &cGetPolygons() const;
+    const std::vector<Triangle> &cGetPolygons() const;
 
-    std::vector<Polygon> &getPolygons();
+    const std::optional<Texture<sf::Color>> &cGetDiffuseMap() const;
 
-    const sf::Color &cGetColor() const;
+    const std::optional<Texture<Matrix<4, 1>>> &cGetNormalMap() const;
+
+    const std::optional<Texture<Matrix<4, 1>>> &cGetMRAOMap() const;
+
+    const std::optional<Texture<sf::Color>> &cGetEmissiveMap() const;
+
+    std::vector<Triangle> &getPolygons();
 
     void convertToDrawable(const Camera &camera);
 
-    const std::vector<DrawableVertex> &cGetDrawable();
+    const std::vector<DrawableVertex> &cGetDrawable() const;
 
     const Matrix<4, 1> &getCenter();
 
@@ -50,9 +57,12 @@ private:
     std::vector<Matrix<4, 1>> vertices;
     const std::vector<Matrix<4, 1>> nVertices;
     const std::vector<Matrix<4, 1>> tVertices;
-    std::vector<Polygon> polygons;
+    std::vector<Triangle> polygons;
 
-    const sf::Color color;
+    const std::optional<Texture<sf::Color>> diffuseMap;
+    const std::optional<Texture<Matrix<4, 1>>> normalMap;
+    const std::optional<Texture<Matrix<4, 1>>> mraoMap;
+    const std::optional<Texture<sf::Color>> emissiveMap;
 
     std::optional<Matrix<4, 1>> center;
     std::optional<Matrix<4, 1>> maxXZ, minXZ;
@@ -60,12 +70,7 @@ private:
     std::vector<DrawableVertex> drawable;
 };
 
-inline const sf::Color &Object::cGetColor() const
-{
-    return color;
-}
-
-inline const std::vector<DrawableVertex> &Object::cGetDrawable()
+inline const std::vector<DrawableVertex> &Object::cGetDrawable() const
 {
     return drawable;
 }
@@ -85,12 +90,32 @@ inline const std::vector<Matrix<4, 1>> &Object::cGetNVertices() const
     return nVertices;
 }
 
-inline const std::vector<Polygon> &Object::cGetPolygons() const
+inline const std::vector<Triangle> &Object::cGetPolygons() const
 {
     return polygons;
 }
 
-inline std::vector<Polygon> &Object::getPolygons()
+inline const std::optional<Texture<sf::Color>> &Object::cGetDiffuseMap() const
+{
+    return diffuseMap;
+}
+
+inline const std::optional<Texture<Matrix<4, 1>>> &Object::cGetNormalMap() const
+{
+    return normalMap;
+}
+
+inline const std::optional<Texture<Matrix<4, 1>>> &Object::cGetMRAOMap() const
+{
+    return mraoMap;
+}
+
+inline const std::optional<Texture<sf::Color>> &Object::cGetEmissiveMap() const
+{
+    return emissiveMap;
+}
+
+inline std::vector<Triangle> &Object::getPolygons()
 {
     return polygons;
 }

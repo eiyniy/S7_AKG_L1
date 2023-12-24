@@ -1,16 +1,17 @@
 #pragma once
 
 #include <Command.hpp>
-#include <Enums.hpp>
+#include <Types.hpp>
 #include <Camera.hpp>
 
-class RotateCameraAroundCommand : public Command {
+class RotateCameraAroundCommand : public Command
+{
 public:
     RotateCameraAroundCommand(
-            Camera &_camera,
-            AxisName _axisName,
-            Direction _direction,
-            double _step);
+        Camera &_camera,
+        AxisName _axisName,
+        Direction _direction,
+        double _step);
 
     ~RotateCameraAroundCommand() override = default;
 

@@ -2,15 +2,15 @@
 
 #include <vector>
 #include <DrawableVertex.hpp>
-#include <Polygon.hpp>
+#include <Triangle.hpp>
 #include <SFML/Config.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <Point.hpp>
 #include <BaseLightingModel.hpp>
-#include <NormalVertex.hpp>
 #include <BaseLightSource.hpp>
 #include <Timer.hpp>
 #include <omp.h>
+#include <Object.hpp>
 
 class BarycentricRasterizer
 {
@@ -26,12 +26,9 @@ public:
         double *_depthBuffer);
 
     void rasterize(
-        Polygon &polygon,
+        Triangle &polygon,
         const Matrix<4, 1> &sightDir,
-        const std::vector<Matrix<4, 1>> &vertices,
-        const std::vector<Matrix<4, 1>> &nVertices,
-        const std::vector<DrawableVertex> &drawableVertices,
-        const sf::Color &color);
+        const Object &object);
 
 private:
     const BaseLightingModel *lightingModel;
@@ -50,16 +47,15 @@ private:
     double *depthBuffer;
 
     static std::pair<Point, Point> findWindowingRectangle(
-        const Polygon &polygon,
+        const Triangle &polygon,
         const std::vector<DrawableVertex> &drawableVertices);
 
     static sf::Color getShadedColor(
-        const sf::Color &color,
-        Polygon &polygon,
-        const Matrix<4, 1> &sightDirection,
+        Triangle &polygon,
+        const Matrix<4, 1> &cameraPosition,
         const double &w0, const double &w1, const double &w2,
-        const std::vector<Matrix<4, 1>> &vertices,
-        const std::vector<Matrix<4, 1>> &nVertices,
+        const double invZ0, const double invZ1, const double invZ2,
+        const Object &object,
         const Matrix<4, 1> &lightDirection,
         ShadingModel shadingModel,
         const BaseLightingModel *lightingModel);

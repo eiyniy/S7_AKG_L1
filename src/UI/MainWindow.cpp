@@ -5,6 +5,7 @@
 #include <ThreadPool.hpp>
 #include <SHClipper.hpp>
 #include <BarycentricRasterizer.hpp>
+#include <Globals.hpp>
 
 MainWindow::MainWindow(
     Point &_resolution,
@@ -42,34 +43,24 @@ MainWindow::MainWindow(
 
 void MainWindow::drawModel(
     Object &objInfo,
-    const Matrix<4, 1> cameraPosition)
+    const Matrix<4, 1> &cameraPosition)
 {
-    const auto color = &objInfo.cGetColor();
     auto &polygons = objInfo.getPolygons();
-    // int backwardClippedCount{};
 
-    // #pragma omp parallel for
+#pragma omp parallel for if (!_DEBUG)
     for (int j = 0; j < polygons.size(); ++j)
     {
         auto sightDir = polygons[j].getCenter(objInfo.cGetVertices()) - cameraPosition;
         sightDir.normalize();
 
-        // std::cout << "Polygon: " << j << std::endl;
         if (!isPolygonFrontOriented(polygons[j], objInfo.cGetVertices(), sightDir))
-        {
-            // #pragma omp atomic
-            // ++backwardClippedCount;
             continue;
-        }
 
         // Timer::start();
         drawPolygon(
             polygons[j],
-            sightDir,
-            objInfo.cGetVertices(),
-            objInfo.cGetNVertices(),
-            objInfo.cGetDrawable(),
-            color);
+            cameraPosition,
+            objInfo);
         // Timer::stop();
     }
 
@@ -165,14 +156,13 @@ void MainWindow::drawPixels()
 }
 
 void MainWindow::drawPolygon(
-    Polygon &polygon,
-    const Matrix<4, 1> &sightDir,
-    const std::vector<Matrix<4, 1>> &vertices,
-    const std::vector<Matrix<4, 1>> &nVertices,
-    const std::vector<DrawableVertex> &drawableVertices,
-    const sf::Color *color)
+    Triangle &polygon,
+    const Matrix<4, 1> &cameraPosition,
+    const Object &object)
 {
-    auto vIndexesCount = polygon.cGetVertexIdsCount();
+    const auto &drawableVertices = object.cGetDrawable();
+
+    const auto vIndexesCount = polygon.cGetVertexIdsCount();
     //    /*
     bool isPolygonVisible = true;
 
@@ -212,13 +202,8 @@ void MainWindow::drawPolygon(
     //    /*
     rasterizer.rasterize(
         polygon,
-        sightDir,
-        vertices,
-        nVertices,
-        drawableVertices,
-        *color
-        //            colors.at(colorNumber)
-    );
+        cameraPosition,
+        object);
 
     //    for (const auto &i: result) {
     //        drawPixel(i.CGetX(), i.CGetY(), &colors.at(colorNumber), resolution.cGetX());

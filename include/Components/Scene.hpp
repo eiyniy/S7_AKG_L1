@@ -3,7 +3,7 @@
 #include <Object.hpp>
 #include <Camera.hpp>
 #include <Matrix.hpp>
-#include <Enums.hpp>
+#include <Types.hpp>
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <BaseLightSource.hpp>
