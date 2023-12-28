@@ -48,13 +48,13 @@ Triangle EarClipper::clipEar(std::vector<std::pair<Matrix<4, 1>, VertexIds>> &po
     {
         auto itPrev = it;
         if (i > 0)
-            itPrev--;
+            --itPrev;
         else
             itPrev = polygonVertices.cend() - 1;
 
         auto itNext = it;
         if (size - i > 1)
-            itNext++;
+            ++itNext;
         else
             itNext = polygonVertices.cbegin();
 

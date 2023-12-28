@@ -3,7 +3,6 @@
 #include <Timer.hpp>
 #include <Converter.hpp>
 #include <ThreadPool.hpp>
-#include <SHClipper.hpp>
 #include <BarycentricRasterizer.hpp>
 #include <Globals.hpp>
 
@@ -11,7 +10,7 @@ MainWindow::MainWindow(
     Point &_resolution,
     const BaseLightingModel *_lightingModel,
     const BaseLightSource *_lightSource,
-    const ShadingModel &_shadingModel)
+    const ShadingModel _shadingModel)
     : window(sf::RenderWindow{
           sf::VideoMode(_resolution.cGetX(), _resolution.cGetY()),
           "SFML Graphics",
@@ -50,15 +49,29 @@ void MainWindow::drawModel(
 #pragma omp parallel for if (!_DEBUG)
     for (int j = 0; j < polygons.size(); ++j)
     {
-        auto sightDir = polygons[j].getCenter(objInfo.cGetVertices()) - cameraPosition;
+        auto &polygon = polygons[j];
+
+        const auto &drawableVertices = objInfo.cGetDrawable();
+
+        const auto vIdsCount = polygon.cGetVertexIdsCount();
+        //    /*
+        bool isPolygonVisible = true;
+
+        for (int i = 0; i < vIdsCount; ++i)
+            isPolygonVisible &= drawableVertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1).cGetW() > 0;
+
+        if (!isPolygonVisible)
+            continue;
+
+        auto sightDir = polygon.getCenter(objInfo.cGetVertices()) - cameraPosition;
         sightDir.normalize();
 
-        if (!isPolygonFrontOriented(polygons[j], objInfo.cGetVertices(), sightDir))
+        if (!isPolygonFrontOriented(polygon, objInfo.cGetVertices(), sightDir))
             continue;
 
         // Timer::start();
         drawPolygon(
-            polygons[j],
+            polygon,
             cameraPosition,
             objInfo);
         // Timer::stop();
@@ -75,8 +88,8 @@ for (auto vertex: viewportVertices) {
     if (!vertex.IsVisible())
         continue;
 
-    int x = vertex.CGetX();
-    int y = vertex.CGetY();
+    int x = vertex.cGetX();
+    int y = vertex.cGetY();
 
 //        if (x - 1 < 0 || x + 1 >= resolution.cGetX() || y - 1 < 0 || y + 1 >= resolution.cGetY())
 //            continue;
@@ -160,19 +173,6 @@ void MainWindow::drawPolygon(
     const Matrix<4, 1> &cameraPosition,
     const Object &object)
 {
-    const auto &drawableVertices = object.cGetDrawable();
-
-    const auto vIndexesCount = polygon.cGetVertexIdsCount();
-    //    /*
-    bool isPolygonVisible = true;
-
-    for (int i = 0; i < vIndexesCount; ++i)
-        isPolygonVisible &= !drawableVertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1).IsWNegative();
-
-    if (!isPolygonVisible)
-        return;
-    //    */
-
     /*
     for (int i = 0; i < vIndexesCount; ++i) {
         const auto j = (i + 1) % vIndexesCount;
@@ -206,7 +206,7 @@ void MainWindow::drawPolygon(
         object);
 
     //    for (const auto &i: result) {
-    //        drawPixel(i.CGetX(), i.CGetY(), &colors.at(colorNumber), resolution.cGetX());
+    //        drawPixel(i.cGetX(), i.cGetY(), &colors.at(colorNumber), resolution.cGetX());
     //    }
 
     //    colorNumber = (colorNumber + 1) % colors.size();
@@ -214,15 +214,15 @@ void MainWindow::drawPolygon(
 }
 
 void MainWindow::drawLineBr(
-    const DrawableVertex &p1,
-    const DrawableVertex &p2,
+    const Point &p1,
+    const Point &p2,
     const sf::Color *color)
 {
-    int x1 = (int)p1.CGetX();
-    int y1 = (int)p1.CGetY();
+    int x1 = (int)p1.cGetX();
+    int y1 = (int)p1.cGetY();
 
-    const int x2 = (int)p2.CGetX();
-    const int y2 = (int)p2.CGetY();
+    const int x2 = (int)p2.cGetX();
+    const int y2 = (int)p2.cGetY();
 
     const int xSize = resolution.cGetX();
 

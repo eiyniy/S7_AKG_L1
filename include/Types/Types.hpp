@@ -1,45 +1,56 @@
 #pragma once
 
-enum class EntryType {
+#include <cstdint>
+
+enum class EntryType
+{
     Vertex,
     TextureVertex,
     NormalVertex,
     Polygon
 };
 
-enum class AxisName {
+enum class AxisName
+{
     X,
     Y,
     Z
 };
 
-enum class Direction {
+enum class Direction
+{
     Forward,
     Backward
 };
 
-enum class ModelMatrixConvert {
+enum class ModelMatrixConvert
+{
     Move,
     Rotate,
     Scale
 };
 
-enum class SceneMatrixConvert {
+enum class SceneMatrixConvert
+{
     View,
     Projection,
     Viewport
 };
 
-enum ShadingModel {
+enum ShadingModel
+{
     Flat,
     Phong
 };
 
-enum class TextureType {
+enum class TextureType
+{
     Diffuse,
     Normal,
-    Specular
+    Emissive,
+    MRAO
 };
 
 using uint = unsigned int;
+using ushort = unsigned short;
 using ubyte = unsigned char;

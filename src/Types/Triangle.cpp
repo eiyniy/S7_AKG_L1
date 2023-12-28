@@ -83,7 +83,7 @@ std::vector<VertexIds> Triangle::parseInner(const std::string &line)
 {
     auto entryType = ObjParser::getEntryType(line);
     if (entryType != EntryType::Polygon)
-        throw std::logic_error("Could not parse value");
+        throw std::logic_error("Could not parse polygon");
 
     std::vector<VertexIds> accumulator{};
     accumulator.reserve(3);

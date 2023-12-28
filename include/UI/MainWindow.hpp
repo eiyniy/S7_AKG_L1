@@ -5,7 +5,6 @@
 #include <Scene.hpp>
 #include <mutex>
 #include <memory>
-#include <CSClipper.hpp>
 #include <BaseLightingModel.hpp>
 #include <BaseLightSource.hpp>
 #include <BarycentricRasterizer.hpp>
@@ -19,7 +18,7 @@ public:
         Point &_resolution,
         const BaseLightingModel *_lightingModel,
         const BaseLightSource *_lightSource,
-        const ShadingModel &_shadingModel);
+        const ShadingModel _shadingModel);
 
     void switchVideoMode(bool isEscape = false);
 
@@ -49,8 +48,8 @@ private:
         const Object &object);
 
     void drawLineBr(
-        const DrawableVertex &p1,
-        const DrawableVertex &p2,
+        const Point &p1,
+        const Point &p2,
         const sf::Color *color);
 
     static void drawPixel(

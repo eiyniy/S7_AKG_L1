@@ -41,94 +41,57 @@ void BarycentricRasterizer::rasterize(
     const auto &b = vertices.at(vId1 - 1);
     const auto &c = vertices.at(vId2 - 1);
 
-    const auto area = edgeFunction(aDrawable, bDrawable, cDrawable);
-    if (area == 0)
-        return;
-    const auto invArea = 1 / area;
+    const auto invAZ = 1 / aDrawable.cGetZ();
+    const auto invBZ = 1 / bDrawable.cGetZ();
+    const auto invCZ = 1 / cDrawable.cGetZ();
 
-    // std::cout << aDrawable.CGetZ() << " " << bDrawable.CGetZ() << " " << cDrawable.CGetZ() << std::endl;
-
-    const auto invAZ = 1 / aDrawable.CGetZ();
-    const auto invBZ = 1 / bDrawable.CGetZ();
-    const auto invCZ = 1 / cDrawable.CGetZ();
+    const auto invAW = 1 / aDrawable.cGetW();
+    const auto invBW = 1 / bDrawable.cGetW();
+    const auto invCW = 1 / cDrawable.cGetW();
 
     const auto windowingRectangle = findWindowingRectangle(polygon, drawableVertices);
-
-    // const int minX = windowingRectangle.first.cGetX();
-    // const int minY = windowingRectangle.first.cGetY();
-    // const int maxX = windowingRectangle.second.cGetX();
-    // const int maxY = windowingRectangle.second.cGetY();
 
     const int minX = std::max(windowingRectangle.first.cGetX(), 0);
     const int minY = std::max(windowingRectangle.first.cGetY(), 0);
     const int maxX = std::min(windowingRectangle.second.cGetX(), resolution.cGetX() - 1);
     const int maxY = std::min(windowingRectangle.second.cGetY(), resolution.cGetY() - 1);
 
-    //    /*
-    //    const Matrix<4, 1> minMinVertex{(double) minX, (double) minY, 0};
-    //    const Matrix<4, 1> maxMinVertex{(double) maxX, (double) minY, 0};
-    //    const Matrix<4, 1> minMaxVertex{(double) minX, (double) maxY, 0};
+    const Matrix<4, 1> minMinVertex{minX, minY, 0};
+    const Matrix<4, 1> maxMinVertex{maxX, minY, 0};
+    const Matrix<4, 1> minMaxVertex{minX, maxY, 0};
 
-    const DrawableVertex minMinVertex{minX, minY, 0};
-    const DrawableVertex maxMinVertex{maxX, minY, 0};
-    const DrawableVertex minMaxVertex{minX, maxY, 0};
+    const Matrix<4, 1> v0{bDrawable.cGetX() - aDrawable.cGetX(), bDrawable.cGetY() - aDrawable.cGetY(), 0, 0};
+    const Matrix<4, 1> v1{cDrawable.cGetX() - aDrawable.cGetX(), cDrawable.cGetY() - aDrawable.cGetY(), 0, 0};
 
-    //    const auto v0 = bMatrix - aMatrix;
-    //    const auto v1 = cMatrix - aMatrix;
+    const auto invDen = 1 / (v0.cGetX() * v1.cGetY() - v1.cGetX() * v0.cGetY());
 
-    const DrawableVertex v0{bDrawable.CGetX() - aDrawable.CGetX(), bDrawable.CGetY() - aDrawable.CGetY(), 0};
-    const DrawableVertex v1{cDrawable.CGetX() - aDrawable.CGetX(), cDrawable.CGetY() - aDrawable.CGetY(), 0};
+    double b0, b1, b2;
+    calcBarycentric(minMinVertex, aDrawable, v0, v1, invDen, b0, b1, b2);
 
-    const auto invDen = 1 / (v0.CGetX() * v1.CGetY() - v1.CGetX() * v0.CGetY());
+    double b0XLast, b1XLast, b2XLast;
+    calcBarycentric(maxMinVertex, aDrawable, v0, v1, invDen, b0XLast, b1XLast, b2XLast);
 
-    double w0, w1, w2;
-
-    w0 = edgeFunction(bDrawable, cDrawable, minMinVertex) * invArea;
-    w1 = edgeFunction(cDrawable, aDrawable, minMinVertex) * invArea;
-    w2 = 1 - w0 - w1;
-
-    // calcBarycentric(minMinVertex, aDrawable, v0, v1, invDen, w0, w1, w2);
-    //    calcBarycentric(minMinVertex, aMatrix, v0, v1, invDen, w0, w1, w2);
-    //    calcBarycentric(minMinVertex, aMatrix, bMatrix, cMatrix, w0, w1, w2);
-
-    double w0XLast, w1XLast, w2XLast;
-
-    w0XLast = edgeFunction(bDrawable, cDrawable, maxMinVertex) * invArea;
-    w1XLast = edgeFunction(cDrawable, aDrawable, maxMinVertex) * invArea;
-    w2XLast = 1 - w0XLast - w1XLast;
-
-    // calcBarycentric(maxMinVertex, aDrawable, v0, v1, invDen, w0XLast, w1XLast, w2XLast);
-    //    calcBarycentric(maxMinVertex, aMatrix, v0, v1, invDen, w0XLast, w1XLast, w2XLast);
-    //    calcBarycentric(maxMinVertex, aMatrix, bMatrix, cMatrix, w0XLast, w1XLast, w2XLast);
-
-    double w0YLast, w1YLast, w2YLast;
-
-    w0YLast = edgeFunction(bDrawable, cDrawable, minMaxVertex) * invArea;
-    w1YLast = edgeFunction(cDrawable, aDrawable, minMaxVertex) * invArea;
-    w2YLast = 1 - w0YLast - w1YLast;
-
-    // calcBarycentric(minMaxVertex, aDrawable, v0, v1, invDen, w0YLast, w1YLast, w2YLast);
-    //    calcBarycentric(minMaxVertex, aMatrix, v0, v1, invDen, w0YLast, w1YLast, w2YLast);
-    //    calcBarycentric(minMaxVertex, aMatrix, bMatrix, cMatrix, w0YLast, w1YLast, w2YLast);
+    double b0YLast, b1YLast, b2YLast;
+    calcBarycentric(minMaxVertex, aDrawable, v0, v1, invDen, b0YLast, b1YLast, b2YLast);
 
     const auto xInterval = maxX - minX;
     const auto yInterval = maxY - minY;
 
-    const auto w0XStep = (w0XLast - w0) / xInterval;
-    const auto w1XStep = (w1XLast - w1) / xInterval;
-    const auto w2XStep = (w2XLast - w2) / xInterval;
+    const auto b0XStep = (b0XLast - b0) / xInterval;
+    const auto b1XStep = (b1XLast - b1) / xInterval;
+    const auto b2XStep = (b2XLast - b2) / xInterval;
 
-    const auto w0RowStep = w0XStep * (xInterval + 1);
-    const auto w1RowStep = w1XStep * (xInterval + 1);
-    const auto w2RowStep = w2XStep * (xInterval + 1);
+    const auto b0RowStep = b0XStep * (xInterval + 1);
+    const auto b1RowStep = b1XStep * (xInterval + 1);
+    const auto b2RowStep = b2XStep * (xInterval + 1);
 
-    const auto w0YStep = (w0YLast - w0) / yInterval - w0RowStep;
-    const auto w1YStep = (w1YLast - w1) / yInterval - w1RowStep;
-    const auto w2YStep = (w2YLast - w2) / yInterval - w2RowStep;
+    const auto b0YStep = (b0YLast - b0) / yInterval - b0RowStep;
+    const auto b1YStep = (b1YLast - b1) / yInterval - b1RowStep;
+    const auto b2YStep = (b2YLast - b2) / yInterval - b2RowStep;
 
-    // std::cout << "w0: " << w0  << ", w1: " << w1 << ", w2: " << w2 << std::endl;
-    // std::cout << "w0XStep: " << w0XStep << ", w1XStep: " << w1XStep << ", w2XStep: " << w2XStep << std::endl;
-    // std::cout << "w0YStep: " << w0YStep << ", w1YStep: " << w1YStep << ", w2YStep: " << w2YStep << std::endl;
+    // std::cout << "b0: " << b0  << ", b1: " << b1 << ", b2: " << b2 << std::endl;
+    // std::cout << "b0XStep: " << b0XStep << ", b1XStep: " << b1XStep << ", b2XStep: " << b2XStep << std::endl;
+    // std::cout << "b0YStep: " << b0YStep << ", b1YStep: " << b1YStep << ", b2YStep: " << b2YStep << std::endl;
     // std::cout << std::endl;
 
     sf::Color shadedColor;
@@ -141,26 +104,20 @@ void BarycentricRasterizer::rasterize(
         shadedColor = getShadedColor(
             polygon,
             sightDir,
-            w0, w1, w2,
-            invAZ, invBZ, invCZ,
+            b0, b1, b2,
+            invAW, invBW, invCW,
             object,
-            lightSource->getLightDirection(polygon.getCenter(vertices)),
-            shadingModel,
-            lightingModel);
+            lightSource->getLightDirection(polygon.getCenter(vertices)));
     }
 
-    //    */
-    for (int i = minY; i <= maxY; ++i, w0 += w0YStep, w1 += w1YStep, w2 += w2YStep)
+    for (int i = minY; i <= maxY; ++i, b0 += b0YStep, b1 += b1YStep, b2 += b2YStep)
     {
-        for (int j = minX; j <= maxX; ++j, w0 += w0XStep, w1 += w1XStep, w2 += w2XStep)
+        for (int j = minX; j <= maxX; ++j, b0 += b0XStep, b1 += b1XStep, b2 += b2XStep)
         {
-            // calcBarycentric({j, i, 0}, aDrawable, v0, v1, invDen, w0, w1, w2);
-
-            if (w0 < 0 || w1 < 0 || w2 < 0)
+            if (b0 < 0 || b1 < 0 || b2 < 0)
                 continue;
 
-            // const auto z = aDrawable.CGetZ() * w0 + bDrawable.CGetZ() * w1 + cDrawable.CGetZ() * w2;
-            const auto z = 1 / (invAZ * w0 + invBZ * w1 + invCZ * w2);
+            const auto z = 1 / (invAZ * b0 + invBZ * b1 + invCZ * b2);
             const auto matrixPos = i * resolution.cGetX() + j;
 
             auto oldZ = depthBuffer[matrixPos];
@@ -175,24 +132,20 @@ void BarycentricRasterizer::rasterize(
 
                     if (shadingModel == ShadingModel::Phong)
                     {
-                        const auto p = a * w0 + b * w1 + c * w2;
+                        const auto p = a * b0 + b * b1 + c * b2;
                         auto sightDir = p - cameraPosition;
                         sightDir.normalize();
 
                         shadedColor = getShadedColor(
                             polygon,
                             sightDir,
-                            w0, w1, w2,
-                            invAZ, invBZ, invCZ,
+                            b0, b1, b2,
+                            invAW, invBW, invCW,
                             object,
-                            lightSource->getLightDirection(p),
-                            shadingModel,
-                            lightingModel);
+                            lightSource->getLightDirection(p));
                     }
 
-                    // drawPixel(pixels, matrixPos, &polygon.color);
                     drawPixel(pixels, matrixPos, &shadedColor);
-                    // drawPixel(pixels, matrixPos, &color);
                 }
 
                 omp_unset_lock(&pixelLocks[matrixPos]);
@@ -203,32 +156,28 @@ void BarycentricRasterizer::rasterize(
 
 std::pair<Point, Point> BarycentricRasterizer::findWindowingRectangle(
     const Triangle &polygon,
-    const std::vector<DrawableVertex> &drawableVertices)
+    const std::vector<Matrix<4, 1>> &drawableVertices)
 {
-    //    const auto &firstVertex = vertices.at(polygon.cGetVertexIds(0).cGetVertexId() - 1);
-
     const auto &firstVertex = drawableVertices.at(polygon.cGetVertexIds(0).cGetVertexId() - 1);
 
-    auto minX = (int)std::floor(firstVertex.CGetX());
-    auto maxX = (int)std::ceil(firstVertex.CGetX());
-    auto minY = (int)std::floor(firstVertex.CGetY());
-    auto maxY = (int)std::ceil(firstVertex.CGetY());
+    auto minX = (int)std::floor(firstVertex.cGetX());
+    auto maxX = (int)std::ceil(firstVertex.cGetX());
+    auto minY = (int)std::floor(firstVertex.cGetY());
+    auto maxY = (int)std::ceil(firstVertex.cGetY());
 
     const auto size = polygon.cGetVertexIdsCount();
     for (int i = 0; i < size; ++i)
     {
-        //        const auto &vertex = vertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1);
-
         const auto &vertex = drawableVertices.at(polygon.cGetVertexIds(i).cGetVertexId() - 1);
 
-        if (vertex.CGetX() < minX)
-            minX = (int)std::floor(vertex.CGetX());
-        else if (vertex.CGetX() > maxX)
-            maxX = (int)std::ceil(vertex.CGetX());
-        if (vertex.CGetY() < minY)
-            minY = (int)std::floor(vertex.CGetY());
-        else if (vertex.CGetY() > maxY)
-            maxY = (int)std::ceil(vertex.CGetY());
+        if (vertex.cGetX() < minX)
+            minX = (int)std::floor(vertex.cGetX());
+        else if (vertex.cGetX() > maxX)
+            maxX = (int)std::ceil(vertex.cGetX());
+        if (vertex.cGetY() < minY)
+            minY = (int)std::floor(vertex.cGetY());
+        else if (vertex.cGetY() > maxY)
+            maxY = (int)std::ceil(vertex.cGetY());
     }
 
     return {{minX, minY},
@@ -238,138 +187,136 @@ std::pair<Point, Point> BarycentricRasterizer::findWindowingRectangle(
 sf::Color BarycentricRasterizer::getShadedColor(
     Triangle &polygon,
     const Matrix<4, 1> &sightDirection,
-    const double &w0, const double &w1, const double &w2,
-    const double invZ0, const double invZ1, const double invZ2,
+    const double b0, const double b1, const double b2,
+    const double invAW, const double invBW, const double invCW,
     const Object &object,
-    const Matrix<4, 1> &lightDirection,
-    ShadingModel shadingModel,
-    const BaseLightingModel *lightingModel)
+    const Matrix<4, 1> &lightDirection)
 {
     const auto invLightDir = lightDirection * -1;
 
     sf::Color result;
+    Matrix<4, 1> mapId;
     Matrix<4, 1> normal;
-    sf::Color diffuseColor;
+    Matrix<4, 1> diffuse;
     Matrix<4, 1> mrao;
-    sf::Color emissiveColor;
-
-    const auto tId0 = polygon.cGetVertexIds(0).cGetTextureVertexId();
-    const auto tId1 = polygon.cGetVertexIds(1).cGetTextureVertexId();
-    const auto tId2 = polygon.cGetVertexIds(2).cGetTextureVertexId();
-
-    if (!tId0.has_value() || !tId2.has_value() || !tId2.has_value())
-        throw std::runtime_error("Can not get diffuseMap");
-
-    const auto &vertices = object.cGetVertices();
-    const auto &tVertices = object.cGetTVertices();
-
-    const auto &aMapId = tVertices.at(*tId0 - 1);
-    const auto &bMapId = tVertices.at(*tId1 - 1);
-    const auto &cMapId = tVertices.at(*tId2 - 1);
-
-    const auto mapIdNominator = aMapId * invZ0 * w0 + bMapId * invZ1 * w1 + cMapId * invZ2 * w2;
-    const auto mapIdDenominator = invZ0 * w0 + invZ1 * w1 + invZ2 * w2;
-    const auto mapId = mapIdNominator / mapIdDenominator;
+    Matrix<4, 1> emissive;
 
     const auto &diffuseMap = object.cGetDiffuseMap();
-    if (diffuseMap.has_value())
-    {
-        const auto width = diffuseMap->cGetWidth() - 1;
-        const auto height = diffuseMap->cGetHeight() - 1;
-
-        const Point normMapId{
-            (int)(mapId.cGetX() * width),
-            (int)(height - mapId.cGetY() * height)};
-
-        diffuseColor = diffuseMap->cGetData().at(normMapId.cGetX() + (width + 1) * normMapId.cGetY());
-    }
-    else
-        diffuseColor = sf::Color::White;
-
     const auto &normalMap = object.cGetNormalMap();
-    if (normalMap.has_value())
-    {
-        const auto width = normalMap->cGetWidth() - 1;
-        const auto height = normalMap->cGetHeight() - 1;
-
-        const Point normMapId{
-            (int)(mapId.cGetX() * width),
-            (int)(height - mapId.cGetY() * height)};
-
-        normal = normalMap->cGetData().at(normMapId.cGetX() + (width + 1) * normMapId.cGetY());
-    }
-    else
-    {
-        switch (shadingModel)
-        {
-        case Flat:
-        {
-            normal = polygon.getNormal(vertices);
-
-            break;
-        }
-        case Phong:
-        {
-            const auto nId0 = polygon.cGetVertexIds(0).cGetNormalVertexId();
-            const auto nId1 = polygon.cGetVertexIds(1).cGetNormalVertexId();
-            const auto nId2 = polygon.cGetVertexIds(2).cGetNormalVertexId();
-
-            if (!nId0.has_value() || !nId2.has_value() || !nId2.has_value())
-                throw std::runtime_error("Can not get normal");
-
-            const auto &nVertices = object.cGetNVertices();
-
-            const auto &aNormal = nVertices.at(*nId0 - 1);
-            const auto &bNormal = nVertices.at(*nId1 - 1);
-            const auto &cNormal = nVertices.at(*nId2 - 1);
-
-            normal = aNormal * w0 + bNormal * w1 + cNormal * w2;
-            normal.normalize();
-
-            break;
-        }
-        }
-    }
-
     const auto &mraoMap = object.cGetMRAOMap();
+    const auto &emissiveMap = object.cGetEmissiveMap();
+
+    if (diffuseMap.has_value() || normalMap.has_value() || mraoMap.has_value() || emissiveMap.has_value())
+        mapId = getMapId(polygon, object, b0, b1, b2, invAW, invBW, invCW);
+
+    if (diffuseMap.has_value())
+        diffuse = getMapValue(*diffuseMap, mapId);
+    else
+        diffuse = Converter::colorToMatrix(sf::Color::White);
+
+    if (normalMap.has_value())
+        normal = getMapValue(*normalMap, mapId);
+    else
+        normal = getNormalByShading(polygon, object, b0, b1, b2);
+
     if (mraoMap.has_value())
-    {
-        const auto width = mraoMap->cGetWidth() - 1;
-        const auto height = mraoMap->cGetHeight() - 1;
-
-        const Point normMapId{
-            (int)(mapId.cGetX() * width),
-            (int)(height - mapId.cGetY() * height)};
-
-        mrao = mraoMap->cGetData().at(normMapId.cGetX() + (width + 1) * normMapId.cGetY());
-    }
+        mrao = getMapValue(*mraoMap, mapId);
     else
     {
         const auto phongModel = ((PhongModel *)lightingModel);
         mrao = Matrix<4, 1>(1, 1, phongModel != nullptr ? phongModel->cGetAmbientCoeff() : 1);
     }
 
-    const auto &emissiveMap = object.cGetEmissiveMap();
     if (emissiveMap.has_value())
-    {
-        const auto width = emissiveMap->cGetWidth() - 1;
-        const auto height = emissiveMap->cGetHeight() - 1;
-
-        const Point normMapId{
-            (int)(mapId.cGetX() * width),
-            (int)(height - mapId.cGetY() * height)};
-
-        emissiveColor = emissiveMap->cGetData().at(normMapId.cGetX() + (width + 1) * normMapId.cGetY());
-    }
+        emissive = getMapValue(*emissiveMap, mapId);
     else
-        emissiveColor = sf::Color(0, 0, 0);
+        emissive = Converter::colorToMatrix(sf::Color::Black);
 
-    const auto color = lightingModel->getLightIntensity(normal, diffuseColor, invLightDir, sightDirection, mrao);
+    const auto color = lightingModel->getLightIntensity(normal, diffuse, invLightDir, sightDirection, mrao);
 
     result = sf::Color(
-        std::min(color.r + emissiveColor.r, 255),
-        std::min(color.g + emissiveColor.g, 255),
-        std::min(color.b + emissiveColor.b, 255));
+        std::min(color.r + emissive.cGetX(), 255.0),
+        std::min(color.g + emissive.cGetY(), 255.0),
+        std::min(color.b + emissive.cGetZ(), 255.0));
 
     return result;
+}
+
+Matrix<4, 1> BarycentricRasterizer::getMapId(
+    const Triangle &polygon,
+    const Object &object,
+    const double b0, const double b1, const double b2,
+    const double invAW, const double invBW, const double invCW)
+{
+    const auto tId0 = polygon.cGetVertexIds(0).cGetTextureVertexId();
+    const auto tId1 = polygon.cGetVertexIds(1).cGetTextureVertexId();
+    const auto tId2 = polygon.cGetVertexIds(2).cGetTextureVertexId();
+
+    if (!tId0.has_value() || !tId1.has_value() || !tId2.has_value())
+        throw std::runtime_error("Can not get texture coordinates");
+
+    const auto &tVertices = object.cGetTVertices();
+
+    const auto &aMapId = tVertices.at(*tId0 - 1);
+    const auto &bMapId = tVertices.at(*tId1 - 1);
+    const auto &cMapId = tVertices.at(*tId2 - 1);
+
+    const auto mapIdNominator = aMapId * invAW * b0 + bMapId * invBW * b1 + cMapId * invCW * b2;
+    const auto mapIdDenominator = invAW * b0 + invBW * b1 + invCW * b2;
+    return mapIdNominator / mapIdDenominator;
+}
+
+Matrix<4, 1> BarycentricRasterizer::getMapValue(
+    const Texture &map,
+    const Matrix<4, 1> &mapId)
+{
+    const auto width = map.cGetWidth();
+    const auto height = map.cGetHeight();
+
+    const Point normMapId{
+        (int)(mapId.cGetX() * (width - 1)),
+        (int)(height - mapId.cGetY() * (height - 1))};
+
+    return map.cGetData().at(normMapId.cGetX() + width * normMapId.cGetY());
+}
+
+Matrix<4, 1> BarycentricRasterizer::getNormalByShading(
+    Triangle &polygon,
+    const Object &object,
+    const double b0, const double b1, const double b2)
+{
+    Matrix<4, 1> normal;
+
+    switch (shadingModel)
+    {
+    case Flat:
+    {
+        const auto &vertices = object.cGetVertices();
+        normal = polygon.getNormal(vertices);
+
+        break;
+    }
+    case Phong:
+    {
+        const auto nId0 = polygon.cGetVertexIds(0).cGetNormalVertexId();
+        const auto nId1 = polygon.cGetVertexIds(1).cGetNormalVertexId();
+        const auto nId2 = polygon.cGetVertexIds(2).cGetNormalVertexId();
+
+        if (!nId0.has_value() || !nId1.has_value() || !nId2.has_value())
+            throw std::runtime_error("Can not get normal");
+
+        const auto &nVertices = object.cGetNVertices();
+
+        const auto &aNormal = nVertices.at(*nId0 - 1);
+        const auto &bNormal = nVertices.at(*nId1 - 1);
+        const auto &cNormal = nVertices.at(*nId2 - 1);
+
+        normal = aNormal * b0 + bNormal * b1 + cNormal * b2;
+        normal.normalize();
+
+        break;
+    }
+    }
+
+    return normal;
 }

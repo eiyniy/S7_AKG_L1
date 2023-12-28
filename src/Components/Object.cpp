@@ -6,7 +6,7 @@
 #include <Timer.hpp>
 #include <Globals.hpp>
 
-DrawableVertex convertVertex(
+Matrix<4, 1> convertVertex(
     const Matrix<4, 1> &,
     const Matrix<4, 4> &,
     const Matrix<4, 4> &);
@@ -16,10 +16,10 @@ Object::Object(
     const std::vector<Matrix<4, 1>> &_tVertices,
     const std::vector<Matrix<4, 1>> &_nVertices,
     const std::vector<Triangle> &_polygons,
-    const std::optional<Texture<sf::Color>> &_diffuseMap,
-    const std::optional<Texture<Matrix<4, 1>>> &_normalMap,
-    const std::optional<Texture<Matrix<4, 1>>> &_mraoMap,
-    const std::optional<Texture<sf::Color>> &_emissiveMap)
+    const std::optional<Texture> &_diffuseMap,
+    const std::optional<Texture> &_normalMap,
+    const std::optional<Texture> &_mraoMap,
+    const std::optional<Texture> &_emissiveMap)
     : vertices(_vertices),
       tVertices(_tVertices),
       nVertices(_nVertices),
@@ -29,7 +29,7 @@ Object::Object(
       mraoMap(_mraoMap),
       emissiveMap(_emissiveMap)
 {
-    drawable = std::vector<DrawableVertex>(vertices.size());
+    drawable = std::vector<Matrix<4, 1>>(vertices.size());
 }
 
 void Object::move(const Matrix<4, 1> &transition)
@@ -56,11 +56,9 @@ void Object::convertToDrawable(const Camera &camera)
     const auto viewportConvert = Matrix<4, 4>::getViewportConvert(
         resolution.cGetX(), resolution.cGetY(), 0, 0);
 
-    // /*
 #pragma omp parallel for if (!_DEBUG)
     for (int j = 0; j < vertices.size(); ++j)
         drawable[j] = convertVertex(vertices[j], convertMatrix, viewportConvert);
-    // */
 }
 
 void Object::calcGeometricParams()
@@ -124,7 +122,7 @@ const Matrix<4, 1> &Object::getMinXZ()
     return *minXZ;
 }
 
-DrawableVertex convertVertex(
+Matrix<4, 1> convertVertex(
     const Matrix<4, 1> &vertex,
     const Matrix<4, 4> &toProjectionConvert,
     const Matrix<4, 4> &viewportConvert)
@@ -137,14 +135,13 @@ DrawableVertex convertVertex(
         isWNegative = true;
 
     const auto w = vertexCopy.cGetW();
+    const auto z = vertexCopy.cGetZ();
     vertexCopy /= w;
-
-    // if (mVertex.cGetX() < -1 || mVertex.cGetX() > 1 ||
-    //     mVertex.cGetY() < -1 || mVertex.cGetY() > 1 ||
-    //     mVertex.cGetZ() < 0 || mVertex.cGetZ() > 1)
-    //     isVisible = false;
 
     vertexCopy = viewportConvert * vertexCopy;
 
-    return Converter::matrixToDrawableVertex(vertexCopy, w, isWNegative);
+    vertexCopy.getZ() = z;
+    vertexCopy.getW() = w;
+
+    return vertexCopy;
 }

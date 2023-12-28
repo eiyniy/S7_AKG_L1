@@ -83,6 +83,7 @@
         "unordered_set": "cpp",
         "regex": "cpp",
         "hash_map": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "*.def": "cpp"
     },
 }

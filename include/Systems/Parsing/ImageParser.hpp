@@ -2,22 +2,20 @@
 
 #include <string>
 #include <Texture.hpp>
+#include <Types.hpp>
 #include <CImg.h>
 #include <SFML/Graphics.hpp>
 
 namespace cimg = cimg_library;
 
-template <typename T>
 class ImageParser
 {
-    static_assert(std::is_same<T, Matrix<4, 1>>::value || std::is_same<T, sf::Color>::value,
-                  "You only can use sf::Color or Matrix<4, 1> here");
-
 private:
     const std::string path;
+    const TextureType type;
 
 public:
-    ImageParser(const std::string &_path);
+    ImageParser(const std::string &_path, const TextureType _type);
 
-    Texture<T> parse() const;
+    Texture parse() const;
 };

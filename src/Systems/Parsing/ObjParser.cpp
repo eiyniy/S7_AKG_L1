@@ -8,6 +8,7 @@
 #include <Timer.hpp>
 #include <ThreadPool.hpp>
 #include <ImageParser.hpp>
+#include <Globals.hpp>
 
 ObjParser::ObjParser(
     const std::string &_pathToObj,
@@ -90,31 +91,31 @@ Object *ObjParser::parse()
 {
     const auto timeStart = std::chrono::high_resolution_clock::now();
 
-    std::optional<Texture<sf::Color>> diffuseMap;
+    std::optional<Texture> diffuseMap;
     if (pathToDiffuseMap.has_value())
     {
-        const ImageParser<sf::Color> parser{*pathToDiffuseMap};
+        const ImageParser parser{*pathToDiffuseMap, TextureType::Diffuse};
         diffuseMap = parser.parse();
     }
 
-    std::optional<Texture<Matrix<4, 1>>> normlMap;
+    std::optional<Texture> normlMap;
     if (pathToNormalMap.has_value())
     {
-        const ImageParser<Matrix<4, 1>> parser{*pathToNormalMap};
+        const ImageParser parser{*pathToNormalMap, TextureType::Normal};
         normlMap = parser.parse();
     }
 
-    std::optional<Texture<Matrix<4, 1>>> mraoMap;
+    std::optional<Texture> mraoMap;
     if (pathToMRAOMap.has_value())
     {
-        const ImageParser<Matrix<4, 1>> parser{*pathToMRAOMap};
+        const ImageParser parser{*pathToMRAOMap, TextureType::MRAO};
         mraoMap = parser.parse();
     }
-    
-    std::optional<Texture<sf::Color>> emissiveMap;
+
+    std::optional<Texture> emissiveMap;
     if (pathToEmissiveMap.has_value())
     {
-        const ImageParser<sf::Color> parser{*pathToEmissiveMap};
+        const ImageParser parser{*pathToEmissiveMap, TextureType::Emissive};
         emissiveMap = parser.parse();
     }
 
@@ -124,14 +125,18 @@ Object *ObjParser::parse()
     for (const auto &line : lines)
         parseEntry(line);
 
-    Timer::start();
+    polygons.reserve(polygonStrings.size());
+
+#pragma omp parallel for if (!_DEBUG)
     for (const auto &line : polygonStrings)
     {
         const auto triangulated = Triangle::parseAndTriangulate(line, vertices);
         for (const auto &polygon : triangulated)
+        {
+#pragma omp critical(new_triangle)
             polygons.emplace_back(polygon);
+        }
     }
-    Timer::stop();
 
     const auto timeEnd = std::chrono::high_resolution_clock::now();
     auto parseTime = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count();

@@ -1,16 +1,12 @@
 #include <ImageParser.hpp>
 #include <Globals.hpp>
 
-template <typename T>
-ImageParser<T>::ImageParser(const std::string &_path)
-    : path(_path)
-{
-}
+ImageParser::ImageParser(const std::string &_path, const TextureType _type)
+    : path(_path), type(_type) {}
 
-template <typename T>
-Texture<T> ImageParser<T>::parse() const
+Texture ImageParser::parse() const
 {
-    std::vector<T> data;
+    std::vector<Matrix<4, 1>> data;
 
     const cimg::CImg<ubyte> image = cimg::CImg<>(path.c_str());
     // image.display();
@@ -18,7 +14,7 @@ Texture<T> ImageParser<T>::parse() const
     uint width = image.width();
     uint height = image.height();
 
-    data = std::vector<T>{width * height};
+    data = std::vector<Matrix<4, 1>>{width * height};
 
 #pragma omp parallel for if (!_DEBUG)
     for (uint i = 0; i < height; ++i)
@@ -29,10 +25,9 @@ Texture<T> ImageParser<T>::parse() const
             const auto g = image(j, i, 1);
             const auto b = image(j, i, 2);
 
-            if constexpr (std::is_same<T, sf::Color>::value)
-
-                data.at(j + width * i) = sf::Color(r, g, b);
-            else if constexpr (std::is_same<T, Matrix<4, 1>>::value)
+            if (type == TextureType::Diffuse || type == TextureType::Emissive)
+                data.at(j + width * i) = Matrix<4, 1>(r, g, b, 0);
+            else if (type == TextureType::Normal)
             {
                 data.at(j + width * i) = Matrix<4, 1>(
                     r / 255.0 * 2 - 1,
@@ -41,13 +36,17 @@ Texture<T> ImageParser<T>::parse() const
                     0);
                 data.at(j + width * i).normalize();
             }
-            else
-                throw std::runtime_error("Invalid template type");
+            else if (type == TextureType::MRAO)
+            {
+                data.at(j + width * i) = Matrix<4, 1>(
+                    r / 255.0,
+                    g / 255.0,
+                    b / 255.0,
+                    0);
+                data.at(j + width * i).normalize();
+            }
         }
     }
 
-    return Texture<T>(width, height, data);
+    return Texture(width, height, data);
 }
-
-template class ImageParser<Matrix<4, 1>>;
-template class ImageParser<sf::Color>;
