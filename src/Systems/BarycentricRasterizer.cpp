@@ -21,6 +21,13 @@ BarycentricRasterizer::BarycentricRasterizer(
       pixelLocks(_pixelLocks),
       depthBuffer(_depthBuffer) {}
 
+void BarycentricRasterizer::resize(sf::Uint8 *newPixels, double *newDepthBuffer, omp_lock_t *newPixelLocks)
+{
+    pixels = newPixels;
+    depthBuffer = newDepthBuffer;
+    pixelLocks = newPixelLocks;
+}
+
 void BarycentricRasterizer::rasterize(
     Triangle &polygon,
     const Matrix<4, 1> &cameraPosition,

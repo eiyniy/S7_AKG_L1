@@ -26,8 +26,8 @@ void Engine::start()
     for (const auto &key : scene.cGetAllObjectNames())
         scene.getObject(key)->convertToDrawable(scene.cGetCamera());
 
-    auto ts = std::chrono::high_resolution_clock::now();
-    auto te = std::chrono::high_resolution_clock::now();
+    // auto ts = std::chrono::high_resolution_clock::now();
+    // auto te = std::chrono::high_resolution_clock::now();
 
     while (mainWindow.getWindow().isOpen())
     {
@@ -36,25 +36,25 @@ void Engine::start()
         // te = std::chrono::high_resolution_clock::now();
         // const auto inputMs = std::chrono::duration_cast<std::chrono::milliseconds>(te - ts).count();
 
-        ts = std::chrono::high_resolution_clock::now();
+        // ts = std::chrono::high_resolution_clock::now();
         update();
-        te = std::chrono::high_resolution_clock::now();
-        const auto updateMs = std::chrono::duration_cast<std::chrono::milliseconds>(te - ts).count();
+        // te = std::chrono::high_resolution_clock::now();
+        // const auto updateMs = std::chrono::duration_cast<std::chrono::milliseconds>(te - ts).count();
 
-        ts = std::chrono::high_resolution_clock::now();
+        // ts = std::chrono::high_resolution_clock::now();
         draw();
-        te = std::chrono::high_resolution_clock::now();
-        const auto drawMs = std::chrono::duration_cast<std::chrono::milliseconds>(te - ts).count();
+        // te = std::chrono::high_resolution_clock::now();
+        // const auto drawMs = std::chrono::duration_cast<std::chrono::milliseconds>(te - ts).count();
 
 
         // std::cout << "Input time: " << inputMs << " ms" << std::endl;
-        std::cout << "Update time: " << updateMs << " ms" << std::endl;
-        std::cout << "Draw time: " << drawMs << " ms" << std::endl;
+        // std::cout << "Update time: " << updateMs << " ms" << std::endl;
+        // std::cout << "Draw time: " << drawMs << " ms" << std::endl;
         // std::cout << "Timer frame time: " << Timer::getMcs() / 1000 << " ms" << std::endl; // 26 ms
 
         // std::cout << "Frame time: " << inputMs + updateMs + drawMs << " ms" << std::endl;
 
-        std::cout << std::endl;
+        // std::cout << std::endl;
 
         // Timer::reset();
     }

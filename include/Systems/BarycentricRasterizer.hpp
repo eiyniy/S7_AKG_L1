@@ -24,6 +24,11 @@ public:
         omp_lock_t *_pixelLocks,
         double *_depthBuffer);
 
+    void resize(
+        sf::Uint8 *newPixels, 
+        double *newDepthBuffer,
+        omp_lock_t *newPixelLocks);
+
     void rasterize(
         Triangle &polygon,
         const Matrix<4, 1> &sightDir,
@@ -66,8 +71,7 @@ private:
     Matrix<4, 1> getNormalByShading(
         Triangle &polygon,
         const Object &object,
-        const double b0, const double b1, const double b2
-    );
+        const double b0, const double b1, const double b2);
 
     static std::pair<Point, Point> findWindowingRectangle(
         const Triangle &polygon,

@@ -144,8 +144,16 @@ void MainWindow::resize(const int width, const int height)
     delete[] pixels;
     pixels = new sf::Uint8[width * height * 4];
 
+    delete[] depthBuffer;
     depthBuffer = new double[width * height];
-    std::fill(depthBuffer, depthBuffer + resolution.cGetX() * resolution.cGetY(), INT_MAX);
+    std::fill(depthBuffer, depthBuffer + width * height, INT_MAX);
+
+    delete[] pixelLocks;
+    pixelLocks = new omp_lock_t[width * height];
+    for (int i = 0; i < width * height; ++i)
+        omp_init_lock(&pixelLocks[i]);
+
+    rasterizer.resize(pixels, depthBuffer, pixelLocks);
 
     bufferTexture.create(width, height);
     bufferSprite.setTexture(bufferTexture, true);
