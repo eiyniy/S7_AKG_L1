@@ -4,7 +4,7 @@
 ImageParser::ImageParser(const std::string &_path, const TextureType _type)
     : path(_path), type(_type) {}
 
-Texture ImageParser::parse() const
+std::unique_ptr<const Texture> ImageParser::parse() const
 {
     std::vector<Matrix<4, 1>> data;
 
@@ -48,5 +48,5 @@ Texture ImageParser::parse() const
         }
     }
 
-    return Texture(width, height, data);
+    return std::make_unique<const Texture>(width, height, data);
 }

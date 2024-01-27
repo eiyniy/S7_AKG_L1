@@ -9,7 +9,8 @@
 #include <BaseLightSource.hpp>
 #include <BaseLightingModel.hpp>
 
-class Scene {
+class Scene
+{
 private:
     const int floorStepsCount = 30;
 
@@ -19,9 +20,9 @@ private:
 
     BaseLightSource *lightSource;
 
-    void generateFloor();
+    // void generateFloor();
 
-    void generateFloor(int size, int step, const Point &center);
+    // void generateFloor(int size, int step, const Point &center);
 
 public:
     const std::string floorObjectName = "_FLOOR";
@@ -31,10 +32,10 @@ public:
     const double rotationSpeed;
 
     Scene(
-            Camera &_camera,
-            BaseLightSource *_lightSource,
-            double _moveSpeed,
-            double _rotationSpeed);
+        Camera &_camera,
+        BaseLightSource *_lightSource,
+        double _moveSpeed,
+        double _rotationSpeed);
 
     ~Scene();
 
@@ -55,18 +56,22 @@ public:
     Camera &getCamera();
 };
 
-inline const Object *Scene::cGetObject(const std::string &key) const {
+inline const Object *Scene::cGetObject(const std::string &key) const
+{
     return objects.at(key);
 }
 
-inline const Camera &Scene::cGetCamera() const {
+inline const Camera &Scene::cGetCamera() const
+{
     return camera;
 }
 
-inline Object *Scene::getObject(const std::string &key) {
+inline Object *Scene::getObject(const std::string &key)
+{
     return objects.at(key);
 }
 
-inline Camera &Scene::getCamera() {
+inline Camera &Scene::getCamera()
+{
     return camera;
 }

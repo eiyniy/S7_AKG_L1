@@ -3,7 +3,8 @@
 
 std::vector<Triangle> EarClipper::triangulate(
     const std::vector<VertexIds> &indexes,
-    const std::vector<Matrix<4, 1>> &vertices)
+    const std::vector<Matrix<4, 1>> &vertices,
+    const std::string &materialName)
 {
     std::vector<std::pair<Matrix<4, 1>, VertexIds>> polygonVertices;
 
@@ -13,15 +14,17 @@ std::vector<Triangle> EarClipper::triangulate(
         polygonVertices.emplace_back(vertices.at(i), indexes.at(i));
     }
 
-    return triangulate(polygonVertices);
+    return triangulate(polygonVertices, materialName);
 }
 
-std::vector<Triangle> EarClipper::triangulate(std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices)
+std::vector<Triangle> EarClipper::triangulate(
+    std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices,
+    const std::string &materialName)
 {
     std::vector<Triangle> result;
 
     while (polygonVertices.size() >= 3)
-        result.emplace_back(clipEar(polygonVertices));
+        result.emplace_back(clipEar(polygonVertices, materialName));
 
     return result;
 }
@@ -40,7 +43,9 @@ bool EarClipper::isConvexVertex(
     return sin > 0;
 }
 
-Triangle EarClipper::clipEar(std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices)
+Triangle EarClipper::clipEar(
+    std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices,
+    const std::string &materialName)
 {
     int i = 0;
     const int size = (int)polygonVertices.size();
@@ -71,8 +76,9 @@ Triangle EarClipper::clipEar(std::vector<std::pair<Matrix<4, 1>, VertexIds>> &po
             continue;
 
         const Triangle result{{it->second,
-                              itNext->second,
-                              itPrev->second}};
+                               itNext->second,
+                               itPrev->second},
+                              materialName};
 
         polygonVertices.erase(it);
 

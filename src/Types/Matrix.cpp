@@ -25,7 +25,6 @@ Matrix<Rows, Cols>::Matrix(
     getW() = w;
 }
 
-// TODO: FIX STORAGE ALLOCATION
 template<int Rows, int Cols>
 Matrix<Rows, Cols>::Matrix(const Matrix &m) {
     for (int i = 0; i < Rows; ++i) {

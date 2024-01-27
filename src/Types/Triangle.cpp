@@ -3,8 +3,11 @@
 #include <Math.hpp>
 #include <EarClipper.hpp>
 
-Triangle::Triangle(const std::vector<VertexIds> &indexes)
-    : vertexIndexesCount((int)indexes.size())
+Triangle::Triangle(
+    const std::vector<VertexIds> &indexes,
+    const std::string &_materialName)
+    : vertexIndexesCount((int)indexes.size()),
+      materialName(_materialName)
 {
     if (values.size() != 3)
         throw std::logic_error("Invalid argument");
@@ -14,12 +17,6 @@ Triangle::Triangle(const std::vector<VertexIds> &indexes)
     values[2] = indexes[2];
 
     color = sf::Color(rand() % 255, rand() % 255, rand() % 255);
-}
-
-Triangle Triangle::parse(const std::string &line)
-{
-    const auto accumulator = parseInner(line);
-    return Triangle{accumulator};
 }
 
 int Triangle::cGetVertexIdsCount() const
@@ -37,10 +34,11 @@ const VertexIds &Triangle::cGetVertexIds(const int i) const
 
 std::vector<Triangle> Triangle::parseAndTriangulate(
     const std::string &line,
-    const std::vector<Matrix<4, 1>> &vertices)
+    const std::vector<Matrix<4, 1>> &vertices,
+    const std::string &materialName)
 {
     const auto accumulator = parseInner(line);
-    return EarClipper::triangulate(accumulator, vertices);
+    return EarClipper::triangulate(accumulator, vertices, materialName);
 }
 
 const Matrix<4, 1> &Triangle::getNormal(const std::vector<Matrix<4, 1>> &vertices)
@@ -82,7 +80,7 @@ const Matrix<4, 1> &Triangle::getCenter(const std::vector<Matrix<4, 1>> &vertice
 std::vector<VertexIds> Triangle::parseInner(const std::string &line)
 {
     auto entryType = ObjParser::getEntryType(line);
-    if (entryType != EntryType::Polygon)
+    if (entryType != ObjEntryType::Polygon)
         throw std::logic_error("Could not parse polygon");
 
     std::vector<VertexIds> accumulator{};

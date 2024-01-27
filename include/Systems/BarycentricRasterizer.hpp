@@ -25,7 +25,7 @@ public:
         double *_depthBuffer);
 
     void resize(
-        sf::Uint8 *newPixels, 
+        sf::Uint8 *newPixels,
         double *newDepthBuffer,
         omp_lock_t *newPixelLocks);
 
@@ -65,7 +65,7 @@ private:
         const double invAW, const double invBW, const double invCW);
 
     Matrix<4, 1> getMapValue(
-        const Texture &map,
+        const std::shared_ptr<const Texture> map,
         const Matrix<4, 1> &mapId);
 
     Matrix<4, 1> getNormalByShading(

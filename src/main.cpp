@@ -16,38 +16,18 @@
 
 int main(int argc, char **argv)
 {
-    // _DEBUG = 1;
-
     std::cout << "Hello world!" << std::endl;
 
     //    auto parser = ObjParser(argv[1]);
 
-    /*
-    auto parser = ObjParser(
-        "C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/mimic/mimic.obj",
-        "C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/mimic/Mimic_albedo.jpg",
-        "C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/mimic/Mimic_normal.png",
-        // std::nullopt,
-        "C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/mimic/Mimic_mrao.jpg",
-        "C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/mimic/Mimic_emissive.jpg");
-    */
-
-    /*
-    auto parser = ObjParser(
-        "resources/models/boll/export3dcoat.obj",
-        "resources/models/boll/export3dcoat_lambert3SG_color.png",
-        "resources/models/boll/export3dcoat_lambert3SG_nmap.png",
-        // std::nullopt,
-        "resources/models/boll/export3dcoat_lambert3SG_mrao.png");
-    */
-
-    /*
-    auto parser = ObjParser(
-        "resources/models/knight/shovel_low.obj",
-        "resources/models/knight/shovel_diffuse.png",
-        "resources/models/knight/shovel_normal_map.png",
-        "resources/models/knight/shovel_mrao.png");
-    */
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/mimic/mimic.obj");
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/boll/export3dcoat.obj");
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Tree Man/model.obj");
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Robot Steampunk/robot_steampunk.obj");
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Intergalactic Spaceship/Intergalactic_Spaceship-(Wavefront).obj");
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Cyber Mancubus/mancubus.obj");
+    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Doom_Slayer/doomslayer.obj");
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/knight/shovel_low.obj");
 
     /*
     auto parser = ObjParser(
@@ -64,7 +44,7 @@ int main(int argc, char **argv)
     */
 
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/untitled.obj");
-    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/rubik.obj");
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/rubik.obj");
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/cat2.obj");
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/woman1.obj");
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/woman2.obj");

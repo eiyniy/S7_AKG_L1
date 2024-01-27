@@ -24,6 +24,7 @@ Scene::~Scene() {
         delete pair.second;
 }
 
+/*
 void Scene::generateFloor() {
     double maxDimensionSize = 0;
     auto center = Point(0, 0);
@@ -52,7 +53,9 @@ void Scene::generateFloor() {
     auto step = maxDimensionSize / floorStepsCount;
     generateFloor(floorStepsCount, ceil(step), center);
 }
+*/
 
+/*
 void Scene::generateFloor(const int size, const int step, const Point &center) {
     auto color = sf::Color(255U, 255U, 255U, 64U);
 
@@ -83,6 +86,7 @@ void Scene::generateFloor(const int size, const int step, const Point &center) {
 
     // objects.insert_or_assign(floorObjectName, floorPt);
 }
+*/
 
 void Scene::addObject(const std::string &key, Object *object) {
     if (key == floorObjectName)

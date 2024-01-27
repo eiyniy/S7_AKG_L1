@@ -1,11 +1,14 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <vector>
+#include <memory>
+#include <map>
+#include <SFML/Graphics.hpp>
 #include <Triangle.hpp>
 #include <Camera.hpp>
 #include <Matrix.hpp>
 #include <Texture.hpp>
+#include <Material.hpp>
 
 class Object
 {
@@ -15,10 +18,7 @@ public:
         const std::vector<Matrix<4, 1>> &_tVertices,
         const std::vector<Matrix<4, 1>> &_nVertices,
         const std::vector<Triangle> &_polygons,
-        const std::optional<Texture> &_diffuseMap,
-        const std::optional<Texture> &_normalMap,
-        const std::optional<Texture> &_mraoMap,
-        const std::optional<Texture> &_emissiveMap);
+        std::unique_ptr<const std::map<std::string, std::shared_ptr<const Material>>> _materials);
 
     void move(const Matrix<4, 1> &transition);
 
@@ -30,13 +30,8 @@ public:
 
     const std::vector<Triangle> &cGetPolygons() const;
 
-    const std::optional<Texture> &cGetDiffuseMap() const;
-
-    const std::optional<Texture> &cGetNormalMap() const;
-
-    const std::optional<Texture> &cGetMRAOMap() const;
-
-    const std::optional<Texture> &cGetEmissiveMap() const;
+    const std::shared_ptr<const Material> cGetMaterial(const std::string &name) const;
+    static const std::shared_ptr<const Material> getDefaultMaterial();
 
     std::vector<Triangle> &getPolygons();
 
@@ -58,10 +53,8 @@ private:
     const std::vector<Matrix<4, 1>> tVertices;
     std::vector<Triangle> polygons;
 
-    const std::optional<Texture> diffuseMap;
-    const std::optional<Texture> normalMap;
-    const std::optional<Texture> mraoMap;
-    const std::optional<Texture> emissiveMap;
+    std::unique_ptr<const std::map<std::string, std::shared_ptr<const Material>>> materials;
+    static std::shared_ptr<const Material> defaultMaterial;
 
     std::optional<Matrix<4, 1>> center;
     std::optional<Matrix<4, 1>> maxXZ, minXZ;
@@ -94,24 +87,17 @@ inline const std::vector<Triangle> &Object::cGetPolygons() const
     return polygons;
 }
 
-inline const std::optional<Texture> &Object::cGetDiffuseMap() const
+inline const std::shared_ptr<const Material> Object::cGetMaterial(const std::string &name) const
 {
-    return diffuseMap;
+    if (!materials->contains(name))
+        throw std::runtime_error("Can't get material");
+
+    return materials->at(name);
 }
 
-inline const std::optional<Texture> &Object::cGetNormalMap() const
+inline const std::shared_ptr<const Material> Object::getDefaultMaterial()
 {
-    return normalMap;
-}
-
-inline const std::optional<Texture> &Object::cGetMRAOMap() const
-{
-    return mraoMap;
-}
-
-inline const std::optional<Texture> &Object::cGetEmissiveMap() const
-{
-    return emissiveMap;
+    return defaultMaterial;
 }
 
 inline std::vector<Triangle> &Object::getPolygons()

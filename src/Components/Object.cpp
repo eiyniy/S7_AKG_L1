@@ -11,23 +11,28 @@ Matrix<4, 1> convertVertex(
     const Matrix<4, 4> &,
     const Matrix<4, 4> &);
 
+std::shared_ptr<const Material> Object::defaultMaterial = std::make_shared<const Material>(
+    "__DEFAULT_MATERIAL",
+    Converter::colorToMatrix(sf::Color::Black),
+    Converter::colorToMatrix(sf::Color::White),
+    Converter::colorToMatrix(sf::Color::Black),
+    1,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr);
+
 Object::Object(
     const std::vector<Matrix<4, 1>> &_vertices,
     const std::vector<Matrix<4, 1>> &_tVertices,
     const std::vector<Matrix<4, 1>> &_nVertices,
     const std::vector<Triangle> &_polygons,
-    const std::optional<Texture> &_diffuseMap,
-    const std::optional<Texture> &_normalMap,
-    const std::optional<Texture> &_mraoMap,
-    const std::optional<Texture> &_emissiveMap)
+    std::unique_ptr<const std::map<std::string, std::shared_ptr<const Material>>> _materials)
     : vertices(_vertices),
       tVertices(_tVertices),
       nVertices(_nVertices),
       polygons(_polygons),
-      diffuseMap(_diffuseMap),
-      normalMap(_normalMap),
-      mraoMap(_mraoMap),
-      emissiveMap(_emissiveMap)
+      materials(std::move(_materials))
 {
     drawable = std::vector<Matrix<4, 1>>(vertices.size());
 }

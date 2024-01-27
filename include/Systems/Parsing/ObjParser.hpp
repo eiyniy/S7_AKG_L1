@@ -9,48 +9,32 @@
 #include <memory>
 #include <Matrix.hpp>
 #include <Texture.hpp>
+#include <BaseTextParser.hpp>
 
-class ObjParser
+class ObjParser : public BaseTextParser
 {
 public:
-    explicit ObjParser(
-        const std::string &_pathToObj,
-        const std::optional<std::string> &_pathToDiffuseMap = std::nullopt,
-        const std::optional<std::string> &_pathToNormalMap = std::nullopt,
-        const std::optional<std::string> &_pathToMRAOMap = std::nullopt,
-        const std::optional<std::string> &_pathToEmissiveMap = std::nullopt);
+    explicit ObjParser(const std::string &_pathToObj);
 
     Object *parse();
 
-    static std::vector<std::string> splitByLines(const std::string &string);
-
-    static std::optional<EntryType> getEntryType(const std::string &line);
-
-    static std::optional<std::string> getNextPart(
-        std::string::const_iterator *iter,
-        std::string::const_iterator iterEnd,
-        char divider,
-        bool allowEmpty = false);
+    static std::optional<ObjEntryType> getEntryType(const std::string &line);
 
 private:
     std::vector<Matrix<4, 1>> vertices;
     std::vector<Matrix<4, 1>> nVertices;
     std::vector<Matrix<4, 1>> tVertices;
     std::vector<Triangle> polygons;
-    std::vector<std::string> polygonStrings;
+    std::vector<std::pair<std::string, std::optional<std::string>>> polygonsStringAndMaterial;
 
-    std::string pathToObj;
-    std::optional<std::string> pathToDiffuseMap;
-    std::optional<std::string> pathToNormalMap;
-    std::optional<std::string> pathToMRAOMap;
-    std::optional<std::string> pathToEmissiveMap;
-    std::ifstream readStream;
+    std::string mtlPath;
+    std::unique_ptr<const std::map<std::string, std::shared_ptr<const Material>>> materials;
 
-    std::string readFile(const std::string &pathToFile);
+    std::optional<std::string> currMaterialName;
 
     void parseEntry(const std::string &line);
 
-    std::array<std::optional<double>, 4> parseAcc(const std::string &line);
+    static std::array<std::optional<double>, 4> parseAcc(const std::string &line);
 
     Matrix<4, 1> parseVertex(const std::array<std::optional<double>, 4> &acc);
 

@@ -208,34 +208,47 @@ sf::Color BarycentricRasterizer::getShadedColor(
     Matrix<4, 1> mrao;
     Matrix<4, 1> emissive;
 
-    const auto &diffuseMap = object.cGetDiffuseMap();
-    const auto &normalMap = object.cGetNormalMap();
-    const auto &mraoMap = object.cGetMRAOMap();
-    const auto &emissiveMap = object.cGetEmissiveMap();
+    // std::cout << "Material name: " << polygon.cGetMaterialName() << std::endl;
+    const auto material = object.cGetMaterial(polygon.cGetMaterialName());
+    const auto defaultMaterial = Object::getDefaultMaterial();
 
-    if (diffuseMap.has_value() || normalMap.has_value() || mraoMap.has_value() || emissiveMap.has_value())
+    const auto diffuseMap = material->cGetDiffuseMap();
+    const auto normalMap = material->cGetNormalMap();
+    const auto mraoMap = material->cGetMRAOMap();
+    const auto emissiveMap = material->cGetEmissiveMap();
+
+    const auto ambientCoeff = material->cGetAmbientCoeff();
+    const auto diffuseCoeff = material->cGetDiffuseCoeff();
+    const auto specularCoeff = material->cGetSpecularCoeff();
+    // const auto specularExp = material->cGetSpecularExp();
+
+    if (diffuseMap != nullptr || normalMap != nullptr || mraoMap != nullptr || emissiveMap != nullptr)
         mapId = getMapId(polygon, object, b0, b1, b2, invAW, invBW, invCW);
 
-    if (diffuseMap.has_value())
-        diffuse = getMapValue(*diffuseMap, mapId);
+    if (diffuseMap != nullptr)
+        diffuse = getMapValue(diffuseMap, mapId);
+    else if (diffuseCoeff.has_value())
+        diffuse = *diffuseCoeff;
     else
-        diffuse = Converter::colorToMatrix(sf::Color::White);
+        diffuse = *defaultMaterial->cGetDiffuseCoeff();
 
-    if (normalMap.has_value())
-        normal = getMapValue(*normalMap, mapId);
+    if (normalMap != nullptr)
+        normal = getMapValue(normalMap, mapId);
     else
         normal = getNormalByShading(polygon, object, b0, b1, b2);
 
-    if (mraoMap.has_value())
-        mrao = getMapValue(*mraoMap, mapId);
+    if (mraoMap != nullptr)
+        mrao = getMapValue(mraoMap, mapId);
     else
     {
-        const auto phongModel = ((PhongModel *)lightingModel);
-        mrao = Matrix<4, 1>(1, 1, phongModel != nullptr ? phongModel->cGetAmbientCoeff() : 1);
+        const auto metallic = specularCoeff.value_or(*defaultMaterial->cGetSpecularCoeff()).cGetX();
+        const auto ambient = ambientCoeff.value_or(*defaultMaterial->cGetAmbientCoeff()).cGetX();
+
+        mrao = Matrix<4, 1>(metallic, 1, ambient);
     }
 
-    if (emissiveMap.has_value())
-        emissive = getMapValue(*emissiveMap, mapId);
+    if (emissiveMap != nullptr)
+        emissive = getMapValue(emissiveMap, mapId);
     else
         emissive = Converter::colorToMatrix(sf::Color::Black);
 
@@ -274,17 +287,17 @@ Matrix<4, 1> BarycentricRasterizer::getMapId(
 }
 
 Matrix<4, 1> BarycentricRasterizer::getMapValue(
-    const Texture &map,
+    const std::shared_ptr<const Texture> map,
     const Matrix<4, 1> &mapId)
 {
-    const auto width = map.cGetWidth();
-    const auto height = map.cGetHeight();
+    const auto width = map->cGetWidth();
+    const auto height = map->cGetHeight();
 
     const Point normMapId{
         (int)(mapId.cGetX() * (width - 1)),
         (int)(height - mapId.cGetY() * (height - 1))};
 
-    return map.cGetData().at(normMapId.cGetX() + width * normMapId.cGetY());
+    return map->cGetData().at(normMapId.cGetX() + width * normMapId.cGetY());
 }
 
 Matrix<4, 1> BarycentricRasterizer::getNormalByShading(

@@ -2,12 +2,28 @@
 
 #include <cstdint>
 
-enum class EntryType
+enum class ObjEntryType
 {
+    MtlPath,
+    UseMtl,
     Vertex,
     TextureVertex,
     NormalVertex,
     Polygon
+};
+
+enum class MtlEntryType
+{
+    NewMaterial,
+    Ambient,
+    Diffuse,
+    Specular,
+    SpecularExp,
+    // AmbientMap,
+    DiffuseMap,
+    EmissiveMap,
+    NormalMap,
+    MRAOMap
 };
 
 enum class AxisName

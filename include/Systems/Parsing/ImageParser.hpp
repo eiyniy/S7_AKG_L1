@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <Texture.hpp>
 #include <Types.hpp>
 #include <CImg.h>
@@ -17,5 +18,5 @@ private:
 public:
     ImageParser(const std::string &_path, const TextureType _type);
 
-    Texture parse() const;
+    std::unique_ptr<const Texture> parse() const;
 };
