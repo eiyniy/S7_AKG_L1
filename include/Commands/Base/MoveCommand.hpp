@@ -11,7 +11,7 @@ protected:
             Direction _direction,
             double _step);
 
-    Matrix<4, 1> getTransition();
+    Vector<4> getTransition();
 
     const AxisName axisName;
     const Direction direction;

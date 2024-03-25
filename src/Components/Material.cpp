@@ -2,9 +2,9 @@
 
 Material::Material(
     const std::string &_name,
-    const std::optional<Matrix<4, 1>> &_ambient,
-    const std::optional<Matrix<4, 1>> &_diffuse,
-    const std::optional<Matrix<4, 1>> &_specular,
+    const std::optional<Vector<4>> &_ambient,
+    const std::optional<Vector<4>> &_diffuse,
+    const std::optional<Vector<4>> &_specular,
     const std::optional<double> _specularExp,
     std::shared_ptr<const Texture> _diffuseMap,
     std::shared_ptr<const Texture> _emissiveMap,

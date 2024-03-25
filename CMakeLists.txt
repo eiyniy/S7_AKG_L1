@@ -19,6 +19,8 @@ set(CIMG_NEED_JPG 1)
 
 set(CIMG_H_PATH "${PROJECT_SOURCE_DIR}/Libraries/CImg")
 
+set(GRAPH_H_PATH "${PROJECT_SOURCE_DIR}/Libraries/Graph")
+
 
 file(GLOB_RECURSE SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 
@@ -26,6 +28,8 @@ MACRO(HEADER_DIRECTORIES return_list)
     FILE(GLOB_RECURSE new_list "${PROJECT_SOURCE_DIR}/include/*.hpp")
     SET(dir_list "")
     FOREACH (file_path ${new_list})
+        # GET_FILENAME_COMPONENT(file_name ${file_path} NAME)
+        # message(STATUS "[INFO] Found ${file_name} header.")
         GET_FILENAME_COMPONENT(dir_path ${file_path} PATH)
         SET(dir_list ${dir_list} ${dir_path})
     ENDFOREACH ()
@@ -82,3 +86,9 @@ if(CIMG_NEED_PNG)
     target_link_libraries (${LOCAL_PROJECT_NAME} PRIVATE ${PNG_LIBRARY})
     target_compile_definitions(${LOCAL_PROJECT_NAME} PRIVATE cimg_use_png=1)
 endif()
+
+
+# ---Graph---
+add_library(Graph_Lib INTERFACE)
+target_include_directories(Graph_Lib INTERFACE ${GRAPH_H_PATH})
+target_link_libraries(${LOCAL_PROJECT_NAME} PRIVATE Graph_Lib)

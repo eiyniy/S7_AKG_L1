@@ -6,7 +6,7 @@ ImageParser::ImageParser(const std::string &_path, const TextureType _type)
 
 std::unique_ptr<const Texture> ImageParser::parse() const
 {
-    std::vector<Matrix<4, 1>> data;
+    std::vector<Vector<4>> data;
 
     const cimg::CImg<ubyte> image = cimg::CImg<>(path.c_str());
     // image.display();
@@ -14,7 +14,7 @@ std::unique_ptr<const Texture> ImageParser::parse() const
     uint width = image.width();
     uint height = image.height();
 
-    data = std::vector<Matrix<4, 1>>{width * height};
+    data = std::vector<Vector<4>>{width * height};
 
 #pragma omp parallel for if (!_DEBUG)
     for (uint i = 0; i < height; ++i)
@@ -26,10 +26,10 @@ std::unique_ptr<const Texture> ImageParser::parse() const
             const auto b = image(j, i, 2);
 
             if (type == TextureType::Diffuse || type == TextureType::Emissive)
-                data.at(j + width * i) = Matrix<4, 1>(r, g, b, 0);
+                data.at(j + width * i) = Vector<4>(r, g, b, 0);
             else if (type == TextureType::Normal)
             {
-                data.at(j + width * i) = Matrix<4, 1>(
+                data.at(j + width * i) = Vector<4>(
                     r / 255.0 * 2 - 1,
                     g / 255.0 * 2 - 1,
                     b / 255.0 * 2 - 1,
@@ -38,7 +38,7 @@ std::unique_ptr<const Texture> ImageParser::parse() const
             }
             else if (type == TextureType::MRAO)
             {
-                data.at(j + width * i) = Matrix<4, 1>(
+                data.at(j + width * i) = Vector<4>(
                     r / 255.0,
                     g / 255.0,
                     b / 255.0,

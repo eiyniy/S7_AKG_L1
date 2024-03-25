@@ -59,7 +59,7 @@ void Scene::generateFloor() {
 void Scene::generateFloor(const int size, const int step, const Point &center) {
     auto color = sf::Color(255U, 255U, 255U, 64U);
 
-    std::vector<Matrix<4, 1>> vertices;
+    std::vector<Vector<4>> vertices;
     std::vector<Triangle> polygons;
 
     const auto evenSize = size % 2 == 0 ? size + 1 : size;

@@ -42,7 +42,7 @@ MainWindow::MainWindow(
 
 void MainWindow::drawModel(
     Object &objInfo,
-    const Matrix<4, 1> &cameraPosition)
+    const Vector<4> &cameraPosition)
 {
     auto &polygons = objInfo.getPolygons();
 
@@ -112,6 +112,63 @@ for (auto vertex: viewportVertices) {
     */
 }
 
+void MainWindow::drawSculptor(Sculptor &sculptor, const Point &mousePos)
+{
+    sculptor.getCircle().setPosition(sf::Vector2f(mousePos.cGetX() - sculptor.cGetRadius(), mousePos.cGetY() - sculptor.cGetRadius()));
+    window.draw(sculptor.getCircle());
+}
+
+int MainWindow::getPointedTriangleId(
+    const Object *objInfo,
+    const Point mousePos) const
+{
+    const auto &drawableVertices = objInfo->cGetDrawable();
+    auto &polygons = objInfo->cGetPolygons();
+    auto &vertices = objInfo->cGetVertices();
+
+    int id;
+    double oldZ = INT_MAX;
+
+    for (int i = 0; i < polygons.size(); ++i)
+    {
+        auto polygon = polygons[i];
+
+        const auto vId0 = polygon.cGetVertexIds(0).cGetVertexId() - 1;
+        const auto vId1 = polygon.cGetVertexIds(1).cGetVertexId() - 1;
+        const auto vId2 = polygon.cGetVertexIds(2).cGetVertexId() - 1;
+
+        const auto &aDrawable = drawableVertices.at(vId0);
+        const auto &bDrawable = drawableVertices.at(vId1);
+        const auto &cDrawable = drawableVertices.at(vId2);
+
+        const auto invAZ = 1 / aDrawable.cGetZ();
+        const auto invBZ = 1 / bDrawable.cGetZ();
+        const auto invCZ = 1 / cDrawable.cGetZ();
+
+        const Vector<2> v0{bDrawable.cGetX() - aDrawable.cGetX(), bDrawable.cGetY() - aDrawable.cGetY()};
+        const Vector<2> v1{cDrawable.cGetX() - aDrawable.cGetX(), cDrawable.cGetY() - aDrawable.cGetY()};
+
+        const auto invDen = 1 / (v0.cGetX() * v1.cGetY() - v1.cGetX() * v0.cGetY());
+
+        double b0, b1, b2;
+        BarycentricRasterizer::calcBarycentric(mousePos, aDrawable, v0, v1, invDen, b0, b1, b2);
+
+        if (b0 < 0 || b1 < 0 || b2 < 0)
+            continue;
+
+        const auto z = 1 / (invAZ * b0 + invBZ * b1 + invCZ * b2);
+
+        if (z >= oldZ)
+            continue;
+
+        // std::cout << "polygon found" << std::endl;
+        oldZ = z;
+        id = i;
+    }
+
+    return id;
+}
+
 void MainWindow::switchVideoMode(const bool isEscape)
 {
     if (!isFullscreen && isEscape)
@@ -173,12 +230,11 @@ void MainWindow::drawPixels()
 {
     bufferTexture.update(pixels);
     window.draw(bufferSprite);
-    window.display();
 }
 
 void MainWindow::drawPolygon(
     Triangle &polygon,
-    const Matrix<4, 1> &cameraPosition,
+    const Vector<4> &cameraPosition,
     const Object &object)
 {
     /*

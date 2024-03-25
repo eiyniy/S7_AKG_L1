@@ -21,9 +21,9 @@ public:
     static std::optional<ObjEntryType> getEntryType(const std::string &line);
 
 private:
-    std::vector<Matrix<4, 1>> vertices;
-    std::vector<Matrix<4, 1>> nVertices;
-    std::vector<Matrix<4, 1>> tVertices;
+    std::vector<Vector<4>> vertices;
+    std::vector<Vector<4>> nVertices;
+    std::vector<Vector<4>> tVertices;
     std::vector<Triangle> polygons;
     std::vector<std::pair<std::string, std::optional<std::string>>> polygonsStringAndMaterial;
 
@@ -36,9 +36,9 @@ private:
 
     static std::array<std::optional<double>, 4> parseAcc(const std::string &line);
 
-    Matrix<4, 1> parseVertex(const std::array<std::optional<double>, 4> &acc);
+    Vector<4> parseVertex(const std::array<std::optional<double>, 4> &acc);
 
-    Matrix<4, 1> parseNVertex(const std::array<std::optional<double>, 4> &acc);
+    Vector<4> parseNVertex(const std::array<std::optional<double>, 4> &acc);
 
-    Matrix<4, 1> parseTVertex(const std::array<std::optional<double>, 4> &acc);
+    Vector<4> parseTVertex(const std::array<std::optional<double>, 4> &acc);
 };

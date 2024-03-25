@@ -6,8 +6,8 @@
 #include <Timer.hpp>
 #include <Globals.hpp>
 
-Matrix<4, 1> convertVertex(
-    const Matrix<4, 1> &,
+Vector<4> convertVertex(
+    const Vector<4> &,
     const Matrix<4, 4> &,
     const Matrix<4, 4> &);
 
@@ -23,9 +23,9 @@ std::shared_ptr<const Material> Object::defaultMaterial = std::make_shared<const
     nullptr);
 
 Object::Object(
-    const std::vector<Matrix<4, 1>> &_vertices,
-    const std::vector<Matrix<4, 1>> &_tVertices,
-    const std::vector<Matrix<4, 1>> &_nVertices,
+    const std::vector<Vector<4>> &_vertices,
+    const std::vector<Vector<4>> &_tVertices,
+    const std::vector<Vector<4>> &_nVertices,
     const std::vector<Triangle> &_polygons,
     std::unique_ptr<const std::map<std::string, std::shared_ptr<const Material>>> _materials)
     : vertices(_vertices),
@@ -34,10 +34,10 @@ Object::Object(
       polygons(_polygons),
       materials(std::move(_materials))
 {
-    drawable = std::vector<Matrix<4, 1>>(vertices.size());
+    drawable = std::vector<Vector<4>>(vertices.size());
 }
 
-void Object::move(const Matrix<4, 1> &transition)
+void Object::move(const Vector<4> &transition)
 {
     const auto moveConvert = Matrix<4, 4>::getMoveConvert(transition);
 
@@ -98,12 +98,12 @@ void Object::calcGeometricParams()
 
     const auto vCount = (double)vertices.size();
 
-    center = Matrix<4, 1>(cx / vCount, cy / vCount, cz / vCount);
-    maxXZ = Matrix<4, 1>(xMax, 0, zMax);
-    minXZ = Matrix<4, 1>(xMin, 0, zMin);
+    center = Vector<4>(cx / vCount, cy / vCount, cz / vCount);
+    maxXZ = Vector<4>(xMax, 0, zMax);
+    minXZ = Vector<4>(xMin, 0, zMin);
 }
 
-const Matrix<4, 1> &Object::getCenter()
+const Vector<4> &Object::getCenter()
 {
     // if (!center.has_value())
     calcGeometricParams();
@@ -111,7 +111,7 @@ const Matrix<4, 1> &Object::getCenter()
     return *center;
 }
 
-const Matrix<4, 1> &Object::getMaxXZ()
+const Vector<4> &Object::getMaxXZ()
 {
     // if (!maxXZ.has_value())
     calcGeometricParams();
@@ -119,7 +119,7 @@ const Matrix<4, 1> &Object::getMaxXZ()
     return *maxXZ;
 }
 
-const Matrix<4, 1> &Object::getMinXZ()
+const Vector<4> &Object::getMinXZ()
 {
     // if (!minXZ.has_value())
     calcGeometricParams();
@@ -127,8 +127,8 @@ const Matrix<4, 1> &Object::getMinXZ()
     return *minXZ;
 }
 
-Matrix<4, 1> convertVertex(
-    const Matrix<4, 1> &vertex,
+Vector<4> convertVertex(
+    const Vector<4> &vertex,
     const Matrix<4, 4> &toProjectionConvert,
     const Matrix<4, 4> &viewportConvert)
 {

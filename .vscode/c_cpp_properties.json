@@ -11,11 +11,12 @@
                 "UNICODE",
                 "_UNICODE"
             ],
-            "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
+            "compilerPath": "C:\\msys64\\mingw64\\bin\\g++.exe",
             "cStandard": "c23",
             "cppStandard": "c++23",
             "intelliSenseMode": "windows-gcc-x64",
             "configurationProvider": "ms-vscode.cmake-tools",
+            // "configurationProvider": "ms-vscode.cpptools",
             "mergeConfigurations": true,
             "browse": {
                 "limitSymbolsToIncludedHeaders": true

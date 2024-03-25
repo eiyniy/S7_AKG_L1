@@ -10,9 +10,9 @@ class Material
 public:
     Material(
         const std::string &_name,
-        const std::optional<Matrix<4, 1>> &_ambient,
-        const std::optional<Matrix<4, 1>> &_diffuse,
-        const std::optional<Matrix<4, 1>> &_specular,
+        const std::optional<Vector<4>> &_ambient,
+        const std::optional<Vector<4>> &_diffuse,
+        const std::optional<Vector<4>> &_specular,
         const std::optional<double> _specularExp,
         std::shared_ptr<const Texture> _diffuseMap,
         std::shared_ptr<const Texture> _emissiveMap,
@@ -25,16 +25,16 @@ public:
     const std::shared_ptr<const Texture> cGetMRAOMap() const;
 
     const std::string &cGetName() const;
-    const std::optional<Matrix<4, 1>> cGetDiffuseCoeff() const;
-    const std::optional<Matrix<4, 1>> cGetAmbientCoeff() const;
-    const std::optional<Matrix<4, 1>> cGetSpecularCoeff() const;
+    const std::optional<Vector<4>> cGetDiffuseCoeff() const;
+    const std::optional<Vector<4>> cGetAmbientCoeff() const;
+    const std::optional<Vector<4>> cGetSpecularCoeff() const;
     const std::optional<double> cGetSpecularExp() const;
 
 private:
     std::string name;
-    std::optional<Matrix<4, 1>> ambient;
-    std::optional<Matrix<4, 1>> diffuse;
-    std::optional<Matrix<4, 1>> specular;
+    std::optional<Vector<4>> ambient;
+    std::optional<Vector<4>> diffuse;
+    std::optional<Vector<4>> specular;
     std::optional<double> specularExp;
     std::shared_ptr<const Texture> diffuseMap;
     std::shared_ptr<const Texture> emissiveMap;
@@ -67,17 +67,17 @@ inline const std::string &Material::cGetName() const
     return name;
 }
 
-inline const std::optional<Matrix<4, 1>> Material::cGetDiffuseCoeff() const
+inline const std::optional<Vector<4>> Material::cGetDiffuseCoeff() const
 {
     return diffuse;
 }
 
-inline const std::optional<Matrix<4, 1>> Material::cGetAmbientCoeff() const
+inline const std::optional<Vector<4>> Material::cGetAmbientCoeff() const
 {
     return ambient;
 }
 
-inline const std::optional<Matrix<4, 1>> Material::cGetSpecularCoeff() const
+inline const std::optional<Vector<4>> Material::cGetSpecularCoeff() const
 {
     return specular;
 }

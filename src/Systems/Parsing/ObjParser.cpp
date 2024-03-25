@@ -55,7 +55,7 @@ Object *ObjParser::parse()
 #pragma omp parallel for if (!_DEBUG)
     for (const auto &pair : polygonsStringAndMaterial)
     {
-        const auto triangulated = Triangle::parseAndTriangulate(pair.first, vertices, *pair.second);
+        const auto triangulated = Triangle::parseAndTriangulate(pair.first, vertices, pair.second);
         for (const auto &polygon : triangulated)
         {
 #pragma omp critical(new_triangle)
@@ -161,17 +161,17 @@ std::array<std::optional<double>, 4> ObjParser::parseAcc(const std::string &line
     return accumulator;
 }
 
-Matrix<4, 1> ObjParser::parseVertex(const std::array<std::optional<double>, 4> &acc)
+Vector<4> ObjParser::parseVertex(const std::array<std::optional<double>, 4> &acc)
 {
     return {*acc[0], *acc[1], *acc[2], acc[3].value_or(1)};
 }
 
-Matrix<4, 1> ObjParser::parseNVertex(const std::array<std::optional<double>, 4> &acc)
+Vector<4> ObjParser::parseNVertex(const std::array<std::optional<double>, 4> &acc)
 {
     return {*acc[0], *acc[1], *acc[2], 0};
 }
 
-Matrix<4, 1> ObjParser::parseTVertex(const std::array<std::optional<double>, 4> &acc)
+Vector<4> ObjParser::parseTVertex(const std::array<std::optional<double>, 4> &acc)
 {
     return {*acc[0], acc[1].value_or(0), acc[2].value_or(0), 1};
 }

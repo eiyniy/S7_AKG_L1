@@ -9,36 +9,36 @@ class EarClipper
 {
 private:
     static double area(
-        const Matrix<4, 1> &v0, const Matrix<4, 1> &v1, const Matrix<4, 1> &v2);
+        const Vector<4> &v0, const Vector<4> &v1, const Vector<4> &v2);
 
     static bool isPointsInside(
-        const std::pair<Matrix<4, 1>, VertexIds> &v0,
-        const std::pair<Matrix<4, 1>, VertexIds> &v1,
-        const std::pair<Matrix<4, 1>, VertexIds> &v2,
-        const std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices);
+        const std::pair<Vector<4>, VertexIds> &v0,
+        const std::pair<Vector<4>, VertexIds> &v1,
+        const std::pair<Vector<4>, VertexIds> &v2,
+        const std::vector<std::pair<Vector<4>, VertexIds>> &polygonVertices);
 
     static Triangle clipEar(
-        std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices,
-        const std::string &materialName);
+        std::vector<std::pair<Vector<4>, VertexIds>> &polygonVertices,
+        const std::optional<std::string> &materialName);
 
     static bool isConvexVertex(
-        const Matrix<4, 1> &vertex,
-        const Matrix<4, 1> &prevVertex,
-        const Matrix<4, 1> &nextVertex);
+        const Vector<4> &vertex,
+        const Vector<4> &prevVertex,
+        const Vector<4> &nextVertex);
 
 public:
     static std::vector<Triangle> triangulate(
-        std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices,
-        const std::string &materialName);
+        std::vector<std::pair<Vector<4>, VertexIds>> &polygonVertices,
+        const std::optional<std::string> &materialName);
 
     static std::vector<Triangle> triangulate(
         const std::vector<VertexIds> &indexes,
-        const std::vector<Matrix<4, 1>> &vertices,
-        const std::string &materialName);
+        const std::vector<Vector<4>> &vertices,
+        const std::optional<std::string> &materialName);
 };
 
 inline double EarClipper::area(
-    const Matrix<4, 1> &v0, const Matrix<4, 1> &v1, const Matrix<4, 1> &v2)
+    const Vector<4> &v0, const Vector<4> &v1, const Vector<4> &v2)
 {
     const auto vec1 = v1 - v0;
     const auto vec2 = v2 - v0;

@@ -30,7 +30,7 @@ void BarycentricRasterizer::resize(sf::Uint8 *newPixels, double *newDepthBuffer,
 
 void BarycentricRasterizer::rasterize(
     Triangle &polygon,
-    const Matrix<4, 1> &cameraPosition,
+    const Vector<4> &cameraPosition,
     const Object &object)
 {
     const auto &drawableVertices = object.cGetDrawable();
@@ -63,12 +63,12 @@ void BarycentricRasterizer::rasterize(
     const int maxX = std::min(windowingRectangle.second.cGetX(), resolution.cGetX() - 1);
     const int maxY = std::min(windowingRectangle.second.cGetY(), resolution.cGetY() - 1);
 
-    const Matrix<4, 1> minMinVertex{minX, minY, 0};
-    const Matrix<4, 1> maxMinVertex{maxX, minY, 0};
-    const Matrix<4, 1> minMaxVertex{minX, maxY, 0};
+    const Point minMinVertex{minX, minY};
+    const Point maxMinVertex{maxX, minY};
+    const Point minMaxVertex{minX, maxY};
 
-    const Matrix<4, 1> v0{bDrawable.cGetX() - aDrawable.cGetX(), bDrawable.cGetY() - aDrawable.cGetY(), 0, 0};
-    const Matrix<4, 1> v1{cDrawable.cGetX() - aDrawable.cGetX(), cDrawable.cGetY() - aDrawable.cGetY(), 0, 0};
+    const Vector<2> v0{bDrawable.cGetX() - aDrawable.cGetX(), bDrawable.cGetY() - aDrawable.cGetY()};
+    const Vector<2> v1{cDrawable.cGetX() - aDrawable.cGetX(), cDrawable.cGetY() - aDrawable.cGetY()};
 
     const auto invDen = 1 / (v0.cGetX() * v1.cGetY() - v1.cGetX() * v0.cGetY());
 
@@ -106,7 +106,7 @@ void BarycentricRasterizer::rasterize(
     if (shadingModel == ShadingModel::Flat)
     {
         auto sightDir = polygon.getCenter(vertices) - cameraPosition;
-        sightDir.normalize();
+        sightDir.normalize(); 
 
         shadedColor = getShadedColor(
             polygon,
@@ -163,7 +163,7 @@ void BarycentricRasterizer::rasterize(
 
 std::pair<Point, Point> BarycentricRasterizer::findWindowingRectangle(
     const Triangle &polygon,
-    const std::vector<Matrix<4, 1>> &drawableVertices)
+    const std::vector<Vector<4>> &drawableVertices)
 {
     const auto &firstVertex = drawableVertices.at(polygon.cGetVertexIds(0).cGetVertexId() - 1);
 
@@ -193,33 +193,35 @@ std::pair<Point, Point> BarycentricRasterizer::findWindowingRectangle(
 
 sf::Color BarycentricRasterizer::getShadedColor(
     Triangle &polygon,
-    const Matrix<4, 1> &sightDirection,
+    const Vector<4> &sightDirection,
     const double b0, const double b1, const double b2,
     const double invAW, const double invBW, const double invCW,
     const Object &object,
-    const Matrix<4, 1> &lightDirection)
+    const Vector<4> &lightDirection)
 {
     const auto invLightDir = lightDirection * -1;
 
     sf::Color result;
-    Matrix<4, 1> mapId;
-    Matrix<4, 1> normal;
-    Matrix<4, 1> diffuse;
-    Matrix<4, 1> mrao;
-    Matrix<4, 1> emissive;
+    Vector<4> mapId;
+    Vector<4> normal;
+    Vector<4> diffuse;
+    Vector<4> mrao;
+    Vector<4> emissive;
 
     // std::cout << "Material name: " << polygon.cGetMaterialName() << std::endl;
-    const auto material = object.cGetMaterial(polygon.cGetMaterialName());
+    const auto material = polygon.cGetMaterialName()
+                              ? object.cGetMaterial(*polygon.cGetMaterialName())
+                              : nullptr;
     const auto defaultMaterial = Object::getDefaultMaterial();
 
-    const auto diffuseMap = material->cGetDiffuseMap();
-    const auto normalMap = material->cGetNormalMap();
-    const auto mraoMap = material->cGetMRAOMap();
-    const auto emissiveMap = material->cGetEmissiveMap();
+    const auto diffuseMap = material ? material->cGetDiffuseMap() : nullptr;
+    const auto normalMap = material ? material->cGetNormalMap() : nullptr;
+    const auto mraoMap = material ? material->cGetMRAOMap() : nullptr;
+    const auto emissiveMap = material ? material->cGetEmissiveMap() : nullptr;
 
-    const auto ambientCoeff = material->cGetAmbientCoeff();
-    const auto diffuseCoeff = material->cGetDiffuseCoeff();
-    const auto specularCoeff = material->cGetSpecularCoeff();
+    const auto diffuseCoeff = material ? material->cGetDiffuseCoeff() : std::nullopt;
+    const auto ambientCoeff = material ? material->cGetAmbientCoeff() : std::nullopt;
+    const auto specularCoeff = material ? material->cGetSpecularCoeff() : std::nullopt;
     // const auto specularExp = material->cGetSpecularExp();
 
     if (diffuseMap != nullptr || normalMap != nullptr || mraoMap != nullptr || emissiveMap != nullptr)
@@ -244,7 +246,7 @@ sf::Color BarycentricRasterizer::getShadedColor(
         const auto metallic = specularCoeff.value_or(*defaultMaterial->cGetSpecularCoeff()).cGetX();
         const auto ambient = ambientCoeff.value_or(*defaultMaterial->cGetAmbientCoeff()).cGetX();
 
-        mrao = Matrix<4, 1>(metallic, 1, ambient);
+        mrao = Vector<4>(metallic, 1, ambient);
     }
 
     if (emissiveMap != nullptr)
@@ -262,7 +264,7 @@ sf::Color BarycentricRasterizer::getShadedColor(
     return result;
 }
 
-Matrix<4, 1> BarycentricRasterizer::getMapId(
+Vector<4> BarycentricRasterizer::getMapId(
     const Triangle &polygon,
     const Object &object,
     const double b0, const double b1, const double b2,
@@ -286,9 +288,9 @@ Matrix<4, 1> BarycentricRasterizer::getMapId(
     return mapIdNominator / mapIdDenominator;
 }
 
-Matrix<4, 1> BarycentricRasterizer::getMapValue(
+Vector<4> BarycentricRasterizer::getMapValue(
     const std::shared_ptr<const Texture> map,
-    const Matrix<4, 1> &mapId)
+    const Vector<4> &mapId)
 {
     const auto width = map->cGetWidth();
     const auto height = map->cGetHeight();
@@ -300,39 +302,26 @@ Matrix<4, 1> BarycentricRasterizer::getMapValue(
     return map->cGetData().at(normMapId.cGetX() + width * normMapId.cGetY());
 }
 
-Matrix<4, 1> BarycentricRasterizer::getNormalByShading(
+Vector<4> BarycentricRasterizer::getNormalByShading(
     Triangle &polygon,
     const Object &object,
     const double b0, const double b1, const double b2)
 {
-    Matrix<4, 1> normal;
+    Vector<4> normal;
 
     switch (shadingModel)
     {
     case Flat:
     {
         const auto &vertices = object.cGetVertices();
-        normal = polygon.getNormal(vertices);
+        normal = polygon.getFlatNormal(vertices);
 
         break;
     }
     case Phong:
     {
-        const auto nId0 = polygon.cGetVertexIds(0).cGetNormalVertexId();
-        const auto nId1 = polygon.cGetVertexIds(1).cGetNormalVertexId();
-        const auto nId2 = polygon.cGetVertexIds(2).cGetNormalVertexId();
-
-        if (!nId0.has_value() || !nId1.has_value() || !nId2.has_value())
-            throw std::runtime_error("Can not get normal");
-
         const auto &nVertices = object.cGetNVertices();
-
-        const auto &aNormal = nVertices.at(*nId0 - 1);
-        const auto &bNormal = nVertices.at(*nId1 - 1);
-        const auto &cNormal = nVertices.at(*nId2 - 1);
-
-        normal = aNormal * b0 + bNormal * b1 + cNormal * b2;
-        normal.normalize();
+        normal = polygon.getPhongNormal(nVertices, b0, b1, b2);
 
         break;
     }

@@ -5,22 +5,22 @@
 
 class Camera {
 private:
-    Matrix<4, 1> up;
-    Matrix<4, 1> position;
-    Matrix<4, 1> target;
+    Vector<4> up;
+    Vector<4> position;
+    Vector<4> target;
     Point resolution;
 
     const int fov;
 
 public:
     Camera(
-            const Matrix<4, 1> &_up,
-            const Matrix<4, 1> &_position,
-            const Matrix<4, 1> &_target,
+            const Vector<4> &_up,
+            const Vector<4> &_position,
+            const Vector<4> &_target,
             Point &_resolution,
             int _fov);
 
-    void move(const Matrix<4, 1> &transition);
+    void move(const Vector<4> &transition);
 
     void rotateAround(
             AxisName axisName,
@@ -29,13 +29,13 @@ public:
 
     void setResolution(const Point &newResolution);
 
-    void setTarget(const Matrix<4, 1> &newTarget);
+    void setTarget(const Vector<4> &newTarget);
 
-    const Matrix<4, 1> &cGetUp() const;
+    const Vector<4> &cGetUp() const;
 
-    const Matrix<4, 1> &cGetPosition() const;
+    const Vector<4> &cGetPosition() const;
 
-    const Matrix<4, 1> &cGetTarget() const;
+    const Vector<4> &cGetTarget() const;
 
     const Point &cGetResolution() const;
 
@@ -44,15 +44,15 @@ public:
     double cGetAspect() const;
 };
 
-inline const Matrix<4, 1> &Camera::cGetUp() const {
+inline const Vector<4> &Camera::cGetUp() const {
     return up;
 }
 
-inline const Matrix<4, 1> &Camera::cGetPosition() const {
+inline const Vector<4> &Camera::cGetPosition() const {
     return position;
 }
 
-inline const Matrix<4, 1> &Camera::cGetTarget() const {
+inline const Vector<4> &Camera::cGetTarget() const {
     return target;
 }
 

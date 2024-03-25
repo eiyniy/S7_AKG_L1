@@ -11,11 +11,11 @@ PhongModel::PhongModel(
       reflectionCoeff(_reflectionCoeff) {}
 
 sf::Color PhongModel::getLightIntensity(
-    const Matrix<4, 1> &normal,
-    const Matrix<4, 1> &diffuseColorMatrix,
-    const Matrix<4, 1> &lightDirection,
-    const Matrix<4, 1> &sightDirection,
-    const Matrix<4, 1> &mrao) const
+    const Vector<4> &normal,
+    const Vector<4> &diffuseColorMatrix,
+    const Vector<4> &lightDirection,
+    const Vector<4> &sightDirection,
+    const Vector<4> &mrao) const
 {
     const auto ambient = diffuseColorMatrix * ambientCoeff * mrao.cGetZ();
     const auto diffuse = diffuseColorMatrix * diffuseCoeff * std::max(normal.scalarMultiply(lightDirection), 0.0);

@@ -3,10 +3,10 @@
 
 std::vector<Triangle> EarClipper::triangulate(
     const std::vector<VertexIds> &indexes,
-    const std::vector<Matrix<4, 1>> &vertices,
-    const std::string &materialName)
+    const std::vector<Vector<4>> &vertices,
+    const std::optional<std::string> &materialName)
 {
-    std::vector<std::pair<Matrix<4, 1>, VertexIds>> polygonVertices;
+    std::vector<std::pair<Vector<4>, VertexIds>> polygonVertices;
 
     const int polygonSize = (int)indexes.size();
     for (int i = 0; i != polygonSize; ++i)
@@ -18,8 +18,8 @@ std::vector<Triangle> EarClipper::triangulate(
 }
 
 std::vector<Triangle> EarClipper::triangulate(
-    std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices,
-    const std::string &materialName)
+    std::vector<std::pair<Vector<4>, VertexIds>> &polygonVertices,
+    const std::optional<std::string> &materialName)
 {
     std::vector<Triangle> result;
 
@@ -30,9 +30,9 @@ std::vector<Triangle> EarClipper::triangulate(
 }
 
 bool EarClipper::isConvexVertex(
-    const Matrix<4, 1> &vertex,
-    const Matrix<4, 1> &prevVertex,
-    const Matrix<4, 1> &nextVertex)
+    const Vector<4> &vertex,
+    const Vector<4> &prevVertex,
+    const Vector<4> &nextVertex)
 {
     const auto v1 = prevVertex - vertex;
     const auto v2 = nextVertex - vertex;
@@ -44,8 +44,8 @@ bool EarClipper::isConvexVertex(
 }
 
 Triangle EarClipper::clipEar(
-    std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices,
-    const std::string &materialName)
+    std::vector<std::pair<Vector<4>, VertexIds>> &polygonVertices,
+    const std::optional<std::string> &materialName)
 {
     int i = 0;
     const int size = (int)polygonVertices.size();
@@ -87,10 +87,10 @@ Triangle EarClipper::clipEar(
 }
 
 bool EarClipper::isPointsInside(
-    const std::pair<Matrix<4, 1>, VertexIds> &v1,
-    const std::pair<Matrix<4, 1>, VertexIds> &v2,
-    const std::pair<Matrix<4, 1>, VertexIds> &v3,
-    const std::vector<std::pair<Matrix<4, 1>, VertexIds>> &polygonVertices)
+    const std::pair<Vector<4>, VertexIds> &v1,
+    const std::pair<Vector<4>, VertexIds> &v2,
+    const std::pair<Vector<4>, VertexIds> &v3,
+    const std::vector<std::pair<Vector<4>, VertexIds>> &polygonVertices)
 {
     bool result = false;
 

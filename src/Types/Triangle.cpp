@@ -5,7 +5,7 @@
 
 Triangle::Triangle(
     const std::vector<VertexIds> &indexes,
-    const std::string &_materialName)
+    const std::optional<std::string> &_materialName)
     : vertexIndexesCount((int)indexes.size()),
       materialName(_materialName)
 {
@@ -34,14 +34,14 @@ const VertexIds &Triangle::cGetVertexIds(const int i) const
 
 std::vector<Triangle> Triangle::parseAndTriangulate(
     const std::string &line,
-    const std::vector<Matrix<4, 1>> &vertices,
-    const std::string &materialName)
+    const std::vector<Vector<4>> &vertices,
+    const std::optional<std::string> &materialName)
 {
     const auto accumulator = parseInner(line);
     return EarClipper::triangulate(accumulator, vertices, materialName);
 }
 
-const Matrix<4, 1> &Triangle::getNormal(const std::vector<Matrix<4, 1>> &vertices)
+const Vector<4> &Triangle::getFlatNormal(const std::vector<Vector<4>> &vertices)
 {
     if (!normal.has_value())
     {
@@ -59,7 +59,30 @@ const Matrix<4, 1> &Triangle::getNormal(const std::vector<Matrix<4, 1>> &vertice
     return *normal;
 }
 
-const Matrix<4, 1> &Triangle::getCenter(const std::vector<Matrix<4, 1>> &vertices)
+const Vector<4> Triangle::getPhongNormal(
+    const std::vector<Vector<4>> &nVertices,
+    const double b0, const double b1, const double b2)
+{
+    Vector<4> phongNormal;
+
+    const auto nId0 = cGetVertexIds(0).cGetNormalVertexId();
+    const auto nId1 = cGetVertexIds(1).cGetNormalVertexId();
+    const auto nId2 = cGetVertexIds(2).cGetNormalVertexId();
+
+    if (!nId0.has_value() || !nId1.has_value() || !nId2.has_value())
+        throw std::runtime_error("Can not get normal");
+
+    const auto &aNormal = nVertices.at(*nId0 - 1);
+    const auto &bNormal = nVertices.at(*nId1 - 1);
+    const auto &cNormal = nVertices.at(*nId2 - 1);
+
+    phongNormal = aNormal * b0 + bNormal * b1 + cNormal * b2;
+    phongNormal.normalize();
+
+    return phongNormal;
+}
+
+const Vector<4> &Triangle::getCenter(const std::vector<Vector<4>> &vertices)
 {
     // if (!center.has_value())
     // {

@@ -157,7 +157,7 @@ void MtlParser::resetMaterial()
     mraoMap = nullptr;
 }
 
-const Matrix<4, 1> MtlParser::parseCoeff(const std::string &line)
+const Vector<4> MtlParser::parseCoeff(const std::string &line)
 {
     const auto entryType = MtlParser::getEntryType(line);
     if (entryType != MtlEntryType::Ambient &&

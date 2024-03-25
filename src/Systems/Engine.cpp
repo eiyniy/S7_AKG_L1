@@ -9,10 +9,12 @@
 #include <ThreadPool.hpp>
 #include <Timer.hpp>
 #include <LambertModel.hpp>
+#include <SculptorPullCommand.hpp>
 
-Engine::Engine(Scene &_scene, MainWindow &_mainWindow)
+Engine::Engine(Scene &_scene, MainWindow &_mainWindow, Sculptor &_sculptor)
     : scene(_scene),
       mainWindow(_mainWindow),
+      sculptor(_sculptor),
       moveAxis(AxisName::X),
       moveDirection(Direction::Forward)
 {
@@ -45,7 +47,6 @@ void Engine::start()
         draw();
         // te = std::chrono::high_resolution_clock::now();
         // const auto drawMs = std::chrono::duration_cast<std::chrono::milliseconds>(te - ts).count();
-
 
         // std::cout << "Input time: " << inputMs << " ms" << std::endl;
         // std::cout << "Update time: " << updateMs << " ms" << std::endl;
@@ -84,6 +85,26 @@ void Engine::handleEvents()
         updateInput(event);
         sendInputCommand(event);
         break;
+    case sf::Event::MouseButtonPressed:
+    {
+        // std::cout << "Sculptor pull" << std::endl;
+
+        const auto mousePosSF = sf::Mouse::getPosition(mainWindow.getWindow());
+        const Point mousePos{mousePosSF.x, mousePosSF.y};
+
+        std::cout << "Mouse pos: " << mousePos.cGetX() << ' ' << mousePos.cGetY() << std::endl;
+
+        const auto camera = scene.cGetCamera();
+        auto direction = camera.cGetTarget() - camera.cGetPosition();
+        direction.normalize();
+
+        commandsQueue.emplace(std::make_unique<SculptorPullCommand>(
+            sculptor,
+            scene.getObject("MainObject"),
+            mainWindow,
+            mousePos,
+            direction));
+    }
     }
 }
 
@@ -178,12 +199,12 @@ void Engine::update()
     if (commandsQueue.empty())
         return;
 
-    // while (!commandsQueue.empty())
-    // {
-    const auto command = std::move(commandsQueue.front());
-    commandsQueue.pop();
-    command->execute();
-    // }
+    while (!commandsQueue.empty())
+    {
+        const auto command = std::move(commandsQueue.front());
+        commandsQueue.pop();
+        command->execute();
+    }
 
     for (const auto &key : scene.cGetAllObjectNames())
         scene.getObject(key)->convertToDrawable(scene.cGetCamera());
@@ -201,7 +222,12 @@ void Engine::draw()
         mainWindow.drawModel(*object, cameraPosition);
     }
 
+    const auto mousePosSF = sf::Mouse::getPosition(mainWindow.getWindow());
+    const Point mousePos{mousePosSF.x, mousePosSF.y};
+
     mainWindow.drawPixels();
+    mainWindow.drawSculptor(sculptor, mousePos);
+    mainWindow.getWindow().display();
 
     dt = clock.restart().asMilliseconds();
 }

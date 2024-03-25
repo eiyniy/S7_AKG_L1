@@ -11,6 +11,6 @@ public:
     Math() = delete;
 
     static std::optional<int> optStoi(const std::string &str);
-    static SphericalCoordinate decartToSpherical(const Matrix<4, 1> &cv);
-    static Matrix<4, 1> sphericalToDecart(const SphericalCoordinate &sc);
+    static SphericalCoordinate decartToSpherical(const Vector<4> &cv);
+    static Vector<4> sphericalToDecart(const SphericalCoordinate &sc);
 };

@@ -1,8 +1,8 @@
 #include <DirectLight.hpp>
 
-Matrix<4, 1> DirectLight::getLightDirection(const Matrix<4, 1> &target) const {
+Vector<4> DirectLight::getLightDirection(const Vector<4> &target) const {
     return direction;
 }
 
-DirectLight::DirectLight(Matrix<4, 1> &direction)
+DirectLight::DirectLight(Vector<4> &direction)
         : direction(direction) {}

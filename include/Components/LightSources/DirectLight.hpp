@@ -4,10 +4,10 @@
 
 class DirectLight : public BaseLightSource {
 public:
-    explicit DirectLight(Matrix<4, 1> &direction);
+    explicit DirectLight(Vector<4> &direction);
 
-    Matrix<4, 1> getLightDirection(const Matrix<4, 1> &target) const override;
+    Vector<4> getLightDirection(const Vector<4> &target) const override;
 
 private:
-    Matrix<4, 1> direction;
+    Vector<4> direction;
 };

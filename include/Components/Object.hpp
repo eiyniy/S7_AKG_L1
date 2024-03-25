@@ -14,70 +14,72 @@ class Object
 {
 public:
     Object(
-        const std::vector<Matrix<4, 1>> &_vertices,
-        const std::vector<Matrix<4, 1>> &_tVertices,
-        const std::vector<Matrix<4, 1>> &_nVertices,
+        const std::vector<Vector<4>> &_vertices,
+        const std::vector<Vector<4>> &_tVertices,
+        const std::vector<Vector<4>> &_nVertices,
         const std::vector<Triangle> &_polygons,
         std::unique_ptr<const std::map<std::string, std::shared_ptr<const Material>>> _materials);
 
-    void move(const Matrix<4, 1> &transition);
+    void move(const Vector<4> &transition);
 
-    const std::vector<Matrix<4, 1>> &cGetVertices() const;
+    const std::vector<Vector<4>> &cGetVertices() const;
 
-    const std::vector<Matrix<4, 1>> &cGetTVertices() const;
+    const std::vector<Vector<4>> &cGetTVertices() const;
 
-    const std::vector<Matrix<4, 1>> &cGetNVertices() const;
+    const std::vector<Vector<4>> &cGetNVertices() const;
 
     const std::vector<Triangle> &cGetPolygons() const;
 
     const std::shared_ptr<const Material> cGetMaterial(const std::string &name) const;
     static const std::shared_ptr<const Material> getDefaultMaterial();
 
+    std::vector<Vector<4>> &getVertices();
+
     std::vector<Triangle> &getPolygons();
 
     void convertToDrawable(const Camera &camera);
 
-    const std::vector<Matrix<4, 1>> &cGetDrawable() const;
+    const std::vector<Vector<4>> &cGetDrawable() const;
 
-    const Matrix<4, 1> &getCenter();
+    const Vector<4> &getCenter();
 
-    const Matrix<4, 1> &getMaxXZ();
+    const Vector<4> &getMaxXZ();
 
-    const Matrix<4, 1> &getMinXZ();
+    const Vector<4> &getMinXZ();
 
 private:
     void calcGeometricParams();
 
-    std::vector<Matrix<4, 1>> vertices;
-    const std::vector<Matrix<4, 1>> nVertices;
-    const std::vector<Matrix<4, 1>> tVertices;
+    std::vector<Vector<4>> vertices;
+    const std::vector<Vector<4>> nVertices;
+    const std::vector<Vector<4>> tVertices;
     std::vector<Triangle> polygons;
 
     std::unique_ptr<const std::map<std::string, std::shared_ptr<const Material>>> materials;
     static std::shared_ptr<const Material> defaultMaterial;
 
-    std::optional<Matrix<4, 1>> center;
-    std::optional<Matrix<4, 1>> maxXZ, minXZ;
+    std::optional<Vector<4>> center;
+    std::optional<Vector<4>> maxXZ, minXZ;
 
-    std::vector<Matrix<4, 1>> drawable;
+    std::vector<Vector<4>> drawable;
 };
 
-inline const std::vector<Matrix<4, 1>> &Object::cGetDrawable() const
+inline const std::vector<Vector<4>> &Object::cGetDrawable() const
 {
     return drawable;
 }
 
-inline const std::vector<Matrix<4, 1>> &Object::cGetVertices() const
+inline const std::vector<Vector<4>> &Object::cGetVertices() const
 {
     return vertices;
 }
 
-inline const std::vector<Matrix<4, 1>> &Object::cGetTVertices() const
+inline const std::vector<Vector<4>> &Object::cGetTVertices() const
 {
     return tVertices;
 }
 
-inline const std::vector<Matrix<4, 1>> &Object::cGetNVertices() const
+inline const std::vector<Vector<4>> &Object::cGetNVertices() const
 {
     return nVertices;
 }
@@ -98,6 +100,11 @@ inline const std::shared_ptr<const Material> Object::cGetMaterial(const std::str
 inline const std::shared_ptr<const Material> Object::getDefaultMaterial()
 {
     return defaultMaterial;
+}
+
+inline std::vector<Vector<4>> &Object::getVertices()
+{
+    return vertices;
 }
 
 inline std::vector<Triangle> &Object::getPolygons()

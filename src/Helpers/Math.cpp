@@ -7,7 +7,7 @@ std::optional<int> Math::optStoi(const std::string &str) {
         return stoi(str);
 }
 
-SphericalCoordinate Math::decartToSpherical(const Matrix<4, 1> &cv) {
+SphericalCoordinate Math::decartToSpherical(const Vector<4> &cv) {
     const auto x = cv.cGetX();
     const auto y = cv.cGetZ();
     const auto z = cv.cGetY();
@@ -36,7 +36,7 @@ SphericalCoordinate Math::decartToSpherical(const Matrix<4, 1> &cv) {
     return {r, a, b};
 }
 
-Matrix<4, 1> Math::sphericalToDecart(const SphericalCoordinate &sc) {
+Vector<4> Math::sphericalToDecart(const SphericalCoordinate &sc) {
     static const auto toRad = M_PI / 180;
 
     const auto radA = sc.a * toRad;

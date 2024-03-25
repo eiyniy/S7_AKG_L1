@@ -8,31 +8,31 @@ MoveCommand::MoveCommand(
       direction(_direction),
       step(_step) {}
 
-Matrix<4, 1> MoveCommand::getTransition()
+Vector<4> MoveCommand::getTransition()
 {
-    Matrix<4, 1> transition;
+    Vector<4> transition;
 
     switch (axisName)
     {
     case AxisName::X:
         if (direction == Direction::Forward)
-            transition = Matrix<4, 1>(step, 0, 0, 0);
+            transition = Vector<4>(step, 0, 0, 0);
         else
-            transition = Matrix<4, 1>(-step, 0, 0, 0);
+            transition = Vector<4>(-step, 0, 0, 0);
 
         break;
     case AxisName::Y:
         if (direction == Direction::Forward)
-            transition = Matrix<4, 1>(0, step, 0, 0);
+            transition = Vector<4>(0, step, 0, 0);
         else
-            transition = Matrix<4, 1>(0, -step, 0, 0);
+            transition = Vector<4>(0, -step, 0, 0);
 
         break;
     case AxisName::Z:
         if (direction == Direction::Forward)
-            transition = Matrix<4, 1>(0, 0, step, 0);
+            transition = Vector<4>(0, 0, step, 0);
         else
-            transition = Matrix<4, 1>(0, 0, -step, 0);
+            transition = Vector<4>(0, 0, -step, 0);
 
         break;
     }

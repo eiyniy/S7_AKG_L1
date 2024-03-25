@@ -18,9 +18,9 @@ private:
     std::unique_ptr<std::map<std::string, std::shared_ptr<const Material>>> materials;
 
     std::string name;
-    std::optional<Matrix<4, 1>> ambient;
-    std::optional<Matrix<4, 1>> diffuse;
-    std::optional<Matrix<4, 1>> specular;
+    std::optional<Vector<4>> ambient;
+    std::optional<Vector<4>> diffuse;
+    std::optional<Vector<4>> specular;
     std::optional<double> specularExp;
     std::unique_ptr<const Texture> diffuseMap;
     std::unique_ptr<const Texture> emissiveMap;
@@ -33,7 +33,7 @@ private:
 
     void resetMaterial();
 
-    static const Matrix<4, 1> parseCoeff(const std::string &line);
+    static const Vector<4> parseCoeff(const std::string &line);
     static std::unique_ptr<const Texture> parseTexture(
         const std::string &line,
         const std::string &pathToFile,

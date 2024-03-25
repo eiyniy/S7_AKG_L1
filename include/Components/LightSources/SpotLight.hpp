@@ -5,10 +5,10 @@
 class SpotLight : public BaseLightSource
 {
 public:
-    explicit SpotLight(Matrix<4, 1> &_position);
+    explicit SpotLight(Vector<4> &_position);
 
-    Matrix<4, 1> getLightDirection(const Matrix<4, 1> &target) const override;
+    Vector<4> getLightDirection(const Vector<4> &target) const override;
 
 private:
-    Matrix<4, 1> position;
+    Vector<4> position;
 };

@@ -5,7 +5,7 @@
 class Converter
 {
 public:
-    static Matrix<4, 1> colorToMatrix(const sf::Color &value);
+    static Vector<4> colorToMatrix(const sf::Color &value);
 
-    static sf::Color matrixToColor(const Matrix<4, 1> &value);
+    static sf::Color matrixToColor(const Vector<4> &value);
 };

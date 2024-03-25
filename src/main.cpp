@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Robot Steampunk/robot_steampunk.obj");
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Intergalactic Spaceship/Intergalactic_Spaceship-(Wavefront).obj");
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Cyber Mancubus/mancubus.obj");
-    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Doom_Slayer/doomslayer.obj");
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/Doom_Slayer/doomslayer.obj");
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/knight/shovel_low.obj");
 
     /*
@@ -44,6 +44,8 @@ int main(int argc, char **argv)
     */
 
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/untitled.obj");
+    // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/cardboar_box_08.obj");
+    auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/sphere/sphere.obj");
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/rubik.obj");
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/cat2.obj");
     // auto parser = ObjParser("C:/Users/Natallia/Documents/Labs/AKG/L1/resources/models/woman1.obj");
@@ -65,10 +67,10 @@ int main(int argc, char **argv)
 
     const auto videoMode = sf::VideoMode::getDesktopMode();
     Point cameraResolution{(int)videoMode.width, (int)videoMode.height};
-    Matrix<4, 1> cameraPosition{15, 40, 15};
+    Vector<4> cameraPosition{15, 40, 15};
     Camera camera{{0, 1, 0}, cameraPosition, {0, 2, 0}, cameraResolution, 100};
-    Matrix<4, 1> lightPos{10, 15, 50};
-    // Matrix<4, 1> lightDirection{-0.5, -2, -1};
+    Vector<4> lightPos{10, 15, 50};
+    // Vector<4> lightDirection{-0.5, -2, -1};
     // lightDirection.normalize();
     // DirectLight lightSource{lightDirection};
     SpotLight lightSource{lightPos};
@@ -76,7 +78,8 @@ int main(int argc, char **argv)
     PhongModel lightingModel{0.1, 1, 32};
     Scene scene{camera, &lightSource, 2, 2};
     MainWindow mainWindow{cameraResolution, &lightingModel, scene.cGetLightSource(), ShadingModel::Phong};
-    Engine engine{scene, mainWindow};
+    Sculptor sculptor{50};
+    Engine engine{scene, mainWindow, sculptor};
 
     auto objInfoPt = objInfoPtFuture.get();
     scene.addObject("MainObject", objInfoPt);

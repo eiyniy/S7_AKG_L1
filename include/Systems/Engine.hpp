@@ -1,14 +1,16 @@
 #pragma once
 
+#include <Sculptor.hpp>
 #include <Scene.hpp>
 #include <MainWindow.hpp>
 #include <Command.hpp>
 #include <memory>
 #include <queue>
 
-class Engine {
+class Engine
+{
 public:
-    Engine(Scene &_scene, MainWindow &_mainWindow);
+    Engine(Scene &_scene, MainWindow &_mainWindow, Sculptor &_sculptor);
 
     void start();
 
@@ -17,6 +19,7 @@ private:
 
     Scene &scene;
     MainWindow &mainWindow;
+    Sculptor &sculptor;
 
     AxisName moveAxis;
     Direction moveDirection;

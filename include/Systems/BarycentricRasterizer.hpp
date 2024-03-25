@@ -14,6 +14,8 @@
 class BarycentricRasterizer
 {
 public:
+    // TODO: replace raw pointers with smart
+
     BarycentricRasterizer(
         const BaseLightingModel *_lightingModel,
         const BaseLightSource *_lightSource,
@@ -31,8 +33,25 @@ public:
 
     void rasterize(
         Triangle &polygon,
-        const Matrix<4, 1> &sightDir,
+        const Vector<4> &sightDir,
         const Object &object);
+
+    static std::pair<Point, Point> findWindowingRectangle(
+        const Triangle &polygon,
+        const std::vector<Vector<4>> &drawableVertices);
+
+    static double edgeFunction(
+        const Vector<4> &a,
+        const Vector<4> &b,
+        const Vector<4> &c);
+
+    static void calcBarycentric(
+        const Point &p,
+        const Vector<4> &a,
+        const Vector<2> &v0,
+        const Vector<2> &v1,
+        double invDen,
+        double &b0, double &b1, double &b2);
 
 private:
     const BaseLightingModel *lightingModel;
@@ -52,65 +71,49 @@ private:
 
     sf::Color getShadedColor(
         Triangle &polygon,
-        const Matrix<4, 1> &cameraPosition,
+        const Vector<4> &cameraPosition,
         const double b0, const double b1, const double b2,
         const double invAW, const double invBW, const double invCW,
         const Object &object,
-        const Matrix<4, 1> &lightDirection);
+        const Vector<4> &lightDirection);
 
-    Matrix<4, 1> getMapId(
+    Vector<4> getMapId(
         const Triangle &polygon,
         const Object &object,
         const double b0, const double b1, const double b2,
         const double invAW, const double invBW, const double invCW);
 
-    Matrix<4, 1> getMapValue(
+    Vector<4> getMapValue(
         const std::shared_ptr<const Texture> map,
-        const Matrix<4, 1> &mapId);
+        const Vector<4> &mapId);
 
-    Matrix<4, 1> getNormalByShading(
+    Vector<4> getNormalByShading(
         Triangle &polygon,
         const Object &object,
         const double b0, const double b1, const double b2);
-
-    static std::pair<Point, Point> findWindowingRectangle(
-        const Triangle &polygon,
-        const std::vector<Matrix<4, 1>> &drawableVertices);
-
-    static double edgeFunction(
-        const Matrix<4, 1> &a,
-        const Matrix<4, 1> &b,
-        const Matrix<4, 1> &c);
-
-    static void calcBarycentric(
-        const Matrix<4, 1> &p,
-        const Matrix<4, 1> &a,
-        const Matrix<4, 1> &v0,
-        const Matrix<4, 1> &v1,
-        double invDen,
-        double &b0, double &b1, double &b2);
 };
 
 inline double BarycentricRasterizer::edgeFunction(
-    const Matrix<4, 1> &a,
-    const Matrix<4, 1> &b,
-    const Matrix<4, 1> &c)
+    const Vector<4> &a,
+    const Vector<4> &b,
+    const Vector<4> &c)
 {
     return (c.cGetX() - a.cGetX()) * (b.cGetY() - a.cGetY()) -
            (c.cGetY() - a.cGetY()) * (b.cGetX() - a.cGetX());
 }
 
 inline void BarycentricRasterizer::calcBarycentric(
-    const Matrix<4, 1> &p,
-    const Matrix<4, 1> &a,
-    const Matrix<4, 1> &v0,
-    const Matrix<4, 1> &v1,
+    const Point &p,
+    const Vector<4> &a,
+    const Vector<2> &v0,
+    const Vector<2> &v1,
     const double invDen,
     double &b0, double &b1, double &b2)
 {
-    const Matrix<4, 1> v2{p.cGetX() - a.cGetX(), p.cGetY() - a.cGetY(), 0, 0};
+    const auto v2X = p.cGetX() - a.cGetX();
+    const auto v2Y = p.cGetY() - a.cGetY();
 
-    b1 = (v2.cGetX() * v1.cGetY() - v1.cGetX() * v2.cGetY()) * invDen;
-    b2 = (v0.cGetX() * v2.cGetY() - v2.cGetX() * v0.cGetY()) * invDen;
+    b1 = (v2X * v1.cGetY() - v1.cGetX() * v2Y) * invDen;
+    b2 = (v0.cGetX() * v2Y - v2X * v0.cGetY()) * invDen;
     b0 = 1 - b2 - b1;
 }

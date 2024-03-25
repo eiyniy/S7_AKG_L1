@@ -3,9 +3,9 @@
 #include <cmath>
 
 Camera::Camera(
-        const Matrix<4, 1> &_up,
-        const Matrix<4, 1> &_position,
-        const Matrix<4, 1> &_target,
+        const Vector<4> &_up,
+        const Vector<4> &_position,
+        const Vector<4> &_target,
         Point &_resolution,
         const int _fov)
         : up(_up),
@@ -14,7 +14,7 @@ Camera::Camera(
           resolution(_resolution),
           fov((int) (_fov * M_PI / 180)) {}
 
-void Camera::move(const Matrix<4, 1> &transition) {
+void Camera::move(const Vector<4> &transition) {
     target += transition;
     position += transition;
 }
@@ -40,6 +40,6 @@ void Camera::setResolution(const Point &newResolution) {
     resolution = newResolution;
 }
 
-void Camera::setTarget(const Matrix<4, 1> &newTarget) {
+void Camera::setTarget(const Vector<4> &newTarget) {
     target = newTarget;
 }

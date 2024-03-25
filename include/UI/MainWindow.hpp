@@ -10,6 +10,7 @@
 #include <BarycentricRasterizer.hpp>
 #include <Types.hpp>
 #include <omp.h>
+#include <Sculptor.hpp>
 
 class MainWindow
 {
@@ -30,21 +31,29 @@ public:
 
     void drawModel(
         Object &objInfo,
-        const Matrix<4, 1> &cameraPosition);
+        const Vector<4> &cameraPosition);
+
+    void drawSculptor(
+        Sculptor &sculptor,
+        const Point &mousePos);
 
     sf::RenderWindow &getWindow();
 
     const Point &cGetResolution() const;
 
+    int getPointedTriangleId(
+        const Object *objInfo,
+        const Point mousePos) const;
+
 private:
     static bool isPolygonFrontOriented(
         Triangle &polygon,
-        const std::vector<Matrix<4, 1>> &vertices,
-        const Matrix<4, 1> &sightDir);
+        const std::vector<Vector<4>> &vertices,
+        const Vector<4> &sightDir);
 
     void drawPolygon(
         Triangle &polygon,
-        const Matrix<4, 1> &cameraPosition,
+        const Vector<4> &cameraPosition,
         const Object &object);
 
     void drawLineBr(
@@ -95,8 +104,8 @@ inline void MainWindow::drawPixel(
 
 inline bool MainWindow::isPolygonFrontOriented(
     Triangle &polygon,
-    const std::vector<Matrix<4, 1>> &vertices,
-    const Matrix<4, 1> &sightDir)
+    const std::vector<Vector<4>> &vertices,
+    const Vector<4> &sightDir)
 {
-    return polygon.getNormal(vertices).scalarMultiply(sightDir) < 0;
+    return polygon.getFlatNormal(vertices).scalarMultiply(sightDir) < 0;
 }
