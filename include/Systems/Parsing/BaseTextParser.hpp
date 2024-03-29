@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <optional>
+#include <memory>
 
 class BaseTextParser
 {
@@ -22,5 +23,5 @@ protected:
     std::string pathToFile;
     std::ifstream readStream;
 
-    std::string readFile(const std::string &pathToFile);
+    std::unique_ptr<std::string> readFile(const std::string &pathToFile);
 };

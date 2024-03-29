@@ -12,7 +12,7 @@ MtlParser::MtlParser(const std::string &_pathToMtl)
 std::unique_ptr<const std::map<std::string, std::shared_ptr<const Material>>> MtlParser::parse()
 {
     const auto fileContent = readFile(pathToFile);
-    const auto lines = splitByLines(fileContent);
+    const auto lines = splitByLines(*fileContent);
 
     for (const auto &line : lines)
         parseEntry(line);

@@ -54,7 +54,7 @@ std::optional<std::string> BaseTextParser::getNextPart(
     return result;
 }
 
-std::string BaseTextParser::readFile(const std::string &pathToFile)
+std::unique_ptr<std::string> BaseTextParser::readFile(const std::string &pathToFile)
 {
     readStream.open(pathToFile);
     if (!readStream.is_open())
@@ -62,9 +62,9 @@ std::string BaseTextParser::readFile(const std::string &pathToFile)
 
     readStream.seekg(0, std::ios::end);
     auto size = readStream.tellg();
-    auto buffer = std::string(size, ' ');
+    auto buffer = std::make_unique<std::string>(size, ' ');
     readStream.seekg(0);
-    readStream.read(&(buffer[0]), size);
+    readStream.read(&((*buffer)[0]), size);
     readStream.close();
 
     return buffer;
